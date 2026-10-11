@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>AlameeereTv</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#000;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;height:100%;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.f:focus,.f.sel{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 24px rgba(255,255,255,.35)}
+.f{outline:none}
+/* Standby */
+#standby{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:50;overflow:hidden;transition:opacity .6s}
+#standby.hide{opacity:0;pointer-events:none}
+.logo{position:relative;font-size:clamp(40px,9vw,120px);font-weight:800;letter-spacing:.04em;color:#fff;direction:ltr}
+.logo span{position:absolute;inset:0;background:linear-gradient(90deg,transparent 40%,rgba(255,255,255,.95) 50%,transparent 60%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;mix-blend-mode:screen}
+.logo .a{animation:sweepR 3.2s ease-in-out infinite}
+.logo .b{animation:sweepL 3.2s ease-in-out infinite}
+@keyframes sweepR{0%{background-position:150% 0}100%{background-position:-50% 0}}
+@keyframes sweepL{0%{background-position:-50% 0}100%{background-position:150% 0}}
+.beam{position:absolute;top:50%;height:2px;width:45vw;transform:translateY(-50%);filter:blur(1px)}
+.beam.r{background:linear-gradient(90deg,transparent,#fff);animation:beamR 3.2s ease-in-out infinite}
+.beam.l{background:linear-gradient(270deg,transparent,#fff);animation:beamL 3.2s ease-in-out infinite}
+@keyframes beamR{0%{right:100%}100%{right:-45vw}}
+@keyframes beamL{0%{left:100%}100%{left:-45vw}}
+.glow{position:absolute;width:40vw;height:40vw;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.12),transparent 60%);animation:pulse 3.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
+.hint{position:absolute;bottom:8%;font-size:14px;color:#888;letter-spacing:.1em}
+/* Layout */
+header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #1a1a1a;flex-wrap:wrap}
+.brand{font-weight:800;font-size:20px;direction:ltr;margin-inline-end:auto}
+.tab{padding:8px 14px;border-radius:999px;background:#111;font-size:15px}
+.tab.on{background:#fff;color:#000}
+main{display:flex;height:calc(100% - 62px)}
+#cats{width:240px;overflow-y:auto;border-inline-end:1px solid #1a1a1a;padding:8px}
+.cat{display:block;width:100%;text-align:start;padding:10px 12px;border-radius:8px;font-size:14px;color:#bbb}
+.cat.on{background:#1c1c1c;color:#fff}
+#grid{flex:1;overflow-y:auto;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-content:start}
+.card{background:#0d0d0d;border-radius:10px;overflow:hidden;text-align:start}
+.card img{width:100%;aspect-ratio:2/3;object-fit:cover;background:#151515;display:block}
+.card.live img{aspect-ratio:16/9;object-fit:contain;padding:12px}
+.card p{padding:8px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg{color:#777;padding:30px;grid-column:1/-1;text-align:center}
+@media(max-width:700px){main{flex-direction:column}#cats{width:100%;height:auto;max-height:none;display:flex;overflow-x:auto;border:0;border-bottom:1px solid #1a1a1a}.cat{white-space:nowrap;width:auto}#grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}}
+/* Player */
+#player{position:fixed;inset:0;background:#000;z-index:40;display:none}
+#player.open{display:block}
+video{width:100%;height:100%;background:#000}
+#ctrl{position:absolute;inset:auto 0 0 0;padding:16px;background:linear-gradient(transparent,rgba(0,0,0,.9));transition:opacity .3s;direction:ltr}
+#player.idle #ctrl,#player.idle #ptitle{opacity:0}
+#ptitle{position:absolute;top:0;inset-inline:0;padding:16px;background:linear-gradient(rgba(0,0,0,.85),transparent);font-size:18px;transition:opacity .3s;direction:rtl}
+#seek{width:100%;accent-color:#fff;margin-bottom:10px}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cb{padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.1);font-size:14px;min-width:44px}
+#vol{width:90px;accent-color:#fff}
+#time{font-size:13px;color:#ccc;margin-inline-end:auto}
+.menu{position:absolute;bottom:90px;right:16px;background:#111;border:1px solid #333;border-radius:10px;padding:6px;min-width:180px;max-height:50vh;overflow:auto;display:none}
+.menu.open{display:block}
+.menu h4{font-size:12px;color:#888;padding:6px 10px}
+.mi{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:6px;font-size:14px}
+.mi.on{background:#fff;color:#000}
+#spin{position:absolute;inset:0;display:none;align-items:center;justify-content:center;pointer-events:none}
+#spin.on{display:flex}
+#spin div{width:48px;height:48px;border:3px solid #333;border-top-color:#fff;border-radius:50%;animation:rot 1s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="standby">
+  <div class="glow"></div>
+  <div class="beam r"></div><div class="beam l"></div>
+  <div class="logo">AlameeereTv<span class="a">AlameeereTv</span><span class="b">AlameeereTv</span></div>
+  <div class="hint">اضغط OK أو المس الشاشة للدخول</div>
+</div>
+
+<header>
+  <div class="brand">AlameeereTv</div>
+  <button class="tab f on" data-t="live">📺 قنوات</button>
+  <button class="tab f" data-t="vod">🎬 أفلام</button>
+  <button class="tab f" data-t="series">🍿 مسلسلات</button>
+  <button class="tab f" id="srv">سيرفر 1</button>
+</header>
+<main><nav id="cats"></nav><section id="grid"></section></main>
+
+<div id="player">
+  <video id="v" playsinline></video>
+  <div id="spin"><div></div></div>
+  <div id="ptitle"></div>
+  <div class="menu" id="menu"></div>
+  <div id="ctrl">
+    <input type="range" id="seek" class="f" min="0" max="1000" value="0">
+    <div class="row">
+      <button class="cb f" id="bPlay">⏸</button>
+      <button class="cb f" id="bMute">🔊</button>
+      <input type="range" id="vol" class="f" min="0" max="1" step="0.05" value="1">
+      <span id="time">00:00</span>
+      <button class="cb f" id="bQ">الجودة</button>
+      <button class="cb f" id="bA">لغة الصوت</button>
+      <button class="cb f" id="bS">الترجمة</button>
+      <button class="cb f" id="bFs">⛶</button>
+      <button class="cb f" id="bX">✕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORKER="https://i.m737217130.workers.dev";
+let server="s1",type="live",cat=null,hls=null,stack=[];
+const $=s=>document.querySelector(s),grid=$("#grid"),cats=$("#cats"),v=$("#v"),P=$("#player");
+const api=a=>fetch(`${WORKER}/${server}/player_api.php?action=${a}`).then(r=>r.json());
+const img=u=>u?(u.startsWith("https")?u:`${WORKER}/proxy?url=${encodeURIComponent(u)}`):"";
+const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* Standby */
+const sb=$("#standby");
+function enter(){if(sb.classList.contains("hide"))return;sb.classList.add("hide");setTimeout(()=>$(".tab").focus(),300)}
+sb.addEventListener("click",enter);
+
+/* Tabs */
+document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{type=b.dataset.t;document.querySelectorAll("[data-t]").forEach(x=>x.classList.toggle("on",x===b));stack=[];loadCats()});
+$("#srv").onclick=()=>{server=server==="s1"?"s2":"s1";$("#srv").textContent=server==="s1"?"سيرفر 1":"سيرفر 2";stack=[];loadCats()};
+
+async function loadCats(){
+  cats.innerHTML="";grid.innerHTML='<div class="msg">جاري التحميل...</div>';
+  const a={live:"get_live_categories",vod:"get_vod_categories",series:"get_series_categories"}[type];
+  try{
+    const list=await api(a);
+    if(!Array.isArray(list)||!list.length)throw 0;
+    list.forEach((c,i)=>{const b=document.createElement("button");b.className="cat f";b.textContent=c.category_name;b.onclick=()=>{document.querySelectorAll(".cat").forEach(x=>x.classList.remove("on"));b.classList.add("on");loadItems(c.category_id)};cats.appendChild(b);if(!i)b.click()});
+  }catch(e){grid.innerHTML='<div class="msg">تعذر تحميل المحتوى من هذا السيرفر</div>'}
+}
+async function loadItems(id){
+  cat=id;stack=[];grid.innerHTML='<div class="msg">جاري التحميل...</div>';
+  const a={live:"get_live_streams",vod:"get_vod_streams",series:"get_series"}[type];
+  try{
+    const list=await api(`${a}&category_id=${id}`);
+    if(cat!==id)return;
+    if(!list.length){grid.innerHTML='<div class="msg">لا يوجد محتوى</div>';return}
+    renderCards(list.map(x=>({name:x.name,pic:x.stream_icon||x.cover,go:()=>{
+      if(type==="live")play(`${WORKER}/${server}/live/${x.stream_id}.m3u8`,x.name,true);
+      else if(type==="vod")play(`${WORKER}/${server}/movie/${x.stream_id}.${x.container_extension||"mp4"}`,x.name,false);
+      else openSeries(x);
+    }})),type==="live");
+  }catch(e){grid.innerHTML='<div class="msg">خطأ في التحميل</div>'}
+}
+function renderCards(items,live){
+  grid.innerHTML="";
+  items.forEach(it=>{const b=document.createElement("button");b.className="card f"+(live?" live":"");b.innerHTML=`<img loading="lazy" src="${esc(img(it.pic))}" onerror="this.style.visibility='hidden'"><p>${esc(it.name)}</p>`;b.onclick=it.go;grid.appendChild(b)});
+}
+async function openSeries(s){
+  grid.innerHTML='<div class="msg">جاري التحميل...</div>';
+  const info=await api(`get_series_info&series_id=${s.series_id}`);
+  stack.push(()=>loadItems(cat));
+  const seasons=Object.keys(info.episodes||{});
+  const showSeason=k=>{
+    renderCards(info.episodes[k].map(e=>({name:`الموسم ${k} - ${e.title}`,pic:(e.info&&e.info.movie_image)||s.cover,go:()=>play(`${WORKER}/${server}/series/${e.id}.${e.container_extension||"mp4"}`,`${s.name} - ${e.title}`,false)})),false);
+    grid.firstChild&&grid.firstChild.focus();
+  };
+  if(seasons.length===1)return showSeason(seasons[0]);
+  renderCards(seasons.map(k=>({name:`الموسم ${k}`,pic:s.cover,go:()=>{stack.push(()=>openSeries(s));showSeason(k)}})),false);
+  grid.firstChild&&grid.firstChild.focus();
+}
+
+/* Player */
+let lastFocus=null,idleT;
+function play(url,title,live){
+  lastFocus=document.activeElement;
+  P.classList.add("open");$("#ptitle").textContent=title;$("#seek").style.display=live?"none":"";
+  $("#spin").classList.add("on");closeMenu();
+  if(hls){hls.destroy();hls=null}
+  const isHls=url.includes(".m3u8");
+  if(isHls&&window.Hls&&Hls.isSupported()){
+    hls=new Hls({enableWorker:true,lowLatencyMode:live});
+    hls.loadSource(url);hls.attachMedia(v);
+    hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play().catch(()=>{}));
+    hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal){if(d.type==="networkError")hls.startLoad();else hls.recoverMediaError()}});
+  }else{v.src=url;v.play().catch(()=>{})}
+  wake();setTimeout(()=>$("#bPlay").focus(),100);
+}
+function closePlayer(){if(hls){hls.destroy();hls=null}v.pause();v.removeAttribute("src");v.load();P.classList.remove("open");closeMenu();if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});lastFocus&&lastFocus.focus()}
+const fmt=t=>isFinite(t)?new Date(t*1000).toISOString().substr(t>=3600?11:14,t>=3600?8:5):"مباشر";
+v.addEventListener("waiting",()=>$("#spin").classList.add("on"));
+v.addEventListener("playing",()=>$("#spin").classList.remove("on"));
+v.addEventListener("play",()=>$("#bPlay").textContent="⏸");
+v.addEventListener("pause",()=>$("#bPlay").textContent="▶");
+v.addEventListener("timeupdate",()=>{$("#time").textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`;if(v.duration&&isFinite(v.duration))$("#seek").value=v.currentTime/v.duration*1000});
+$("#seek").oninput=e=>{if(v.duration)v.currentTime=e.target.value/1000*v.duration};
+$("#bPlay").onclick=()=>v.paused?v.play():v.pause();
+$("#bMute").onclick=()=>{v.muted=!v.muted;$("#bMute").textContent=v.muted?"🔇":"🔊"};
+$("#vol").oninput=e=>{v.volume=e.target.value;v.muted=false;$("#bMute").textContent=v.volume==0?"🔇":"🔊"};
+$("#bFs").onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else if(P.requestFullscreen)P.requestFullscreen().catch(()=>{});else if(v.webkitEnterFullscreen)v.webkitEnterFullscreen()};
+$("#bX").onclick=closePlayer;
+function wake(){P.classList.remove("idle");clearTimeout(idleT);idleT=setTimeout(()=>{if(!v.paused&&!$("#menu").classList.contains("open"))P.classList.add("idle")},4000)}
+["mousemove","touchstart","keydown"].forEach(ev=>P.addEventListener(ev,wake));
+v.addEventListener("click",()=>v.paused?v.play():v.pause());
+
+/* Menus: quality / audio / subtitles */
+const menu=$("#menu");
+function closeMenu(){menu.classList.remove("open")}
+function openMenu(title,opts,cur,pick){
+  menu.innerHTML=`<h4>${title}</h4>`;
+  if(!opts.length)menu.innerHTML+='<div class="mi">غير متوفر</div>';
+  opts.forEach(o=>{const b=document.createElement("button");b.className="mi f"+(o.id===cur?" on":"");b.textContent=o.label;b.onclick=()=>{pick(o.id);closeMenu();$("#bPlay").focus()};menu.appendChild(b)});
+  menu.classList.add("open");(menu.querySelector(".mi.on")||menu.querySelector(".mi"))?.focus();
+}
+$("#bQ").onclick=()=>{
+  if(!hls)return openMenu("الجودة",[{id:-1,label:"تلقائي (الأصلية)"}],-1,()=>{});
+  openMenu("الجودة",[{id:-1,label:"تلقائي"},...hls.levels.map((l,i)=>({id:i,label:l.height?l.height+"p":Math.round(l.bitrate/1000)+"kbps"}))],hls.autoLevelEnabled?-1:hls.currentLevel,id=>hls.currentLevel=id);
+};
+$("#bA").onclick=()=>{
+  if(hls)return openMenu("لغة الصوت",hls.audioTracks.map((t,i)=>({id:i,label:t.name||t.lang||"مسار "+(i+1)})),hls.audioTrack,id=>hls.audioTrack=id);
+  const at=v.audioTracks;if(!at)return openMenu("لغة الصوت",[],0,()=>{});
+  const arr=[...Array(at.length)].map((_,i)=>({id:i,label:at[i].label||at[i].language||"مسار "+(i+1)}));
+  openMenu("لغة الصوت",arr,arr.findIndex((_,i)=>at[i].enabled),id=>{for(let i=0;i<at.length;i++)at[i].enabled=i===id});
+};
+$("#bS").onclick=()=>{
+  if(hls&&hls.subtitleTracks.length)return openMenu("الترجمة",[{id:-1,label:"إيقاف"},...hls.subtitleTracks.map((t,i)=>({id:i,label:t.name||t.lang}))],hls.subtitleTrack,id=>{hls.subtitleTrack=id;hls.subtitleDisplay=id>=0});
+  const tt=v.textTracks,arr=[{id:-1,label:"إيقاف"}];let cur=-1;
+  for(let i=0;i<tt.length;i++){arr.push({id:i,label:tt[i].label||tt[i].language||"ترجمة "+(i+1)});if(tt[i].mode==="showing")cur=i}
+  openMenu("الترجمة",arr,cur,id=>{for(let i=0;i<tt.length;i++)tt[i].mode=i===id?"showing":"disabled"});
+};
+
+/* Remote control / D-pad spatial navigation */
+function visibleFocusables(){
+  const root=menu.classList.contains("open")?menu:P.classList.contains("open")?P:document;
+  return [...root.querySelectorAll(".f")].filter(e=>e.offsetParent!==null||e.closest("#player.open"));
+}
+function move(dir){
+  const cur=document.activeElement,els=visibleFocusables();
+  if(!els.includes(cur)){els[0]&&els[0].focus();return}
+  const r=cur.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  let best=null,bd=1e9;
+  els.forEach(e=>{if(e===cur)return;const q=e.getBoundingClientRect();if(!q.width)return;const x=q.left+q.width/2,y=q.top+q.height/2,dx=x-cx,dy=y-cy;
+    const ok={left:dx<-2,right:dx>2,up:dy<-2,down:dy>2}[dir];if(!ok)return;
+    const main=dir==="left"||dir==="right"?Math.abs(dx):Math.abs(dy),side=dir==="left"||dir==="right"?Math.abs(dy):Math.abs(dx);
+    const d=main+side*3;if(d<bd){bd=d;best=e}});
+  if(best){best.focus();best.scrollIntoView({block:"nearest",inline:"nearest"})}
+}
+function back(){
+  if(menu.classList.contains("open")){closeMenu();$("#bPlay").focus();return true}
+  if(P.classList.contains("open")){closePlayer();return true}
+  if(stack.length){stack.pop()();return true}
+  return false;
+}
+document.addEventListener("keydown",e=>{
+  const k=e.keyCode;
+  if(!sb.classList.contains("hide")){enter();e.preventDefault();return}
+  const map={37:"left",38:"up",39:"right",40:"down"};
+  const a=document.activeElement;
+  if(map[k]){
+    if(a&&a.type==="range"&&(k===37||k===39)){
+      if(a.id==="seek"&&v.duration){v.currentTime+=k===39?10:-10;e.preventDefault()}
+      return;
+    }
+    e.preventDefault();move(map[k]);return;
+  }
+  if(k===8||k===27||k===10009||k===461||k===166){if(back())e.preventDefault();return}
+  if(P.classList.contains("open")){
+    if(k===179||k===415||k===19||k===32&&a.tagName!=="BUTTON"){v.paused?v.play():v.pause();e.preventDefault()}
+  }
+});
+loadCats();
+</script>
+</body>
+</html>
