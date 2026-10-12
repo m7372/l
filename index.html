@@ -31,6 +31,12 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .hint{position:absolute;bottom:8%;font-size:14px;color:#888;letter-spacing:.1em}
 
 /* Layout */
+.search-box{display:flex;align-items:center;position:relative;flex:1;max-width:240px;min-width:140px}
+#search{width:100%;padding:7px 28px 7px 12px;border-radius:999px;background:#141414;border:1px solid #2a2a2a;color:#fff;font-size:14px;transition:border-color .2s,background .2s;direction:rtl}
+#search:focus{border-color:#fff;background:#1c1c1c;outline:none}
+.search-clear{position:absolute;left:8px;color:#888;font-size:14px;background:none;border:0;cursor:pointer;display:none;line-height:1;padding:4px}
+.search-clear:hover{color:#fff}
+.search-clear.on{display:block}
 header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #1a1a1a;flex-wrap:wrap;flex-shrink:0}
 .brand{font-weight:800;font-size:20px;direction:ltr;margin-inline-end:auto}
 .tab{padding:8px 14px;border-radius:999px;background:#111;font-size:15px;transition:background .2s,color .2s}
@@ -106,6 +112,9 @@ main{display:flex;flex:1;min-height:0;min-width:0;overflow:hidden;width:100%}
 .msg{color:#777;padding:30px;grid-column:1/-1;text-align:center}
 
 @media(max-width:768px){
+  header{padding:8px 10px;gap:6px}
+  .search-box{max-width:100%;width:100%;order:5;margin-top:4px}
+  #search{font-size:13px;padding:6px 28px 6px 10px}
   main{flex-direction:column}
   #cats{width:100%;height:auto;max-height:50px;display:flex;overflow-x:auto;overflow-y:hidden;border:0;border-bottom:1px solid #1a1a1a;padding:6px 8px;gap:6px;-webkit-overflow-scrolling:touch}
   .cat{width:auto;flex-shrink:0;padding:6px 12px;font-size:13px}
@@ -152,6 +161,7 @@ video{width:100%;height:100%;background:#000}
   <button class="tab f" data-t="vod">🎬 أفلام</button>
   <button class="tab f" data-t="series">🍿 مسلسلات</button>
   <button class="tab f" id="srv">سيرفر 1</button>
+  <div class="search-box"><input type="text" id="search" class="f" placeholder="🔍 بحث عام..." autocomplete="off" spellcheck="false"><button id="clearSearch" class="search-clear" type="button" title="مسح">✕</button></div>
 </header>
 <main>
   <nav id="cats"></nav>
@@ -159,7 +169,7 @@ video{width:100%;height:100%;background:#000}
 </main>
 
 <div id="player">
-  <video id="v" playsinline webkit-playsinline preload="auto"></video>
+  <video id="v" playsinline webkit-playsinline preload="metadata"></video>
   <div id="spin"><div></div></div>
   <div id="ptitle"></div>
   <div class="menu" id="menu"></div>
@@ -180,15 +190,30 @@ video{width:100%;height:100%;background:#000}
 <script>
 const WORKER="https://i.m737217130.workers.dev";
 let server="s1",type="live",cat=null,hls=null,stack=[];
+let allCache={live:null,vod:null,series:null},currentList=[],searchT=null;
+
 const $=s=>document.querySelector(s),grid=$("#grid"),cats=$("#cats"),v=$("#v"),P=$("#player");
+const sInput=$("#search"),sClear=$("#clearSearch");
 const api=a=>fetch(`${WORKER}/${server}/player_api.php?action=${a}`).then(r=>r.json());
 const img=u=>u?(u.startsWith("https")?u:`${WORKER}/proxy?url=${encodeURIComponent(u)}`):"";
 const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=s=>String(s||"").toLowerCase().replace(/[إأآا]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/[ً-ٟ]/g,"").trim();
 
 /* Standby */
 const sb=$("#standby");
 function enter(){if(sb.classList.contains("hide"))return;sb.classList.add("hide");setTimeout(()=>$(".tab").focus(),300)}
 sb.addEventListener("click",enter);
+
+/* Pre-fetch all items for instant universal search */
+async function getAllItems(t){
+  if(allCache[t])return allCache[t];
+  const a={live:"get_live_streams",vod:"get_vod_streams",series:"get_series"}[t];
+  try{
+    const list=await api(a);
+    if(Array.isArray(list)){allCache[t]=list;return list}
+  }catch(e){}
+  return null;
+}
 
 /* Tabs */
 document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{
@@ -196,12 +221,19 @@ document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("[data-t]").forEach(x=>x.classList.toggle("on",x===b));
   grid.classList.toggle("live-mode",type==="live");
   stack=[];
+  sInput.value="";
+  sClear.classList.remove("on");
   loadCats();
+  getAllItems(type); // background preload for instant search
 });
+
 $("#srv").onclick=()=>{
   server=server==="s1"?"s2":"s1";
   $("#srv").textContent=server==="s1"?"سيرفر 1":"سيرفر 2";
+  allCache={live:null,vod:null,series:null};
   stack=[];
+  sInput.value="";
+  sClear.classList.remove("on");
   loadCats();
 };
 
@@ -218,6 +250,8 @@ async function loadCats(){
       b.onclick=()=>{
         document.querySelectorAll(".cat").forEach(x=>x.classList.remove("on"));
         b.classList.add("on");
+        sInput.value="";
+        sClear.classList.remove("on");
         loadItems(c.category_id);
       };
       cats.appendChild(b);
@@ -228,18 +262,27 @@ async function loadCats(){
   }
 }
 
+function mapItem(x,isLive){
+  return {
+    name: x.name,
+    pic: x.stream_icon || x.cover,
+    go: () => {
+      if(isLive) play(`${WORKER}/${server}/live/${x.stream_id}.m3u8`, x.name, true);
+      else if(type==="vod") play(`${WORKER}/${server}/movie/${x.stream_id}.${x.container_extension||"mp4"}`, x.name, false);
+      else openSeries(x);
+    }
+  };
+}
+
 async function loadItems(id){
   cat=id;stack=[];grid.innerHTML='<div class="msg">جاري التحميل...</div>';
   const a={live:"get_live_streams",vod:"get_vod_streams",series:"get_series"}[type];
   try{
     const list=await api(`${a}&category_id=${id}`);
     if(cat!==id)return;
-    if(!list||!list.length){grid.innerHTML='<div class="msg">لا يوجد محتوى</div>';return}
-    renderCards(list.map(x=>({name:x.name,pic:x.stream_icon||x.cover,go:()=>{
-      if(type==="live")play(`${WORKER}/${server}/live/${x.stream_id}.m3u8`,x.name,true);
-      else if(type==="vod")play(`${WORKER}/${server}/movie/${x.stream_id}.${x.container_extension||"mp4"}`,x.name,false);
-      else openSeries(x);
-    }})),type==="live");
+    if(!list||!list.length){currentList=[];grid.innerHTML='<div class="msg">لا يوجد محتوى</div>';return}
+    currentList=list;
+    renderCards(list.map(x=>mapItem(x,type==="live")),type==="live");
   }catch(e){
     grid.innerHTML='<div class="msg">خطأ في التحميل</div>';
   }
@@ -257,6 +300,55 @@ function renderCards(items,live){
   });
 }
 
+/* Universal Smooth Search */
+function doSearch(){
+  const raw=sInput.value, q=norm(raw);
+  sClear.classList.toggle("on",!!raw);
+  if(!q){
+    if(currentList.length) renderCards(currentList.map(x=>mapItem(x,type==="live")), type==="live");
+    else if(cat) loadItems(cat);
+    return;
+  }
+  
+  const filterAndShow=(pool)=>{
+    const matches=[];
+    for(let i=0;i<pool.length;i++){
+      if(norm(pool[i].name).includes(q)){
+        matches.push(pool[i]);
+        if(matches.length>=150) break; // Fast 60fps rendering
+      }
+    }
+    if(!matches.length){
+      grid.innerHTML='<div class="msg">لا توجد نتائج تطابق: "'+esc(raw)+'"</div>';
+    }else{
+      renderCards(matches.map(x=>mapItem(x,type==="live")), type==="live");
+    }
+  };
+
+  if(allCache[type]){
+    filterAndShow(allCache[type]);
+  } else {
+    if(currentList&&currentList.length) filterAndShow(currentList);
+    else grid.innerHTML='<div class="msg">جاري البحث الشامل...</div>';
+    getAllItems(type).then(all=>{
+      if(all&&norm(sInput.value)===q){
+        filterAndShow(all);
+      }
+    });
+  }
+}
+
+sInput.addEventListener("input",()=>{
+  clearTimeout(searchT);
+  searchT=setTimeout(doSearch,50);
+});
+sInput.addEventListener("focus",()=>getAllItems(type));
+sClear.onclick=()=>{
+  sInput.value="";
+  doSearch();
+  sInput.focus();
+};
+
 async function openSeries(s){
   grid.innerHTML='<div class="msg">جاري التحميل...</div>';
   const info=await api(`get_series_info&series_id=${s.series_id}`);
@@ -271,7 +363,7 @@ async function openSeries(s){
   grid.firstChild&&grid.firstChild.focus();
 }
 
-/* Player Engine - Ultra Fast Speed & Low Latency */
+/* Player Engine - Ultra Fast Speed & Lowest Quality */
 let lastFocus=null,idleT;
 function play(url,title,live){
   lastFocus=document.activeElement;
@@ -285,8 +377,6 @@ function play(url,title,live){
     hls.destroy();
     hls=null;
   }
-  v.removeAttribute("src");
-  v.load();
 
   const isHls=url.includes(".m3u8");
   if(isHls&&window.Hls&&Hls.isSupported()){
@@ -294,26 +384,23 @@ function play(url,title,live){
       enableWorker:true,
       lowLatencyMode:true,
       startFragPrefetch:true,
-      liveSyncDurationCount:2,
-      liveMaxLatencyDurationCount:4,
-      initialLiveManifestSize:1,
-      maxBufferLength:live?8:20,
-      maxMaxBufferLength:live?16:40,
-      maxBufferSize:30*1000*1000,
-      backBufferLength:6,
+      startLevel:0,             // البدء فوراً بأقل جودة للتشغيل الفوري
+      autoLevelCapping:0,       // تثبيت أقل جودة لسرعة فائقة
+      maxBufferLength:4,        // تحميل 4 ثوانٍ فقط للبدء بأسرع ما يمكن
+      maxMaxBufferLength:8,
+      maxBufferSize:5*1000*1000,
+      backBufferLength:2,
       capLevelToPlayerSize:true,
       fastSwitch:true,
-      manifestLoadingTimeOut:6000,
-      manifestLoadingMaxRetry:5,
-      levelLoadingTimeOut:6000,
-      levelLoadingMaxRetry:5,
-      fragLoadingTimeOut:8000,
-      fragLoadingMaxRetry:5,
       autoStartLoad:true
     });
     hls.loadSource(url);
     hls.attachMedia(v);
-    hls.on(Hls.Events.MANIFEST_PARSED,()=>v.play().catch(()=>{}));
+    hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+      hls.startLevel=0;
+      hls.currentLevel=0;
+      v.play().catch(()=>{});
+    });
     hls.on(Hls.Events.FRAG_LOADED,()=>{if(v.paused)v.play().catch(()=>{})});
     hls.on(Hls.Events.ERROR,(e,d)=>{
       if(d.fatal){
@@ -323,8 +410,12 @@ function play(url,title,live){
       }
     });
   }else{
+    v.preload="metadata";
     v.src=url;
-    v.play().catch(()=>{});
+    const start=()=>v.play().catch(()=>{});
+    v.addEventListener("loadedmetadata",start,{once:true});
+    v.addEventListener("canplay",start,{once:true});
+    start();
   }
   wake();
   setTimeout(()=>$("#bPlay").focus(),100);
@@ -334,7 +425,6 @@ function closePlayer(){
   if(hls){hls.destroy();hls=null}
   v.pause();
   v.removeAttribute("src");
-  v.load();
   P.classList.remove("open");
   closeMenu();
   if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
@@ -344,6 +434,8 @@ function closePlayer(){
 const fmt=t=>isFinite(t)?new Date(t*1000).toISOString().substr(t>=3600?11:14,t>=3600?8:5):"مباشر";
 v.addEventListener("waiting",()=>$("#spin").classList.add("on"));
 v.addEventListener("playing",()=>$("#spin").classList.remove("on"));
+v.addEventListener("canplay",()=>$("#spin").classList.remove("on"));
+v.addEventListener("error",()=>$("#spin").classList.remove("on"));
 v.addEventListener("play",()=>$("#bPlay").textContent="⏸");
 v.addEventListener("pause",()=>$("#bPlay").textContent="▶");
 v.addEventListener("timeupdate",()=>{
@@ -422,14 +514,16 @@ function move(dir){
 function back(){
   if(menu.classList.contains("open")){closeMenu();$("#bPlay").focus();return true}
   if(P.classList.contains("open")){closePlayer();return true}
+  if(sInput.value){sInput.value="";doSearch();return true}
   if(stack.length){stack.pop()();return true}
   return false;
 }
 document.addEventListener("keydown",e=>{
   const k=e.keyCode;
   if(!sb.classList.contains("hide")){enter();e.preventDefault();return}
-  const map={37:"left",38:"up",39:"right",40:"down"};
   const a=document.activeElement;
+  if(a===sInput&&k!==27&&k!==13&&k!==38&&k!==40)return; // allow normal typing in search
+  const map={37:"left",38:"up",39:"right",40:"down"};
   if(map[k]){
     if(a&&a.type==="range"&&(k===37||k===39)){
       if(a.id==="seek"&&v.duration){v.currentTime+=k===39?10:-10;e.preventDefault()}
@@ -445,6 +539,7 @@ document.addEventListener("keydown",e=>{
 
 grid.classList.toggle("live-mode",type==="live");
 loadCats();
+getAllItems(type);
 </script>
 </body>
 </html>
