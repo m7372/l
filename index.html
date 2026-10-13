@@ -7,18 +7,18 @@
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{background:#000;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+html,body{background:#0a0c10;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-.f:focus,.f.sel{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 24px rgba(255,255,255,.35)}
+.f:focus,.f.sel{outline:2px solid #fff;outline-offset:2px}
 .f{outline:none}
 
-/* Standby */
-#standby{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:50;overflow:hidden;transition:opacity .6s}
+/* Standby Screen */
+#standby{position:fixed;inset:0;background:#05070a;display:flex;align-items:center;justify-content:center;z-index:50;overflow:hidden;transition:opacity .6s}
 #standby.hide{opacity:0;pointer-events:none}
-.logo{position:relative;font-size:clamp(40px,9vw,120px);font-weight:800;letter-spacing:.04em;color:#fff;direction:ltr}
-.logo span{position:absolute;inset:0;background:linear-gradient(90deg,transparent 40%,rgba(255,255,255,.95) 50%,transparent 60%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;mix-blend-mode:screen}
-.logo .a{animation:sweepR 3.2s ease-in-out infinite}
-.logo .b{animation:sweepL 3.2s ease-in-out infinite}
+.standby-logo{position:relative;font-size:clamp(40px,9vw,110px);font-weight:900;letter-spacing:.04em;color:#fff;direction:ltr}
+.standby-logo span{position:absolute;inset:0;background:linear-gradient(90deg,transparent 40%,rgba(255,255,255,.95) 50%,transparent 60%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;mix-blend-mode:screen}
+.standby-logo .a{animation:sweepR 3.2s ease-in-out infinite}
+.standby-logo .b{animation:sweepL 3.2s ease-in-out infinite}
 @keyframes sweepR{0%{background-position:150% 0}100%{background-position:-50% 0}}
 @keyframes sweepL{0%{background-position:-50% 0}100%{background-position:150% 0}}
 .beam{position:absolute;top:50%;height:2px;width:45vw;transform:translateY(-50%);filter:blur(1px)}
@@ -30,170 +30,220 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 @keyframes pulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
 .hint{position:absolute;bottom:8%;font-size:14px;color:#888;letter-spacing:.1em}
 
-/* Header & Spectacular Logo Animation */
+/* Header & Centered Logo */
 header{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:10px 14px;
+  background:#0e1117;
+  border-bottom:1px solid #1a1f2c;
+  flex-shrink:0;
+  gap:10px;
+}
+
+/* Centered Brand Container */
+.brand-center{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:10px;
-  padding:10px 16px;
-  border-bottom:1px solid #1a1a1a;
-  flex-wrap:wrap;
-  flex-shrink:0;
-  position:relative;
+  gap:8px;
+  width:100%;
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+  padding:2px 0;
+}
+.brand-ico{
+  font-size:24px;
+  line-height:1;
+  display:inline-block;
 }
 
-.brand-wrap{
-  display:inline-flex;
+/* AlameeereTv Text: Lighting STRICTLY INSIDE THE LETTERS ONLY */
+.brand-text{
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:1px;
+  direction:ltr;
+  display:inline-block;
+  line-height:1.1;
+  background-clip:text !important;
+  -webkit-background-clip:text !important;
+  color:transparent !important;
+  -webkit-text-fill-color:transparent !important;
+  background-color:transparent !important;
+  background-size:300% 300%;
+  animation:logoLetterGlow 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* الإضاءة داخل حروف AlameeereTv فقط */
+@keyframes logoLetterGlow {
+  /* 1. إضاءة من خافتة إلى مشعة (0% - 15%) */
+  0% {
+    background-image: linear-gradient(#3a3e48, #3a3e48);
+  }
+  15% {
+    background-image: linear-gradient(#ffffff, #ffffff);
+  }
+
+  /* 2. من مشعة إلى خافتة (15% - 30%) */
+  30% {
+    background-image: linear-gradient(#3a3e48, #3a3e48);
+  }
+
+  /* 3. إطفاء كامل لكلمة AlameeereTv (30% - 38%) */
+  33%, 38% {
+    background-image: linear-gradient(#101318, #101318);
+  }
+
+  /* 4. مسح ضوئي من بداية حرف A إلى نهاية الكلمة v بحركة معتدلة (39% - 60%) */
+  39% {
+    background-image: linear-gradient(90deg, #101318 0%, #101318 40%, #ffffff 50%, #101318 60%, #101318 100%);
+    background-position: 100% 50%;
+    background-size: 250% 100%;
+  }
+  59% {
+    background-image: linear-gradient(90deg, #101318 0%, #101318 40%, #ffffff 50%, #101318 60%, #101318 100%);
+    background-position: 0% 50%;
+    background-size: 250% 100%;
+  }
+
+  /* 5. إطفاء (60% - 66%) */
+  60%, 66% {
+    background-image: linear-gradient(#101318, #101318);
+    background-position: 0% 0%;
+    background-size: 100% 100%;
+  }
+
+  /* 6. صعود الإضاءة من أسفل الكلمة بتموج مثل سكب الحليب داخل الكوب (67% - 92%) */
+  67% {
+    background-image: linear-gradient(0deg, #ffffff 0%, rgba(255,255,255,0.9) 15%, rgba(255,255,255,0.25) 28%, #101318 40%, #101318 100%);
+    background-position: 50% 100%;
+    background-size: 100% 300%;
+  }
+  80% {
+    background-image: linear-gradient(0deg, #ffffff 0%, #ffffff 50%, rgba(255,255,255,0.7) 65%, #101318 78%, #101318 100%);
+    background-position: 50% 50%;
+    background-size: 100% 300%;
+  }
+  90% {
+    background-image: linear-gradient(0deg, #ffffff 0%, #ffffff 100%);
+    background-position: 50% 0%;
+    background-size: 100% 300%;
+  }
+
+  /* 7. عودة سلسة للخفوت (92% - 100%) */
+  96%, 100% {
+    background-image: linear-gradient(#3a3e48, #3a3e48);
+    background-position: 0% 0%;
+    background-size: 100% 100%;
+  }
+}
+
+/* Controls Bar (Tabs + Server + Search) */
+.controls-bar{
+  display:flex;
   align-items:center;
   justify-content:center;
   gap:8px;
-  direction:ltr;
-  width:100%; /* توسيط الشعار في الوسط في سطر علوي مميز */
-  padding:2px 0 6px;
-  text-align:center;
+  width:100%;
+  flex-wrap:wrap;
 }
 
-.brand-icon{
-  font-size:24px;
-  display:inline-block;
-  animation:iconGlow 12s ease-in-out infinite;
+.tab{
+  padding:7px 14px;
+  border-radius:999px;
+  background:#161b24;
+  font-size:14px;
+  color:#a5b0c2;
+  border:1px solid #232a38;
+  transition:all .2s;
+  white-space:nowrap;
 }
+.tab:hover{background:#1f2633;color:#fff}
+.tab.on{background:#fff;color:#000;font-weight:700;border-color:#fff}
 
-.brand-text{
-  font-size:24px;
-  font-weight:900;
-  letter-spacing:.05em;
+.srv-btn{
+  padding:7px 13px;
+  border-radius:999px;
+  background:#1a2130;
+  font-size:13px;
+  color:#38bdf8;
+  border:1px solid #0284c7;
+  white-space:nowrap;
+  font-weight:600;
+}
+.srv-btn:hover{background:#0284c7;color:#fff}
+
+.search-box{
+  display:flex;
+  align-items:center;
   position:relative;
-  display:inline-block;
-  color:#222; /* لون الأساس المظلم عند الإطفاء */
-  user-select:none;
+  flex:1;
+  max-width:260px;
+  min-width:140px;
 }
-
-.brand-text::before{
-  content:"AlameeereTv";
+#search{
+  width:100%;
+  padding:7px 28px 7px 12px;
+  border-radius:999px;
+  background:#141822;
+  border:1px solid #283042;
+  color:#fff;
+  font-size:13px;
+  transition:all .2s;
+  direction:rtl;
+}
+#search:focus{border-color:#38bdf8;background:#181e2b;outline:none}
+.search-clear{
   position:absolute;
-  inset:0;
-  z-index:2;
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  animation:alameeerAnim 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  background-size:300% 300%;
+  left:8px;
+  color:#888;
+  font-size:14px;
+  background:none;
+  border:0;
+  cursor:pointer;
+  display:none;
+  line-height:1;
+  padding:4px;
 }
-
-@keyframes iconGlow{
-  0%,100%{opacity:.25;transform:scale(.95);filter:drop-shadow(0 0 2px rgba(255,255,255,.2))}
-  12%{opacity:1;transform:scale(1.15);filter:drop-shadow(0 0 14px #fff) drop-shadow(0 0 24px rgba(255,255,255,.9))}
-  24%{opacity:.25;transform:scale(1);filter:none}
-  27%,63%{opacity:.15}
-  66%,95%{opacity:.95;filter:drop-shadow(0 0 10px rgba(255,255,255,.8))}
-}
-
-@keyframes alameeerAnim{
-  /* 1. إضاءة من خافتة إلى مشعة ومن مشعة إلى خافتة (0% - 24%) */
-  0%{
-    background:radial-gradient(circle at center, rgba(255,255,255,.25) 0%, transparent 80%);
-    opacity:.3;
-    filter:drop-shadow(0 0 2px rgba(255,255,255,.2));
-  }
-  12%{
-    background:radial-gradient(circle at center, #ffffff 0%, rgba(255,255,255,.9) 50%, transparent 100%);
-    opacity:1;
-    filter:drop-shadow(0 0 15px #fff) drop-shadow(0 0 25px rgba(255,255,255,.95));
-  }
-  24%{
-    background:radial-gradient(circle at center, rgba(255,255,255,.25) 0%, transparent 80%);
-    opacity:.3;
-    filter:drop-shadow(0 0 2px rgba(255,255,255,.2));
-  }
-
-  /* 2. إطفاء AlameeereTv (26% - 31%) */
-  26%,31%{
-    background:none;
-    opacity:0;
-    filter:none;
-  }
-
-  /* 3. إضاءة أفقية من بداية حرف A إلى نهاية v بحركة عادية متزنة (33% - 58%) */
-  33%{
-    background:linear-gradient(90deg, transparent 0%, transparent 20%, #ffffff 25%, #ffffff 32%, transparent 37%, transparent 100%);
-    background-size:300% 100%;
-    background-position:100% 0;
-    opacity:1;
-    filter:drop-shadow(0 0 12px rgba(255,255,255,.95));
-  }
-  58%{
-    background:linear-gradient(90deg, transparent 0%, transparent 20%, #ffffff 25%, #ffffff 32%, transparent 37%, transparent 100%);
-    background-size:300% 100%;
-    background-position:0% 0;
-    opacity:1;
-    filter:drop-shadow(0 0 12px rgba(255,255,255,.95));
-  }
-
-  /* 4. تنطفي مجدداً (60% - 64%) */
-  60%,64%{
-    background:none;
-    opacity:0;
-    filter:none;
-  }
-
-  /* 5. إضاءة من أسفل الكلمة مع تموج كالحليب يسكب في الكوب (66% - 95%) */
-  66%{
-    background:radial-gradient(ellipse 120% 50% at 50% 120%, #ffffff 30%, rgba(255,255,255,.8) 50%, transparent 70%);
-    background-size:160% 200%;
-    background-position:50% 100%;
-    opacity:.75;
-    filter:drop-shadow(0 0 6px rgba(255,255,255,.6));
-  }
-  75%{
-    background:radial-gradient(ellipse 140% 70% at 40% 90%, #ffffff 40%, rgba(255,255,255,.85) 65%, transparent 80%);
-    background-size:170% 200%;
-    background-position:42% 70%;
-    opacity:1;
-    filter:drop-shadow(0 0 12px rgba(255,255,255,.85));
-  }
-  85%{
-    background:radial-gradient(ellipse 160% 90% at 60% 50%, #ffffff 60%, rgba(255,255,255,.9) 80%, transparent 95%);
-    background-size:180% 200%;
-    background-position:58% 30%;
-    opacity:1;
-    filter:drop-shadow(0 0 16px #fff);
-  }
-  95%{
-    background:radial-gradient(ellipse 180% 100% at 50% 20%, #ffffff 80%, rgba(255,255,255,.95) 95%, transparent 100%);
-    background-size:190% 200%;
-    background-position:50% 0%;
-    opacity:1;
-    filter:drop-shadow(0 0 20px #fff);
-  }
-
-  /* العودة السلسة للبداية */
-  98%,100%{
-    background:radial-gradient(circle at center, rgba(255,255,255,.25) 0%, transparent 80%);
-    opacity:.3;
-    filter:drop-shadow(0 0 2px rgba(255,255,255,.2));
-  }
-}
-
-.search-box{display:flex;align-items:center;position:relative;flex:1;max-width:240px;min-width:140px}
-#search{width:100%;padding:7px 28px 7px 12px;border-radius:999px;background:#141414;border:1px solid #2a2a2a;color:#fff;font-size:14px;transition:border-color .2s,background .2s;direction:rtl}
-#search:focus{border-color:#fff;background:#1c1c1c;outline:none}
-.search-clear{position:absolute;left:8px;color:#888;font-size:14px;background:none;border:0;cursor:pointer;display:none;line-height:1;padding:4px}
-.search-clear:hover{color:#fff}
 .search-clear.on{display:block}
-.tab{padding:8px 14px;border-radius:999px;background:#111;font-size:15px;transition:background .2s,color .2s}
-.tab.on{background:#fff;color:#000;font-weight:600}
+
+/* Main Layout */
 main{display:flex;flex:1;min-height:0;min-width:0;overflow:hidden;width:100%}
 
 /* Categories Sidebar */
-#cats{width:240px;flex-shrink:0;overflow-y:auto;overflow-x:hidden;border-inline-end:1px solid #1a1a1a;padding:8px;scrollbar-width:thin;scrollbar-color:#2a2a2a transparent}
-#cats::-webkit-scrollbar{width:6px}
-#cats::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:3px}
-.cat{display:block;width:100%;text-align:start;padding:10px 12px;border-radius:8px;font-size:14px;color:#bbb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .2s,color .2s}
-.cat.on{background:#1c1c1c;color:#fff;font-weight:600}
+#cats{
+  width:230px;
+  flex-shrink:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  border-inline-end:1px solid #1a1f2c;
+  padding:8px;
+  background:#0c0f14;
+  scrollbar-width:thin;
+  scrollbar-color:#2a3244 transparent;
+}
+#cats::-webkit-scrollbar{width:5px}
+#cats::-webkit-scrollbar-thumb{background:#2a3244;border-radius:3px}
+.cat{
+  display:block;
+  width:100%;
+  text-align:start;
+  padding:9px 12px;
+  border-radius:8px;
+  font-size:13px;
+  color:#9aa5b8;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  transition:all .2s;
+}
+.cat:hover{background:#161c26;color:#fff}
+.cat.on{background:#1f2838;color:#38bdf8;font-weight:700}
 
-/* Grid & Cards - حل نهائي لانضغاط الأيقونات والأخبار */
+/* Grid & Cards Container */
 #grid{
   flex:1;
   min-height:0;
@@ -203,53 +253,44 @@ main{display:flex;flex:1;min-height:0;min-width:0;overflow:hidden;width:100%}
   padding:14px;
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  grid-auto-rows:max-content;
+  grid-auto-rows:max-content; /* يمنع انضغاط الصفوف مهما زاد عدد البوسترات */
   gap:14px;
   align-content:start;
   scrollbar-width:thin;
-  scrollbar-color:#2a2a2a transparent;
+  scrollbar-color:#2a3244 transparent;
   -webkit-overflow-scrolling:touch;
 }
-#grid.live-mode{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
 #grid::-webkit-scrollbar{width:6px}
-#grid::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:3px}
+#grid::-webkit-scrollbar-thumb{background:#2a3244;border-radius:3px}
 
+/* Standard Video/Channel Card */
 .card{
-  background:#0d0d0d;
+  background:#10141c;
   border-radius:10px;
   overflow:hidden;
   text-align:start;
   display:flex;
   flex-direction:column;
   width:100%;
-  max-width:100%;
-  min-height:160px; /* ضمان عدم انضغاط الكرت */
-  flex-shrink:0;
-  border:1px solid #1c1c1c;
-  transition:transform .15s ease,box-shadow .15s ease;
+  min-height:fit-content;
+  border:1px solid #1a2230;
+  transition:transform .15s ease,border-color .15s ease;
   cursor:pointer;
   touch-action:manipulation;
 }
-.card.live{
-  min-height:115px; /* ارتفاع ثابت ومثالي لقنوات الأخبار والبث المباشر */
-}
-.card:hover{transform:translateY(-2px);border-color:#333}
+.card:hover{transform:translateY(-2px);border-color:#38bdf8}
 .card img{
   width:100%;
-  max-width:100%;
   aspect-ratio:2/3;
-  min-height:140px;
   object-fit:cover;
-  background:#151515;
+  background:#141924;
   display:block;
-  flex-shrink:0;
 }
 .card.live img{
   aspect-ratio:16/9;
-  min-height:85px; /* يمنع انكماش شعار القناة إلى خط رفيع */
   object-fit:contain;
   padding:8px;
-  background:#111;
+  background:#0c0f16;
 }
 .card p{
   padding:8px 10px;
@@ -259,72 +300,227 @@ main{display:flex;flex:1;min-height:0;min-width:0;overflow:hidden;width:100%}
   text-overflow:ellipsis;
   margin:0;
   line-height:1.3;
-  flex-shrink:0;
-  background:#0d0d0d;
 }
-.msg{color:#777;padding:30px;grid-column:1/-1;text-align:center}
+
+/* Matches Layout */
+.match-card{
+  grid-column: span 2;
+  background:#121722;
+  border:1px solid #1f2838;
+  border-radius:12px;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  transition:all .2s;
+}
+@media(max-width:550px){.match-card{grid-column: 1 / -1}}
+.match-card:hover{border-color:#38bdf8}
+.match-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid #1d2535;
+  padding-bottom:8px;
+  font-size:12px;
+  color:#8c9bb3;
+}
+.match-tour{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-weight:600;
+  color:#cbd5e1;
+}
+.match-tour img{width:20px;height:20px;object-fit:contain}
+.match-badge{
+  padding:3px 8px;
+  border-radius:6px;
+  font-size:11px;
+  font-weight:700;
+  background:#1a2232;
+  color:#94a3b8;
+}
+.match-badge.live{background:#ef4444;color:#fff;animation:pulseLive 1.5s infinite}
+@keyframes pulseLive{0%,100%{opacity:1}50%{opacity:.7}}
+.match-body{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:4px 0;
+}
+.team{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  flex:1;
+  text-align:center;
+}
+.team img{
+  width:44px;
+  height:44px;
+  object-fit:contain;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));
+}
+.team-name{
+  font-size:13px;
+  font-weight:600;
+  color:#f1f5f9;
+  max-width:110px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.score-box{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-width:70px;
+  padding:0 8px;
+}
+.scores{
+  font-size:22px;
+  font-weight:900;
+  color:#fff;
+  letter-spacing:3px;
+  direction:ltr;
+}
+.match-time{
+  font-size:11px;
+  color:#94a3b8;
+  margin-top:2px;
+}
+
+/* News Layout (حماية كاملة من الانضغاط) */
+.news-card{
+  grid-column: span 2;
+  background:#11151f;
+  border:1px solid #1e2637;
+  border-radius:12px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  transition:all .2s;
+}
+@media(max-width:550px){.news-card{grid-column: 1 / -1}}
+.news-card:hover{border-color:#38bdf8;transform:translateY(-2px)}
+.news-thumb{
+  width:100%;
+  aspect-ratio:16/9;
+  min-height:140px;
+  background:#0c0f16;
+  position:relative;
+  overflow:hidden;
+}
+.news-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.news-tour-tag{
+  position:absolute;
+  top:8px;
+  right:8px;
+  background:rgba(10,13,20,.85);
+  backdrop-filter:blur(4px);
+  color:#38bdf8;
+  padding:3px 8px;
+  border-radius:6px;
+  font-size:11px;
+  font-weight:700;
+  border:1px solid rgba(56,189,248,.3);
+}
+.news-content{
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  flex:1;
+}
+.news-title{
+  font-size:14px;
+  font-weight:700;
+  color:#f8fafc;
+  line-height:1.45;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.news-date{
+  font-size:11px;
+  color:#8292a8;
+  margin-top:auto;
+}
+
+.msg{color:#8896ab;padding:40px;grid-column:1/-1;text-align:center;font-size:14px}
 
 @media(max-width:768px){
-  header{padding:8px 10px;gap:6px;justify-content:center}
-  .brand-wrap{padding:2px 0 4px}
-  .search-box{max-width:100%;width:100%;order:6;margin-top:4px}
+  header{padding:8px 10px;gap:8px}
+  .brand-text{font-size:22px}
+  .search-box{max-width:100%;width:100%;order:6;margin-top:2px}
   #search{font-size:13px;padding:6px 28px 6px 10px}
   main{flex-direction:column}
-  #cats{width:100%;height:auto;max-height:50px;display:flex;overflow-x:auto;overflow-y:hidden;border:0;border-bottom:1px solid #1a1a1a;padding:6px 8px;gap:6px;-webkit-overflow-scrolling:touch}
-  .cat{width:auto;flex-shrink:0;padding:6px 12px;font-size:13px}
+  #cats{width:100%;height:auto;max-height:48px;display:flex;overflow-x:auto;overflow-y:hidden;border:0;border-bottom:1px solid #1a1f2c;padding:5px 8px;gap:6px;-webkit-overflow-scrolling:touch}
+  .cat{width:auto;flex-shrink:0;padding:5px 12px;font-size:12px}
   #grid{padding:10px;gap:10px;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));grid-auto-rows:max-content}
-  #grid.live-mode{grid-template-columns:repeat(auto-fill,minmax(125px,1fr));grid-auto-rows:max-content}
-  .card{min-height:145px}
-  .card.live{min-height:105px}
-  .card.live img{min-height:75px;padding:6px}
 }
 
-/* Player */
+/* Player Overlay */
 #player{position:fixed;inset:0;background:#000;z-index:40;display:none}
 #player.open{display:block}
 video{width:100%;height:100%;background:#000}
 #ctrl{position:absolute;inset:auto 0 0 0;padding:16px;background:linear-gradient(transparent,rgba(0,0,0,.92));transition:opacity .3s;direction:ltr}
 #player.idle #ctrl,#player.idle #ptitle{opacity:0;pointer-events:none}
 #ptitle{position:absolute;top:0;inset-inline:0;padding:16px;background:linear-gradient(rgba(0,0,0,.85),transparent);font-size:18px;transition:opacity .3s;direction:rtl;pointer-events:none}
-#seek{width:100%;accent-color:#fff;margin-bottom:10px;cursor:pointer}
+#seek{width:100%;accent-color:#38bdf8;margin-bottom:10px;cursor:pointer}
 .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .cb{padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.1);font-size:14px;min-width:44px;display:flex;align-items:center;justify-content:center}
 .cb:hover{background:rgba(255,255,255,.2)}
-#vol{width:90px;accent-color:#fff;cursor:pointer}
+#vol{width:90px;accent-color:#38bdf8;cursor:pointer}
 #time{font-size:13px;color:#ccc;margin-inline-end:auto;font-variant-numeric:tabular-nums}
 .menu{position:absolute;bottom:90px;right:16px;background:#111;border:1px solid #333;border-radius:10px;padding:6px;min-width:180px;max-height:50vh;overflow:auto;display:none;z-index:45}
 .menu.open{display:block}
 .menu h4{font-size:12px;color:#888;padding:6px 10px}
 .mi{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:6px;font-size:14px}
-.mi.on{background:#fff;color:#000}
+.mi.on{background:#38bdf8;color:#000;font-weight:700}
 #spin{position:absolute;inset:0;display:none;align-items:center;justify-content:center;pointer-events:none}
 #spin.on{display:flex}
-#spin div{width:48px;height:48px;border:3px solid #333;border-top-color:#fff;border-radius:50%;animation:rot 0.8s linear infinite}
+#spin div{width:48px;height:48px;border:3px solid #333;border-top-color:#38bdf8;border-radius:50%;animation:rot 0.8s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+
 <div id="standby">
   <div class="glow"></div>
   <div class="beam r"></div><div class="beam l"></div>
-  <div class="logo">AlameeereTv<span class="a">AlameeereTv</span><span class="b">AlameeereTv</span></div>
+  <div class="standby-logo">AlameeereTv<span class="a">AlameeereTv</span><span class="b">AlameeereTv</span></div>
   <div class="hint">اضغط OK أو المس الشاشة للدخول</div>
 </div>
 
 <header>
-  <!-- الشعار في الوسط مع الأيقونة وتأثير الإضاءة المطلوب -->
-  <div class="brand-wrap">
-    <span class="brand-icon">📺</span>
+  <!-- شعار في الوسط تماماً مع إضاءة الحروف فقط -->
+  <div class="brand-center">
+    <span class="brand-ico">📺</span>
     <span class="brand-text">AlameeereTv</span>
   </div>
-  <button class="tab f on" data-t="live">📺 قنوات</button>
-  <button class="tab f" data-t="vod">🎬 أفلام</button>
-  <button class="tab f" data-t="series">🍿 مسلسلات</button>
-  <button class="tab f" data-t="matches">⚽ مباريات</button>
-  <button class="tab f" id="srv">سيرفر 1</button>
-  <div class="search-box">
-    <input type="text" id="search" class="f" placeholder="🔍 بحث عام..." autocomplete="off" spellcheck="false">
-    <button id="clearSearch" class="search-clear" type="button" title="مسح">✕</button>
+
+  <!-- شريط التحكم والتبويبات -->
+  <div class="controls-bar">
+    <button class="tab f on" data-t="live">📺 قنوات</button>
+    <button class="tab f" data-t="vod">🎬 أفلام</button>
+    <button class="tab f" data-t="series">🍿 مسلسلات</button>
+    <button class="tab f" data-t="matches">⚽ مباريات</button>
+    <button class="tab f" data-t="news">📰 أخبار</button>
+    <button class="srv-btn f" id="srv">سيرفر 1</button>
+    <div class="search-box">
+      <input type="text" id="search" class="f" placeholder="🔍 بحث عام..." autocomplete="off" spellcheck="false">
+      <button id="clearSearch" class="search-clear" type="button" title="مسح">✕</button>
+    </div>
   </div>
 </header>
 
@@ -345,7 +541,7 @@ video{width:100%;height:100%;background:#000}
       <button class="cb f" id="bMute" title="كتم الصوت">🔊</button>
       <input type="range" id="vol" class="f" min="0" max="1" step="0.05" value="1">
       <span id="time">00:00</span>
-      <button class="cb f" id="bExt" title="فتح برابط مباشر خارجي">↗ خارجي</button>
+      <button class="cb f" id="bExt" title="فتح برابط خارجي مباشر">↗ خارجي</button>
       <button class="cb f" id="bA" title="لغة الصوت">لغة الصوت</button>
       <button class="cb f" id="bFs" title="ملء الشاشة">⛶</button>
       <button class="cb f" id="bX" title="إغلاق">✕</button>
@@ -357,15 +553,16 @@ video{width:100%;height:100%;background:#000}
 const WORKER="https://i.m737217130.workers.dev";
 let server="s1",type="live",cat=null,hls=null,stack=[];
 let allCache={live:null,vod:null,series:null},currentList=[],searchT=null;
-let activeDirectUrl="";
+let currentExternalUrl="";
 
-// بديل فوري في حال تعذر تحميل الشعار حتى لا ينضغط الكرت
-const FALLBACK_ICON = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90"><rect fill="%23141414" width="160" height="90"/><text fill="%23666" font-size="28" x="50%" y="60%" text-anchor="middle">📺</text></svg>';
+/* البيانات المضمنة للمباريات والأخبار */
+const MATCHES_DATA = {"status":true,"status_code":200,"message":"successful request","matches_live":1,"data":[{"match_id":5868049,"championship_id":938652,"championship":{"id":1933,"url_id":938652,"title":"الدوري الإسباني","image":"8641690196626.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":9,"status":1,"followed":1},"home_team":{"row_id":10267,"title":"فالنسيا","image":"7881690196747.png"},"away_team":{"row_id":8634,"title":"برشلونة","image":"9541690196746.png"},"type":1,"match_type":0,"rank":1,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"17:15:00","match_timestamp":1788704100,"home_scores":0,"away_scores":5,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5868041,"championship_id":938652,"championship":{"id":1933,"url_id":938652,"title":"الدوري الإسباني","image":"8641690196626.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":9,"status":1,"followed":1},"home_team":{"row_id":9866,"title":"ألافيس","image":"2381690196746.png"},"away_team":{"row_id":8371,"title":"أوساسونا","image":"7961690196745.png"},"type":1,"match_type":0,"rank":0,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"19:30:00","match_timestamp":1788712200,"home_scores":5,"away_scores":2,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5868047,"championship_id":938652,"championship":{"id":1933,"url_id":938652,"title":"الدوري الإسباني","image":"8641690196626.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":9,"status":1,"followed":1},"home_team":{"row_id":9864,"title":"ملقا","image":"1171690458315.png"},"away_team":{"row_id":8581,"title":"ليفانتي","image":"2601690370530.png"},"type":1,"match_type":0,"rank":0,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"19:30:00","match_timestamp":1788712200,"home_scores":0,"away_scores":0,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5868045,"championship_id":938652,"championship":{"id":1933,"url_id":938652,"title":"الدوري الإسباني","image":"8641690196626.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":9,"status":1,"followed":1},"home_team":{"row_id":8558,"title":"إسبانيول","image":"4481690370529.png"},"away_team":{"row_id":8302,"title":"إشبيلية","image":"6931690196743.png"},"type":1,"match_type":0,"rank":0,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"22:00:00","match_timestamp":1788721200,"home_scores":1,"away_scores":1,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5802927,"championship_id":937873,"championship":{"id":1985,"url_id":937873,"title":"الدوري الفرنسي","image":"9551719862665.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":21,"status":1,"followed":1},"home_team":{"row_id":10242,"title":"تروا","image":"6871690370557.png"},"away_team":{"row_id":9848,"title":"ستراسبورغ","image":"8951690287872.png"},"type":1,"match_type":0,"rank":0,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"16:00:00","match_timestamp":1788699600,"home_scores":2,"away_scores":6,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5802919,"championship_id":937873,"championship":{"id":1985,"url_id":937873,"title":"الدوري الفرنسي","image":"9551719862665.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":21,"status":1,"followed":1},"home_team":{"row_id":8121,"title":"أنجيه","image":"1121690370513.png"},"away_team":{"row_id":9851,"title":"رين","image":"5061690287944.png"},"type":1,"match_type":0,"rank":0,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"18:15:00","match_timestamp":1788707700,"home_scores":1,"away_scores":2,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":0,"penalties":null,"channel_commm":[]},{"match_id":5802923,"championship_id":937873,"championship":{"id":1985,"url_id":937873,"title":"الدوري الفرنسي","image":"9551719862665.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":21,"status":1,"followed":1},"home_team":{"row_id":8592,"title":"مارسيليا","image":"17816370094121.png"},"away_team":{"row_id":6379,"title":"نادي باريس","image":"6551690370501.png"},"type":1,"match_type":0,"rank":1,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"21:45:00","match_timestamp":1788720300,"home_scores":2,"away_scores":3,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":0,"penalties":null,"channel_commm":[]},{"match_id":5881155,"championship_id":938769,"championship":{"id":2606,"url_id":938769,"title":"الدوري الألماني","image":"6171690288722.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":20,"status":1,"followed":1},"home_team":{"row_id":9790,"title":"هامبورغ","image":"261690370540.png"},"away_team":{"row_id":9905,"title":"ماينتس","image":"8131690288819.png"},"type":1,"match_type":0,"rank":0,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"16:30:00","match_timestamp":1788701400,"home_scores":0,"away_scores":5,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5881154,"championship_id":938769,"championship":{"id":2606,"url_id":938769,"title":"الدوري الألماني","image":"6171690288722.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":20,"status":1,"followed":1},"home_team":{"row_id":9810,"title":"فرانكفورت","image":"231690288818.png"},"away_team":{"row_id":8406,"title":"أوجسبورغ","image":"7221690288817.png"},"type":1,"match_type":0,"rank":0,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"18:30:00","match_timestamp":1788708600,"home_scores":1,"away_scores":4,"ex_time":3,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5749664,"championship_id":936357,"championship":{"id":3734,"url_id":936357,"title":"الدوري الإيطالي","image":"6281692568873.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":17,"status":1,"followed":1},"home_team":{"row_id":9891,"title":"فروزينوني","image":"5761690283004.png"},"away_team":{"row_id":7881,"title":"فينيسا","image":"771690370510.png"},"type":1,"match_type":0,"rank":0,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"16:00:00","match_timestamp":1788699600,"home_scores":3,"away_scores":2,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5749668,"championship_id":936357,"championship":{"id":3734,"url_id":936357,"title":"الدوري الإيطالي","image":"6281692568873.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":17,"status":1,"followed":1},"home_team":{"row_id":10167,"title":"بارما","image":"4061690823331.png"},"away_team":{"row_id":6504,"title":"مونزا","image":"5671690283001.png"},"type":1,"match_type":0,"rank":0,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"16:00:00","match_timestamp":1788699600,"home_scores":1,"away_scores":1,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5749661,"championship_id":936357,"championship":{"id":3734,"url_id":936357,"title":"الدوري الإيطالي","image":"6281692568873.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":17,"status":1,"followed":1},"home_team":{"row_id":9857,"title":"بولوغنيا","image":"4281690283003.png"},"away_team":{"row_id":7943,"title":"ساسولو","image":"731690283001.png"},"type":1,"match_type":0,"rank":0,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"19:00:00","match_timestamp":1788710400,"home_scores":2,"away_scores":2,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5749667,"championship_id":936357,"championship":{"id":3734,"url_id":936357,"title":"الدوري الإيطالي","image":"6281692568873.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":17,"status":1,"followed":1},"home_team":{"row_id":9885,"title":"يوفنتوس","image":"9331690283003.png"},"away_team":{"row_id":8564,"title":"ميلان","image":"3181690283002.png"},"type":1,"match_type":0,"rank":2,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"21:45:00","match_timestamp":1788720300,"home_scores":1,"away_scores":1,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5795438,"championship_id":937599,"championship":{"id":6811,"url_id":937599,"title":"الدوري الإنجليزي","image":"3411694791422.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":7,"status":1,"followed":1},"home_team":{"row_id":8668,"title":"إيفرتون","image":"8461690118694.png"},"away_team":{"row_id":10260,"title":"مان يونايتد","image":"4871690119302.png"},"type":1,"match_type":0,"rank":1,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"16:00:00","match_timestamp":1788699600,"home_scores":2,"away_scores":2,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5795435,"championship_id":937599,"championship":{"id":6811,"url_id":937599,"title":"الدوري الإنجليزي","image":"3411694791422.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":7,"status":1,"followed":1},"home_team":{"row_id":9825,"title":"أرسنال","image":"1701690118820.png"},"away_team":{"row_id":8455,"title":"تشيلسي","image":"2571690118280.png"},"type":1,"match_type":0,"rank":2,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"18:30:00","match_timestamp":1788708600,"home_scores":2,"away_scores":1,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5961837,"championship_id":939531,"championship":{"id":9468,"url_id":939531,"title":"دوري أدنوك للمحترفين","image":"6401690296766.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":84,"status":1,"followed":1},"home_team":{"row_id":102123,"title":"النصر","image":"7031758628390.png"},"away_team":{"row_id":149994,"title":"عجمان","image":"6021690300867.png"},"type":1,"match_type":0,"rank":0,"live":1,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"16:45:00","match_timestamp":1788702300,"home_scores":1,"away_scores":2,"ex_time":6,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":5961838,"championship_id":939531,"championship":{"id":9468,"url_id":939531,"title":"دوري أدنوك للمحترفين","image":"6401690296766.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":84,"status":1,"followed":1},"home_team":{"row_id":102118,"title":"الظفرة","image":"7361755293874.png"},"away_team":{"row_id":102122,"title":"الوحدة","image":"8811690300661.png"},"type":1,"match_type":0,"rank":0,"live":1,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"19:15:00","match_timestamp":1788711300,"home_scores":0,"away_scores":1,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":51918350,"championship_id":41791876,"championship":{"id":44444,"url_id":41791876,"title":"كأس الكونفيدرالية","image":"17638085863023.png","image_light":"17638085806160.png","type":2,"players_st":0,"standings":null,"cups":null,"active_bar":0,"ranking":null,"status":1,"followed":1},"home_team":{"row_id":75121631,"title":"الأهلي","image":"441755826814.png"},"away_team":{"row_id":6748935,"title":"توسكر","image":"8911744419087.png"},"type":1,"match_type":1,"rank":0,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"17:00:00","match_timestamp":1788703200,"home_scores":2,"away_scores":2,"ex_time":null,"score_time":null,"events":1,"lineup":0,"statics":1,"video":0,"penalties":null,"channel_commm":[]},{"match_id":45067484,"championship_id":41791876,"championship":{"id":44444,"url_id":41791876,"title":"كأس الكونفيدرالية","image":"17638085863023.png","image_light":"17638085806160.png","type":2,"players_st":0,"standings":null,"cups":null,"active_bar":0,"ranking":null,"status":1,"followed":1},"home_team":{"row_id":585662,"title":"نادي زد","image":"8411694619351.png"},"away_team":{"row_id":558372,"title":"جيبوتي تيليكوم","image":"4931692540888.png"},"type":1,"match_type":1,"rank":1,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"20:00:00","match_timestamp":1788714000,"home_scores":4,"away_scores":0,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":71955062,"championship_id":97887515,"championship":{"id":76040,"url_id":97887515,"title":"الرابطة التونسية","image":"5641693174914.png","image_light":null,"type":1,"players_st":1,"standings":1,"cups":null,"active_bar":0,"ranking":77,"status":1,"followed":1},"home_team":{"row_id":8153,"title":"الترجي","image":"9451695299186.png"},"away_team":{"row_id":102105,"title":"المرسى","image":"4311753401308.png"},"type":1,"match_type":0,"rank":1,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"18:30:00","match_timestamp":1788708600,"home_scores":2,"away_scores":1,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":0,"penalties":null,"channel_commm":[]},{"match_id":6019491,"championship_id":943487,"championship":{"id":97533,"url_id":943487,"title":"دوري أبطال أفريقيا","image":"17638081914419.png","image_light":"17638081961987.png","type":2,"players_st":0,"standings":null,"cups":null,"active_bar":0,"ranking":null,"status":1,"followed":1},"home_team":{"row_id":164931,"title":"غور ماهيا","image":"2981720801428.png"},"away_team":{"row_id":517894,"title":"بيراميدز","image":"5771692283569.png"},"type":1,"match_type":1,"rank":1,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"15:00:00","match_timestamp":1788696000,"home_scores":0,"away_scores":2,"ex_time":null,"score_time":null,"events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]},{"match_id":6019509,"championship_id":943487,"championship":{"id":97533,"url_id":943487,"title":"دوري أبطال أفريقيا","image":"17638081914419.png","image_light":"17638081961987.png","type":2,"players_st":0,"standings":null,"cups":null,"active_bar":0,"ranking":null,"status":1,"followed":1},"home_team":{"row_id":1419931,"title":"نيجيليك","image":"17869925581408.png"},"away_team":{"row_id":6353,"title":"مولودية الجزائر","image":"7391693665631.png"},"type":1,"match_type":1,"rank":1,"live":0,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"18:30:00","match_timestamp":1788708600,"home_scores":0,"away_scores":0,"ex_time":null,"score_time":null,"events":0,"lineup":1,"statics":0,"video":0,"penalties":null,"channel_commm":[]},{"match_id":6019499,"championship_id":943487,"championship":{"id":97533,"url_id":943487,"title":"دوري أبطال أفريقيا","image":"17638081914419.png","image_light":"17638081961987.png","type":2,"players_st":0,"standings":null,"cups":null,"active_bar":0,"ranking":null,"status":1,"followed":1},"home_team":{"row_id":102043,"title":"المغرب الفاسي","image":"17869850204497.png"},"away_team":{"row_id":1404987,"title":"راهيمو","image":"1611739528925.png"},"type":1,"match_type":1,"rank":0,"live":1,"status":4,"ht_time":null,"match_date":"2026-09-06","match_time":"22:00:00","match_timestamp":1788721200,"home_scores":4,"away_scores":1,"ex_time":null,"score_time":"[{"1":59}]","events":1,"lineup":1,"statics":1,"video":1,"penalties":null,"channel_commm":[]}]};
+const NEWS_DATA = [{"Id":569015,"Title":"قرارات منتظرة.. أول إجراء من الأعلى للإعلام تجاه شكوى الزمالك ضد مخرج القمة","Description":null,"Date":"2026-10-13T11:48:00","Tour":{"ID":3031,"Name":"الدوري المصري","Logo":"https://mediayk.gemini.media/img/yallakora/tourlogo/EPLLogo19-9-2023-16-31-21.png"},"Picture":{"Title":"مباراة الأهلي والزمالك","SmallPath":"https://mediayk.gemini.media/img/yallakora/thumb/2026/10/11/image-2026-10-11t222401-9072026_10_11_22_24.webp","ArabiaLargePath":"https://mediayk.gemini.media/img/yallakora/normal/2026/10/11/image-2026-10-11t222401-9072026_10_11_22_24.webp"}},{"Id":569014,"Title":"أزمة خارج الملعب.. تقارير: سيارة فارهة تورط عمر مرموش في غرامة مالية","Description":null,"Date":"2026-10-13T11:35:00","Tour":{"ID":3033,"Name":"الدوري الإنجليزي","Logo":"https://mediayk.gemini.media/img/yallakora/tourlogo/Premier-League-Symbol (1)28-01-2025-12-24-46.webp"},"Picture":{"Title":"عمر مرموش","SmallPath":"https://mediayk.gemini.media/img/yallakora/thumb/2026/9/10/image-2026-09-10t232655-1252026_9_10_23_23.webp","ArabiaLargePath":"https://mediayk.gemini.media/img/yallakora/normal/2026/9/10/image-2026-09-10t232655-1252026_9_10_23_23.webp"}},{"Id":569013,"Title":"عودة إلى مدريد.. خيتافي يعلن تعاقده مع كارفاخال","Description":null,"Date":"2026-10-13T11:33:00","Tour":{"ID":3034,"Name":"الدوري الإسباني","Logo":"https://mediayk.gemini.media/img/yallakora/tourlogo/354466675_177497535300975_2290177074408202728_n3-7-2023-21-58-53.png"},"Picture":{"Title":"داني كارفاخال","SmallPath":"https://mediayk.gemini.media/img/yallakora/thumb/2026/5/16/image-2026-05-16t154106-6592026_5_16_15_52.webp","ArabiaLargePath":"https://mediayk.gemini.media/img/yallakora/normal/2026/5/16/image-2026-05-16t154106-6592026_5_16_15_52.webp"}},{"Id":569012,"Title":"مدرب القناة يوضح حقيقة مفاوضات الأهلي لضم إبراهيم سامي","Description":null,"Date":"2026-10-13T11:01:00","Tour":{"ID":3031,"Name":"الدوري المصري","Logo":"https://mediayk.gemini.media/img/yallakora/tourlogo/EPLLogo19-9-2023-16-31-21.png"},"Picture":{"Title":"إبراهيم سامي","SmallPath":"https://mediayk.gemini.media/img/yallakora/thumb/2026/10/13/إبراهيم-سامي-2026_10_13_10_46.webp","ArabiaLargePath":"https://mediayk.gemini.media/img/yallakora/normal/2026/10/13/إبراهيم-سامي-2026_10_13_10_46.webp"}},{"Id":569011,"Title":"بالمواعيد.. مباريات الجولة الثانية من دوري أبطال أوروبا 2026-2027","Description":null,"Date":"2026-10-13T10:56:00","Tour":{"ID":3049,"Name":"دوري أبطال أوروبا","Logo":"https://mediayk.gemini.media/img/yallakora/tourlogo/UEFAChampionsLeague30-7-2018-14-58-54.png"},"Picture":{"Title":"دوري أبطال أوروبا","SmallPath":"https://mediayk.gemini.media/img/yallakora/thumb/2026/8/27/دوري2026_8_27_19_16.webp","ArabiaLargePath":"https://mediayk.gemini.media/img/yallakora/normal/2026/8/27/دوري2026_8_27_19_16.webp"}},{"Id":569010,"Title":"في مباراة روما وريال مدريد.. مبابي يسعى لتحطيم رقم ميسي","Description":null,"Date":"2026-10-13T10:42:00","Tour":{"ID":3049,"Name":"دوري أبطال أوروبا","Logo":"https://mediayk.gemini.media/img/yallakora/tourlogo/UEFAChampionsLeague30-7-2018-14-58-54.png"},"Picture":{"Title":"مبابي","SmallPath":"https://mediayk.gemini.media/img/yallakora/thumb/2026/9/7/gettyimages-2293530380-612x612-easy-resize-com2026_9_7_18_42.webp","ArabiaLargePath":"https://mediayk.gemini.media/img/yallakora/normal/2026/9/7/gettyimages-2293530380-612x612-easy-resize-com2026_9_7_18_42.webp"}},{"Id":569008,"Title":"تشكيل برشلونة المتوقع لمباراة جالاتا سراي.. موقف حمزة عبد الكريم","Description":null,"Date":"2026-10-13T10:22:00","Tour":{"ID":3049,"Name":"دوري أبطال أوروبا","Logo":"https://mediayk.gemini.media/img/yallakora/tourlogo/UEFAChampionsLeague30-7-2018-14-58-54.png"},"Picture":{"Title":"حمزة عبد الكريم","SmallPath":"https://mediayk.gemini.media/img/yallakora/thumb/2026/10/12/12026_10_12_10_48.webp","ArabiaLargePath":"https://mediayk.gemini.media/img/yallakora/normal/2026/10/12/12026_10_12_10_48.webp"}},{"Id":569007,"Title":"مواعيد مباريات الثلاثاء.. برشلونة أمام جالاتا سراي.. ومواجهات قوية بالدوري المصري","Description":null,"Date":"2026-10-13T10:19:00","Tour":{"ID":3049,"Name":"دوري أبطال أوروبا","Logo":"https://mediayk.gemini.media/img/yallakora/tourlogo/UEFAChampionsLeague30-7-2018-14-58-54.png"},"Picture":{"Title":"برشلونة حمزة عبد الكريم","SmallPath":"https://mediayk.gemini.media/img/yallakora/thumb/2026/7/31/حمزةة2026_7_31_23_3.webp","ArabiaLargePath":"https://mediayk.gemini.media/img/yallakora/normal/2026/7/31/حمزةة2026_7_31_23_3.webp"}},{"Id":569006,"Title":"وصول بعثة الزمالك إلى رواندا لمواجهة الجيش","Description":null,"Date":"2026-10-13T10:16:00","Tour":{"ID":3031,"Name":"الدوري المصري","Logo":"https://mediayk.gemini.media/img/yallakora/tourlogo/EPLLogo19-9-2023-16-31-21.png"},"Picture":{"Title":"الزمالك","SmallPath":"https://mediayk.gemini.media/img/yallakora/thumb/2026/10/10/1-2026-10-10t205113-2362026_10_10_21_1.webp","ArabiaLargePath":"https://mediayk.gemini.media/img/yallakora/normal/2026/10/10/1-2026-10-10t205113-2362026_10_10_21_1.webp"}},{"Id":569005,"Title":"صباحك أوروبي.. نصيحة إيراولا.. اعتذار فينيسيوس.. وموقف كوناتي من الكلاسيكو","Description":null,"Date":"2026-10-13T09:48:00","Tour":{"ID":3034,"Name":"الدوري الإسباني","Logo":"https://mediayk.gemini.media/img/yallakora/tourlogo/354466675_177497535300975_2290177074408202728_n3-7-2023-21-58-53.png"},"Picture":{"Title":"اعتراض فينيسيوس جونيور","SmallPath":"https://mediayk.gemini.media/img/yallakora/thumb/2026/10/11/gettyimages-2299571118-612x6122026_10_11_11_8.webp","ArabiaLargePath":"https://mediayk.gemini.media/img/yallakora/normal/2026/10/11/gettyimages-2299571118-612x6122026_10_11_11_8.webp"}},{"Id":569004,"Title":"ملف يلا كورة.. فوز بيراميدز.. شكاوى الزمالك.. وتطورات حالة معتمد جمال","Description":null,"Date":"2026-10-13T01:21:00","Tour":{"ID":3031,"Name":"الدوري المصري","Logo":"https://mediayk.gemini.media/img/yallakora/tourlogo/EPLLogo19-9-2023-16-31-21.png"},"Picture":{"Title":"غرفة ملابس الزمالك","SmallPath":"https://mediayk.gemini.media/img/yallakora/thumb/2026/10/11/843976387-1407026251645742-6481756576140508229-n-easy-resize-com-1-2026_10_11_17_40.webp","ArabiaLargePath":"https://mediayk.gemini.media/img/yallakora/normal/2026/10/11/843976387-1407026251645742-6481756576140508229-n-easy-resize-com-1-2026_10_11_17_40.webp"}}];
 
 const $=s=>document.querySelector(s),grid=$("#grid"),cats=$("#cats"),v=$("#v"),P=$("#player");
 const sInput=$("#search"),sClear=$("#clearSearch");
 const api=a=>fetch(`${WORKER}/${server}/player_api.php?action=${a}`).then(r=>r.json());
-const img=u=>u?(u.startsWith("https")?u:`${WORKER}/proxy?url=${encodeURIComponent(u)}`):FALLBACK_ICON;
+const img=u=>u?(u.startsWith("https")?u:`${WORKER}/proxy?url=${encodeURIComponent(u)}`):"";
 const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const norm=s=>String(s||"").toLowerCase().replace(/[إأآا]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/[ً-ٟ]/g,"").trim();
 
@@ -376,10 +573,9 @@ sb.addEventListener("click",enter);
 
 /* Pre-fetch all items for instant universal search */
 async function getAllItems(t){
-  if(t==="matches")return null;
   if(allCache[t])return allCache[t];
   const a={live:"get_live_streams",vod:"get_vod_streams",series:"get_series"}[t];
-  if(!a)return null;
+  if(!a) return null;
   try{
     const list=await api(a);
     if(Array.isArray(list)){allCache[t]=list;return list}
@@ -391,361 +587,358 @@ async function getAllItems(t){
 document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{
   type=b.dataset.t;
   document.querySelectorAll("[data-t]").forEach(x=>x.classList.toggle("on",x===b));
-  grid.classList.toggle("live-mode",type==="live"||type==="matches");
-  stack=[];
   sInput.value="";
   sClear.classList.remove("on");
-  
-  if(type==="matches"){
+  cat=null;
+  stack=[];
+
+  if(type === "matches"){
     loadMatches();
+  } else if(type === "news"){
+    loadNews();
   } else {
-    loadCats();
+    load();
     getAllItems(type);
   }
 });
 
+/* Server switch */
 $("#srv").onclick=()=>{
   server=server==="s1"?"s2":"s1";
   $("#srv").textContent=server==="s1"?"سيرفر 1":"سيرفر 2";
   allCache={live:null,vod:null,series:null};
-  stack=[];
-  sInput.value="";
-  sClear.classList.remove("on");
-  if(type==="matches") loadMatches();
-  else loadCats();
+  if(type !== "matches" && type !== "news"){
+    load();
+    getAllItems(type);
+  }
 };
 
-/* جدول المباريات - جاهز للربط مع رابط API الذي سترسله */
+/* Load Matches Tab */
 function loadMatches(){
-  cats.innerHTML='<div class="cat on">⚽ مباريات اليوم</div>';
-  grid.innerHTML=`
-    <div class="msg" style="line-height:1.8">
-      <div style="font-size:32px;margin-bottom:8px">⚽</div>
-      <strong>قسم جدول المباريات مفعل وجاهز</strong><br>
-      بانتظار رابط API الذي سترسله لربط مباريات اليوم فوراً.
-    </div>
-  `;
-}
-
-async function loadCats(){
-  cats.innerHTML="";grid.innerHTML='<div class="msg">جاري التحميل...</div>';
-  const a={live:"get_live_categories",vod:"get_vod_categories",series:"get_series_categories"}[type];
-  try{
-    const list=await api(a);
-    if(!Array.isArray(list)||!list.length)throw 0;
-    list.forEach((c,i)=>{
-      const b=document.createElement("button");
-      b.className="cat f";
-      b.textContent=c.category_name;
-      b.onclick=()=>{
-        document.querySelectorAll(".cat").forEach(x=>x.classList.remove("on"));
-        b.classList.add("on");
-        sInput.value="";
-        sClear.classList.remove("on");
-        loadItems(c.category_id);
-      };
-      cats.appendChild(b);
-      if(!i)b.click();
-    });
-  }catch(e){
-    grid.innerHTML='<div class="msg">تعذر تحميل المحتوى من هذا السيرفر</div>';
-  }
-}
-
-function mapItem(x,isLive){
-  const ext = (server === "s2") ? "m3u8" : (x.container_extension || "mp4");
-  return {
-    name: x.name,
-    pic: x.stream_icon || x.cover || FALLBACK_ICON,
-    go: () => {
-      if(isLive){
-        play(`${WORKER}/${server}/live/${x.stream_id}.m3u8`, x.name, true, `http://so.ta2al.us/live/MH12ARBMH12/MH12ARBMH12/${x.stream_id}.m3u8`);
-      }else if(type==="vod"){
-        const streamUrl = `${WORKER}/${server}/movie/${x.stream_id}.${ext}`;
-        const directUrl = `http://so.ta2al.us/movie/MH12ARBMH12/MH12ARBMH12/${x.stream_id}.mp4`;
-        play(streamUrl, x.name, false, directUrl);
-      }else{
-        openSeries(x);
-      }
+  cats.style.display="block";
+  const matches = MATCHES_DATA.data || [];
+  
+  // استخراج البطولات للتصنيف
+  const toursMap = new Map();
+  matches.forEach(m => {
+    if(m.championship && m.championship.title){
+      toursMap.set(m.championship.title, (toursMap.get(m.championship.title) || 0) + 1);
     }
-  };
-}
-
-async function loadItems(id){
-  cat=id;stack=[];grid.innerHTML='<div class="msg">جاري التحميل...</div>';
-  const a={live:"get_live_streams",vod:"get_vod_streams",series:"get_series"}[type];
-  try{
-    const list=await api(`${a}&category_id=${id}`);
-    if(cat!==id)return;
-    if(!list||!list.length){currentList=[];grid.innerHTML='<div class="msg">لا يوجد محتوى</div>';return}
-    currentList=list;
-    renderCards(list.map(x=>mapItem(x,type==="live")),type==="live");
-  }catch(e){
-    grid.innerHTML='<div class="msg">خطأ في التحميل</div>';
-  }
-}
-
-function renderCards(items,live){
-  grid.innerHTML="";
-  grid.classList.toggle("live-mode",!!live);
-  items.forEach(it=>{
-    const b=document.createElement("button");
-    b.className="card f"+(live?" live":"");
-    const safePic = it.pic ? esc(img(it.pic)) : FALLBACK_ICON;
-    b.innerHTML=`<img loading="lazy" src="${safePic}" onerror="this.onerror=null;this.src='${FALLBACK_ICON}'"><p title="${esc(it.name)}">${esc(it.name)}</p>`;
-    b.onclick=it.go;
-    grid.appendChild(b);
   });
+
+  cats.innerHTML = `<button class="cat f on" data-c="all">🏆 كل المباريات (${matches.length})</button>` +
+    Array.from(toursMap.entries()).map(([tour, count]) => 
+      `<button class="cat f" data-tour="${esc(tour)}">⚽ ${esc(tour)} (${count})</button>`
+    ).join("");
+
+  cats.querySelectorAll(".cat").forEach(b => {
+    b.onclick = () => {
+      cats.querySelectorAll(".cat").forEach(x => x.classList.remove("on"));
+      b.classList.add("on");
+      renderMatches(b.dataset.tour);
+    };
+  });
+
+  renderMatches();
 }
 
-/* Universal Smooth Search */
-function doSearch(){
-  const raw=sInput.value, q=norm(raw);
-  sClear.classList.toggle("on",!!raw);
-  if(!q){
-    if(currentList.length) renderCards(currentList.map(x=>mapItem(x,type==="live")), type==="live");
-    else if(cat) loadItems(cat);
+function renderMatches(filterTour = null, filterQuery = null){
+  let matches = MATCHES_DATA.data || [];
+  if(filterTour){
+    matches = matches.filter(m => m.championship && m.championship.title === filterTour);
+  }
+  if(filterQuery){
+    const q = norm(filterQuery);
+    matches = matches.filter(m => {
+      const h = norm(m.home_team && m.home_team.title);
+      const a = norm(m.away_team && m.away_team.title);
+      const t = norm(m.championship && m.championship.title);
+      return h.includes(q) || a.includes(q) || t.includes(q);
+    });
+  }
+
+  if(!matches.length){
+    grid.innerHTML = `<div class="msg">لا توجد مباريات مطابقة</div>`;
     return;
   }
+
+  grid.innerHTML = matches.map(m => {
+    const isLive = m.live === 1;
+    const isEnded = m.status === 4;
+    const tourTitle = (m.championship && m.championship.title) || "مباراة";
+    const tourImg = m.championship && m.championship.image ? `https://imgs.ysscores.com/championship/48/${m.championship.image}` : "";
+    const homeTitle = (m.home_team && m.home_team.title) || "المضيف";
+    const homeImg = m.home_team && m.home_team.image ? `https://imgs.ysscores.com/teams/128/${m.home_team.image}` : "";
+    const awayTitle = (m.away_team && m.away_team.title) || "الضيف";
+    const awayImg = m.away_team && m.away_team.image ? `https://imgs.ysscores.com/teams/128/${m.away_team.image}` : "";
+
+    const hScore = m.home_scores !== null && m.home_scores !== undefined ? m.home_scores : "-";
+    const aScore = m.away_scores !== null && m.away_scores !== undefined ? m.away_scores : "-";
+
+    let badgeText = isLive ? "🔴 مباشر" : (isEnded ? "انتهت" : "قريباً");
+    let badgeClass = isLive ? "match-badge live" : "match-badge";
+
+    return `
+      <div class="match-card">
+        <div class="match-header">
+          <div class="match-tour">
+            ${tourImg ? `<img src="${tourImg}" onerror="this.style.display='none'">` : ""}
+            <span>${esc(tourTitle)}</span>
+          </div>
+          <span class="${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="match-body">
+          <div class="team">
+            <img src="${homeImg}" onerror="this.src='https://imgs.ysscores.com/teams/64/${m.home_team && m.home_team.image || ''}';this.onerror=null;">
+            <span class="team-name" title="${esc(homeTitle)}">${esc(homeTitle)}</span>
+          </div>
+          <div class="score-box">
+            <div class="scores">${hScore} - ${aScore}</div>
+            <div class="match-time">🕒 ${m.match_time ? m.match_time.slice(0,5) : ""}</div>
+          </div>
+          <div class="team">
+            <img src="${awayImg}" onerror="this.src='https://imgs.ysscores.com/teams/64/${m.away_team && m.away_team.image || ''}';this.onerror=null;">
+            <span class="team-name" title="${esc(awayTitle)}">${esc(awayTitle)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* Load News Tab */
+function loadNews(){
+  cats.style.display="none";
+  renderNews();
+}
+
+function renderNews(filterQuery = null){
+  let news = NEWS_DATA || [];
+  if(filterQuery){
+    const q = norm(filterQuery);
+    news = news.filter(n => norm(n.Title).includes(q) || (n.Tour && norm(n.Tour.Name).includes(q)));
+  }
+
+  if(!news.length){
+    grid.innerHTML = `<div class="msg">لا توجد أخبار مطابقة</div>`;
+    return;
+  }
+
+  grid.innerHTML = news.map(n => {
+    const thumb = (n.Picture && (n.Picture.ArabiaLargePath || n.Picture.SmallPath)) || "";
+    const tourName = (n.Tour && n.Tour.Name) || "أخبار الرياضة";
+    const dateFormatted = n.Date ? n.Date.replace("T", " ").slice(0, 16) : "";
+
+    return `
+      <div class="news-card">
+        <div class="news-thumb">
+          <img src="${thumb}" onerror="this.src='https://mediayk.gemini.media/img/yallakora/tourlogo/EPLLogo19-9-2023-16-31-21.png';this.onerror=null;" loading="lazy">
+          <span class="news-tour-tag">${esc(tourName)}</span>
+        </div>
+        <div class="news-content">
+          <div class="news-title">${esc(n.Title)}</div>
+          <div class="news-date">🕒 ${dateFormatted}</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* IPTV Load Categories & Streams */
+async function load(){
+  cats.style.display="block";
+  cats.innerHTML='<div class="msg">تحميل...</div>';
+  grid.innerHTML='<div class="msg">تحميل...</div>';
+  try{
+    const cs=await api({live:"get_live_categories",vod:"get_vod_categories",series:"get_series_categories"}[type]);
+    cats.innerHTML=`<button class="cat f on" data-c="all">★ الكل</button>`+cs.map(c=>`<button class="cat f" data-c="${c.category_id}">${esc(c.category_name)}</button>`).join("");
+    cats.querySelectorAll(".cat").forEach(b=>b.onclick=()=>{
+      cats.querySelectorAll(".cat").forEach(x=>x.classList.remove("on"));
+      b.classList.add("on");
+      cat=b.dataset.c;
+      loadGrid();
+    });
+    cat="all";
+    loadGrid();
+  }catch(e){
+    cats.innerHTML='<div class="msg">خطأ اتصال</div>';
+    grid.innerHTML='<div class="msg">تعذر جلب البيانات</div>';
+  }
+}
+
+async function loadGrid(){
+  grid.innerHTML='<div class="msg">تحميل...</div>';
+  try{
+    const a={live:"get_live_streams",vod:"get_vod_streams",series:"get_series"}[type];
+    const u=cat==="all"?a:`${a}&category_id=${cat}`;
+    const list=await api(u);
+    currentList=Array.isArray(list)?list:[];
+    renderCards(currentList);
+  }catch(e){
+    grid.innerHTML='<div class="msg">فشل التحميل</div>';
+  }
+}
+
+function renderCards(list){
+  if(!list||!list.length){grid.innerHTML='<div class="msg">لا يوجد محتوى</div>';return}
+  grid.innerHTML=list.map(it=>{
+    const id=it.stream_id||it.series_id;
+    const name=it.name||it.title;
+    const icon=it.stream_icon||it.cover;
+    const isLive=type==="live";
+    return `<div class="card f ${isLive?'live':''}" data-id="${id}" data-name="${esc(name)}">
+      <img src="${img(icon)}" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'160\' height=\'100\' fill=\'%23222\'><rect width=\'100%\' height=\'100%\'/><text x=\'50%\' y=\'50%\' fill=\'%23666\' font-size=\'14\' text-anchor=\'middle\' dy=\'.3em\'>📺</text></svg>';" loading="lazy">
+      <p>${esc(name)}</p>
+    </div>`;
+  }).join("");
+
+  grid.querySelectorAll(".card").forEach(c=>c.onclick=()=>playItem(c.dataset.id,c.dataset.name));
+}
+
+/* Universal Fast Search */
+function handleSearch(q){
+  q=norm(q);
+  if(q){sClear.classList.add("on")}else{sClear.classList.remove("on")}
   
-  const filterAndShow=(pool)=>{
-    const matches=[];
-    for(let i=0;i<pool.length;i++){
-      if(norm(pool[i].name).includes(q)){
-        matches.push(pool[i]);
-        if(matches.length>=150) break;
-      }
-    }
-    if(!matches.length){
-      grid.innerHTML='<div class="msg">لا توجد نتائج تطابق: "'+esc(raw)+'"</div>';
-    }else{
-      renderCards(matches.map(x=>mapItem(x,type==="live")), type==="live");
-    }
-  };
-  if(allCache[type]){
-    filterAndShow(allCache[type]);
-  } else {
-    if(currentList&&currentList.length) filterAndShow(currentList);
-    else grid.innerHTML='<div class="msg">جاري البحث الشامل...</div>';
-    getAllItems(type).then(all=>{
-      if(all&&norm(sInput.value)===q){
-        filterAndShow(all);
+  if(type === "matches"){
+    renderMatches(null, q);
+    return;
+  }
+  if(type === "news"){
+    renderNews(q);
+    return;
+  }
+
+  if(!q){
+    renderCards(currentList);
+    return;
+  }
+
+  const pool = allCache[type] || currentList;
+  const filtered = pool.filter(it => norm(it.name || it.title).includes(q));
+  renderCards(filtered);
+
+  if(!allCache[type]){
+    getAllItems(type).then(fullList => {
+      if(fullList && sInput.value.trim()){
+        const qNow = norm(sInput.value);
+        renderCards(fullList.filter(it => norm(it.name || it.title).includes(qNow)));
       }
     });
   }
 }
-sInput.addEventListener("input",()=>{
+
+sInput.addEventListener("input",e=>{
   clearTimeout(searchT);
-  searchT=setTimeout(doSearch,50);
+  searchT=setTimeout(()=>handleSearch(e.target.value),120);
 });
-sInput.addEventListener("focus",()=>getAllItems(type));
+
 sClear.onclick=()=>{
   sInput.value="";
-  doSearch();
+  handleSearch("");
   sInput.focus();
 };
 
-async function openSeries(s){
-  grid.innerHTML='<div class="msg">جاري التحميل...</div>';
-  const info=await api(`get_series_info&series_id=${s.series_id}`);
-  stack.push(()=>loadItems(cat));
-  const seasons=Object.keys(info.episodes||{});
-  const showSeason=k=>{
-    renderCards(info.episodes[k].map(e=>{
-      const ext = (server === "s2") ? "m3u8" : (e.container_extension || "mp4");
-      const streamUrl = `${WORKER}/${server}/series/${e.id}.${ext}`;
-      const directUrl = `http://so.ta2al.us/series/MH12ARBMH12/MH12ARBMH12/${e.id}.mp4`;
-      return {
-        name:`الموسم ${k} - ${e.title}`,
-        pic:(e.info&&e.info.movie_image)||s.cover||FALLBACK_ICON,
-        go:()=>play(streamUrl, `${s.name} - ${e.title}`, false, directUrl)
-      };
-    }),false);
-    grid.firstChild&&grid.firstChild.focus();
-  };
-  if(seasons.length===1)return showSeason(seasons[0]);
-  renderCards(seasons.map(k=>({name:`الموسم ${k}`,pic:s.cover||FALLBACK_ICON,go:()=>{stack.push(()=>openSeries(s));showSeason(k)}})),false);
-  grid.firstChild&&grid.firstChild.focus();
+/* Video Player */
+async function playItem(id,title){
+  if(type==="series"){
+    stack.push({cat,list:currentList});
+    try{
+      const info=await api(`get_series_info&series_id=${id}`);
+      const eps=[];
+      Object.keys(info.episodes||{}).forEach(s=>{
+        (info.episodes[s]||[]).forEach(e=>{
+          eps.push({stream_id:e.id,name:`م${s}:ح${e.episode_num} - ${e.title||''}`,stream_icon:e.info&&e.info.movie_image});
+        });
+      });
+      type="series_episodes";
+      cats.innerHTML='<button class="cat f on" id="bBack">↩ رجوع للمسلسلات</button>';
+      $("#bBack").onclick=()=>{type="series";const p=stack.pop();currentList=p.list;renderCards(currentList);load()};
+      renderCards(eps);
+    }catch(e){alert("تعذر جلب الحلقات")}
+    return;
+  }
+
+  const isLive=type==="live";
+  const ext=isLive?"m3u8":"mp4";
+  const sub=isLive?"live":(type==="series_episodes"?"series":"movie");
+  const url=`${WORKER}/${server}/${sub}/${id}.${ext}`;
+  currentExternalUrl=url;
+
+  $("#ptitle").textContent=title;
+  P.classList.add("open");
+  playStream(url,isLive);
 }
 
-/* Player Engine - Ultra Fast Speed & Lowest Quality */
-let lastFocus=null,idleT;
-function play(url,title,live,directUrl){
-  lastFocus=document.activeElement;
-  activeDirectUrl = directUrl || url;
-  P.classList.add("open");
-  $("#ptitle").textContent=title;
-  $("#seek").style.display=live?"none":"";
+function playStream(url,isLive){
+  if(hls){hls.destroy();hls=null}
   $("#spin").classList.add("on");
-  closeMenu();
-  if(hls){
-    hls.destroy();
-    hls=null;
-  }
-  const isHls=url.includes(".m3u8");
-  if(isHls&&window.Hls&&Hls.isSupported()){
+
+  if(Hls.isSupported()){
     hls=new Hls({
-      enableWorker:true,
-      lowLatencyMode:true,
-      startFragPrefetch:true,
-      startLevel:0,
-      autoLevelCapping:0,
-      maxBufferLength:4,
-      maxMaxBufferLength:8,
-      maxBufferSize:5*1000*1000,
-      backBufferLength:2,
-      capLevelToPlayerSize:true,
-      fastSwitch:true,
-      autoStartLoad:true
+      startLevel: 0,
+      capLevelToPlayerSize: true,
+      maxBufferLength: 10,
+      maxMaxBufferLength: 20
     });
     hls.loadSource(url);
     hls.attachMedia(v);
-    hls.on(Hls.Events.MANIFEST_PARSED,()=>{
-      hls.startLevel=0;
-      hls.currentLevel=0;
-      v.play().catch(()=>{});
-    });
-    hls.on(Hls.Events.FRAG_LOADED,()=>{if(v.paused)v.play().catch(()=>{})});
+    hls.on(Hls.Events.MANIFEST_PARSED,()=>{$("#spin").classList.remove("on");v.play().catch(()=>{})});
     hls.on(Hls.Events.ERROR,(e,d)=>{
       if(d.fatal){
-        if(d.type==="networkError")hls.startLoad();
-        else if(d.type==="mediaError")hls.recoverMediaError();
-        else closePlayer();
+        if(d.type===Hls.ErrorTypes.NETWORK_ERROR){hls.startLoad()}
+        else if(d.type===Hls.ErrorTypes.MEDIA_ERROR){hls.recoverMediaError()}
+        else{hls.destroy();v.src=url;v.play().catch(()=>{})}
       }
     });
-  }else{
-    v.preload="metadata";
+  }else if(v.canPlayType("application/vnd.apple.mpegurl")){
     v.src=url;
-    const start=()=>v.play().catch(()=>{});
-    v.addEventListener("loadedmetadata",start,{once:true});
-    v.addEventListener("canplay",start,{once:true});
-    start();
+    v.addEventListener("loadedmetadata",()=>{$("#spin").classList.remove("on");v.play().catch(()=>{})},{once:true});
+  }else{
+    v.src=url;
+    v.play().catch(()=>{});
   }
-  wake();
-  setTimeout(()=>$("#bPlay").focus(),100);
 }
 
-function closePlayer(){
-  if(hls){hls.destroy();hls=null}
-  v.pause();
-  v.removeAttribute("src");
-  P.classList.remove("open");
-  closeMenu();
-  if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});
-  lastFocus&&lastFocus.focus();
-}
-
-const fmt=t=>isFinite(t)?new Date(t*1000).toISOString().substr(t>=3600?11:14,t>=3600?8:5):"مباشر";
-v.addEventListener("waiting",()=>$("#spin").classList.add("on"));
-v.addEventListener("playing",()=>$("#spin").classList.remove("on"));
-v.addEventListener("canplay",()=>$("#spin").classList.remove("on"));
-v.addEventListener("error",()=>$("#spin").classList.remove("on"));
-v.addEventListener("play",()=>$("#bPlay").textContent="⏸");
-v.addEventListener("pause",()=>$("#bPlay").textContent="▶");
-v.addEventListener("timeupdate",()=>{
-  $("#time").textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`;
-  if(v.duration&&isFinite(v.duration))$("#seek").value=v.currentTime/v.duration*1000;
-});
-$("#seek").oninput=e=>{if(v.duration)v.currentTime=e.target.value/1000*v.duration};
-$("#bPlay").onclick=()=>v.paused?v.play():v.pause();
+/* Player Controls */
+$("#bPlay").onclick=()=>{v.paused?v.play():v.pause()};
+v.onplay=()=>$("#bPlay").textContent="⏸";
+v.onpause=()=>$("#bPlay").textContent="▶";
 $("#bMute").onclick=()=>{v.muted=!v.muted;$("#bMute").textContent=v.muted?"🔇":"🔊"};
-$("#vol").oninput=e=>{v.volume=e.target.value;v.muted=false;$("#bMute").textContent=v.volume==0?"🔇":"🔊"};
+$("#vol").oninput=e=>v.volume=e.target.value;
+$("#seek").oninput=e=>{if(v.duration)v.currentTime=(e.target.value/1000)*v.duration};
+v.ontimeupdate=()=>{
+  if(!v.duration)return;
+  $("#seek").value=(v.currentTime/v.duration)*1000;
+  const m=Math.floor(v.currentTime/60),s=Math.floor(v.currentTime%60);
+  $("#time").textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+};
+$("#bExt").onclick=()=>{if(currentExternalUrl)window.open(currentExternalUrl,"_blank")};
 $("#bFs").onclick=()=>{
-  if(document.fullscreenElement)document.exitFullscreen();
-  else if(P.requestFullscreen)P.requestFullscreen().catch(()=>{});
-  else if(v.webkitEnterFullscreen)v.webkitEnterFullscreen();
+  if(!document.fullscreenElement){P.requestFullscreen().catch(()=>{})}
+  else{document.exitFullscreen().catch(()=>{})}
 };
 $("#bX").onclick=closePlayer;
-$("#bExt").onclick=()=>{
-  if(activeDirectUrl) window.open(activeDirectUrl, "_blank");
-};
 
-function wake(){
+function closePlayer(){
+  v.pause();
+  v.removeAttribute("src");
+  v.load();
+  if(hls){hls.destroy();hls=null}
+  P.classList.remove("open");
+}
+
+let idleT=null;
+function bump(){
   P.classList.remove("idle");
   clearTimeout(idleT);
-  idleT=setTimeout(()=>{if(!v.paused&&!$("#menu").classList.contains("open"))P.classList.add("idle")},4000);
+  idleT=setTimeout(()=>P.classList.add("idle"),3500);
 }
-["mousemove","touchstart","keydown"].forEach(ev=>P.addEventListener(ev,wake));
-v.addEventListener("click",()=>v.paused?v.play():v.pause());
+["mousemove","touchstart","click","keydown"].forEach(ev=>document.addEventListener(ev,bump));
 
-/* Audio Track Menu Only */
-const menu=$("#menu");
-function closeMenu(){menu.classList.remove("open")}
-function openMenu(title,opts,cur,pick){
-  menu.innerHTML=`<h4>${title}</h4>`;
-  if(!opts.length)menu.innerHTML+='<div class="mi">غير متوفر</div>';
-  opts.forEach(o=>{
-    const b=document.createElement("button");
-    b.className="mi f"+(o.id===cur?" on":"");
-    b.textContent=o.label;
-    b.onclick=()=>{pick(o.id);closeMenu();$("#bPlay").focus()};
-    menu.appendChild(b);
-  });
-  menu.classList.add("open");
-  (menu.querySelector(".mi.on")||menu.querySelector(".mi"))?.focus();
-}
-$("#bA").onclick=()=>{
-  if(hls&&hls.audioTracks&&hls.audioTracks.length){
-    return openMenu("لغة الصوت",hls.audioTracks.map((t,i)=>({id:i,label:t.name||t.lang||"مسار "+(i+1)})),hls.audioTrack,id=>hls.audioTrack=id);
-  }
-  const at=v.audioTracks;
-  if(!at||!at.length)return openMenu("لغة الصوت",[],0,()=>{});
-  const arr=[...Array(at.length)].map((_,i)=>({id:i,label:at[i].label||at[i].language||"مسار "+(i+1)}));
-  openMenu("لغة الصوت",arr,arr.findIndex((_,i)=>at[i].enabled),id=>{for(let i=0;i<at.length;i++)at[i].enabled=i===id});
-};
-
-/* Remote control / D-pad spatial navigation */
-function visibleFocusables(){
-  const root=menu.classList.contains("open")?menu:P.classList.contains("open")?P:document;
-  return [...root.querySelectorAll(".f")].filter(e=>e.offsetParent!==null||e.closest("#player.open"));
-}
-function move(dir){
-  const cur=document.activeElement,els=visibleFocusables();
-  if(!els.includes(cur)){els[0]&&els[0].focus();return}
-  const r=cur.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
-  let best=null,bd=1e9;
-  els.forEach(e=>{
-    if(e===cur)return;
-    const q=e.getBoundingClientRect();
-    if(!q.width)return;
-    const x=q.left+q.width/2,y=q.top+q.height/2,dx=x-cx,dy=y-cy;
-    const ok={left:dx<-2,right:dx>2,up:dy<-2,down:dy>2}[dir];
-    if(!ok)return;
-    const main=dir==="left"||dir==="right"?Math.abs(dx):Math.abs(dy),side=dir==="left"||dir==="right"?Math.abs(dy):Math.abs(dx);
-    const d=main+side*3;
-    if(d<bd){bd=d;best=e}
-  });
-  if(best){best.focus();best.scrollIntoView({block:"nearest",inline:"nearest"})}
-}
-function back(){
-  if(menu.classList.contains("open")){closeMenu();$("#bPlay").focus();return true}
-  if(P.classList.contains("open")){closePlayer();return true}
-  if(sInput.value){sInput.value="";doSearch();return true}
-  if(stack.length){stack.pop()();return true}
-  return false;
-}
-document.addEventListener("keydown",e=>{
-  const k=e.keyCode;
-  if(!sb.classList.contains("hide")){enter();e.preventDefault();return}
-  const a=document.activeElement;
-  if(a===sInput&&k!==27&&k!==13&&k!==38&&k!==40)return;
-  const map={37:"left",38:"up",39:"right",40:"down"};
-  if(map[k]){
-    if(a&&a.type==="range"&&(k===37||k===39)){
-      if(a.id==="seek"&&v.duration){v.currentTime+=k===39?10:-10;e.preventDefault()}
-      return;
-    }
-    e.preventDefault();move(map[k]);return;
-  }
-  if(k===8||k===27||k===10009||k===461||k===166){if(back())e.preventDefault();return}
-  if(P.classList.contains("open")){
-    if(k===179||k===415||k===19||k===32&&a.tagName!=="BUTTON"){v.paused?v.play():v.pause();e.preventDefault()}
-  }
-});
-
-grid.classList.toggle("live-mode",type==="live");
-loadCats();
-getAllItems(type);
+/* Initial Start */
+load();
+getAllItems("live");
 </script>
 </body>
 </html>
