@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AlameeereTv - منصة الترفيه</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background: #000; color: #fff; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
+    header { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.95); backdrop-filter: blur(12px); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1a1a1a; }
+    .logo { font-size: 20px; font-weight: 800; background: linear-gradient(90deg, #e50914, #ff5e62); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .filter-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 10px 16px; background: #000; scrollbar-width: none; }
+    .filter-tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { background: #141414; color: #aaa; border: 1px solid #222; padding: 7px 15px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: 0.2s; }
+    .tab-btn.active, .tab-btn:hover { background: #e50914; color: #fff; border-color: #e50914; }
+    
+    .hero { position: relative; width: 100%; height: 50vh; min-height: 320px; max-height: 480px; overflow: hidden; background: #000; }
+    .hero-bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.75; transition: opacity 0.4s ease; }
+    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.65) 60%, #000 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 20px 16px; }
+    .hero-tag { display: inline-flex; align-items: center; gap: 6px; background: #e50914; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; margin-bottom: 8px; width: fit-content; }
+    .hero-title { font-size: 24px; font-weight: 800; line-height: 1.25; margin-bottom: 6px; }
+    .hero-meta { font-size: 13px; color: #bbb; display: flex; gap: 12px; margin-bottom: 14px; align-items: center; }
+    .hero-btn { background: #e50914; color: #fff; border: none; padding: 10px 22px; border-radius: 6px; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; width: fit-content; }
+    
+    .content-rows { padding: 8px 0 60px; background: #000; }
+    .row { margin-bottom: 26px; }
+    .row-header { display: flex; justify-content: space-between; align-items: center; padding: 0 16px 10px; }
+    .row-title { font-size: 17px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .row-title::before { content: ""; display: inline-block; width: 4px; height: 16px; background: #e50914; border-radius: 2px; }
+    .items-track { display: flex; gap: 10px; overflow-x: auto; padding: 4px 16px; scrollbar-width: none; scroll-snap-type: x mandatory; }
+    .items-track::-webkit-scrollbar { display: none; }
+    
+    .card { flex: 0 0 120px; border-radius: 8px; overflow: hidden; background: #111; cursor: pointer; transition: transform 0.2s; position: relative; scroll-snap-align: start; }
+    .card:active { transform: scale(0.96); }
+    .card-img-wrap { width: 100%; aspect-ratio: 2/3; background: #181818; position: relative; overflow: hidden; }
+    .card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .card-badge { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.75); color: #ffb703; font-size: 10px; font-weight: 700; padding: 2px 5px; border-radius: 4px; }
+    .card-play-icon { position: absolute; bottom: 6px; left: 6px; background: rgba(229,9,20,0.85); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+    .card-body { padding: 7px 6px 9px; }
+    .card-title { font-size: 12px; font-weight: 600; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-sub { font-size: 10px; color: #888; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .card.channel { flex: 0 0 105px; text-align: center; }
+    .card.channel .card-img-wrap { aspect-ratio: 1/1; border-radius: 50%; padding: 14px; background: #141414; border: 1px solid #222; }
+    .card.channel .card-img { object-fit: contain; }
+    
+    .modal { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.92); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 16px; }
+    .modal.active { display: flex; }
+    .modal-box { width: 100%; max-width: 680px; background: #111; border: 1px solid #222; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+    .modal-close { position: absolute; top: 10px; left: 10px; z-index: 10; background: #222; color: #fff; border: none; width: 34px; height: 34px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .modal-frame { width: 100%; aspect-ratio: 16/9; background: #000; border: none; display: none; }
+    .modal-info { padding: 16px; }
+    .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .modal-desc { font-size: 13px; color: #999; line-height: 1.5; }
+    .modal-poster { width: 100px; aspect-ratio: 2/3; border-radius: 6px; object-fit: cover; margin-bottom: 12px; display: none; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">AlameeereTv</div>
+    <div style="font-size:12px;color:#888;">منصة الترفيه</div>
+  </header>
+
+  <div class="filter-tabs">
+    <button class="tab-btn active" onclick="filterCategory('all', this)">الكل</button>
+    <button class="tab-btn" onclick="filterCategory('channels', this)">القنوات</button>
+    <button class="tab-btn" onclick="filterCategory('episodes', this)">المسلسلات والحلقات</button>
+    <button class="tab-btn" onclick="filterCategory('posters', this)">الأفلام</button>
+  </div>
+
+  <div class="hero" id="hero">
+    <img class="hero-bg" id="hero-img" src="" alt="Hero">
+    <div class="hero-overlay">
+      <div class="hero-tag" id="hero-tag">مميز</div>
+      <h1 class="hero-title" id="hero-title">...</h1>
+      <div class="hero-meta" id="hero-meta"></div>
+      <button class="hero-btn" id="hero-btn" onclick="playHero()">▶ تشغيل الآن</button>
+    </div>
+  </div>
+
+  <div class="content-rows" id="content-rows"></div>
+
+  <div class="modal" id="playerModal">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <iframe class="modal-frame" id="modalFrame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+      <div class="modal-info">
+        <img class="modal-poster" id="modalPoster" src="" alt="">
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-desc" id="modalDesc"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SECTIONS_DATA = [{"tp":"slider","tt":"أعمال مميزة","it":[{"t":"The Odyssey","p":"https://image.tmdb.org/t/p/w500/mH400wWkX4aUe72aI4q5cK3Q0G.jpg","v":6.9,"ep":"","sn":"","g":"إثارة","l":""},{"t":"السراب","p":"https://image.tmdb.org/t/p/w500/vGfA7g7bFj8rL49S6wG8fM7GfC.jpg","v":7.2,"ep":"","sn":"","g":"دراما","l":""},{"t":"House of the Dragon","p":"https://image.tmdb.org/t/p/w500/7QMsOTMUswlwxJP0rTTZfmz2tX2.jpg","v":8.4,"ep":"","sn":"","g":"خيال علمي وفانتازيا","l":""},{"t":"The Walking Dead: Daryl Dixon","p":"https://image.tmdb.org/t/p/w500/w20v3N8W1Z1C2r8x7e9L8sM4p3.jpg","v":8.1,"ep":"","sn":"","g":"خيال علمي وفانتازيا","l":""},{"t":"FROM","p":"https://image.tmdb.org/t/p/w500/uuxUcwzWbA38i8xVl8nN3dC9g.jpg","v":8.2,"ep":"","sn":"","g":"غموض","l":""},{"t":"Tulsa King","p":"https://image.tmdb.org/t/p/w500/fwHn2v9a7x8B6K1q8X2f9L5.jpg","v":8.5,"ep":"","sn":"","g":"جريمة","l":""},{"t":"Penguin","p":"https://image.tmdb.org/t/p/w500/vOW8m7C1Z4r4W5b9K1q8X2f9L.jpg","v":8.8,"ep":"","sn":"","g":"دراما","l":""}]},{"tp":"channels","tt":"قنوات البث المباشر","it":[{"t":"beIN Sports 1","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283626.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=63"},{"t":"beIN Sports 2","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283677.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=64"},{"t":"beIN Sports 3","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283731.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=65"},{"t":"beIN Sports 4","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283785.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=66"},{"t":"beIN Sports 5","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283833.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=67"},{"t":"beIN Sports 6","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283881.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=68"},{"t":"beIN Sports 7","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283928.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=69"},{"t":"beIN Sports 8","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283976.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=70"},{"t":"beIN Sports 9","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284024.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=71"},{"t":"beIN Sports Extra 1","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284073.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=72"},{"t":"beIN Sports Extra 2","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284121.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=73"},{"t":"beIN Sports News","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284170.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=74"},{"t":"SSC 1 HD","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284218.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=75"},{"t":"SSC 2 HD","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284267.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=76"},{"t":"SSC 3 HD","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284315.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=77"},{"t":"SSC 4 HD","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284364.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=78"},{"t":"SSC 5 HD","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284412.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=79"},{"t":"SSC Extra 1","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284461.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=80"},{"t":"SSC Extra 2","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284509.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=81"},{"t":"SSC Extra 3","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284558.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=82"}]},{"tp":"actors","tt":"أشهر الممثلين","it":[{"t":"Tom Cruise","p":"https://image.tmdb.org/t/p/w500/8qB9q59qM4aM0lS5bC1Z8X2f9L5.jpg","v":8.4,"ep":"","sn":"","g":"تمثيل","l":""},{"t":"Leonardo DiCaprio","p":"https://image.tmdb.org/t/p/w500/wo2hxAzv4vPUw10L3u87wMhW9b.jpg","v":8.9,"ep":"","sn":"","g":"تمثيل","l":""},{"t":"Cillian Murphy","p":"https://image.tmdb.org/t/p/w500/360R1v9X0k8bW3C1Z8X2f9L5.jpg","v":8.7,"ep":"","sn":"","g":"تمثيل","l":""},{"t":"Jason Statham","p":"https://image.tmdb.org/t/p/w500/whNlvx57zFaeW10L3u87wMhW9b.jpg","v":7.9,"ep":"","sn":"","g":"تمثيل","l":""},{"t":"Keanu Reeves","p":"https://image.tmdb.org/t/p/w500/4D0PpNI0kmP5bC1Z8X2f9L5.jpg","v":8.6,"ep":"","sn":"","g":"تمثيل","l":""},{"t":"Robert Downey Jr.","p":"https://image.tmdb.org/t/p/w500/im9SAqJPZKEW10L3u87wMhW9b.jpg","v":8.8,"ep":"","sn":"","g":"تمثيل","l":""}]},{"tp":"posters","tt":"آخر الأفلام المضافة","it":[{"t":"Deadpool & Wolverine","p":"https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg","v":7.7,"ep":"","sn":"","g":"أكشن","l":""},{"t":"Alien: Romulus","p":"https://image.tmdb.org/t/p/w500/b33nnKl1vOX6KGfbtlr0093Hk8x.jpg","v":7.3,"ep":"","sn":"","g":"رعب","l":""},{"t":"Inside Out 2","p":"https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg","v":7.6,"ep":"","sn":"","g":"رسوم متحركة","l":""},{"t":"Bad Boys: Ride or Die","p":"https://image.tmdb.org/t/p/w500/oGythE98MYleE6mZlGs5oBGkux1.jpg","v":7.5,"ep":"","sn":"","g":"أكشن","l":""},{"t":"Twisters","p":"https://image.tmdb.org/t/p/w500/pjnD08FlMAIXsfOLKQbvmO0f0MD.jpg","v":7,"ep":"","sn":"","g":"إثارة","l":""},{"t":"A Quiet Place: Day One","p":"https://image.tmdb.org/t/p/w500/yrpPYKijwd9Ja5G9vxep09DH1t5.jpg","v":6.8,"ep":"","sn":"","g":"رعب","l":""}]},{"tp":"posters","tt":"تريند","it":[{"t":"Rebel Ridge","p":"https://image.tmdb.org/t/p/w500/xEt2GSz9z5rLEKSeg749fsug2ST.jpg","v":7.1,"ep":"","sn":"","g":"إثارة","l":""},{"t":"Beetlejuice Beetlejuice","p":"https://image.tmdb.org/t/p/w500/kKgQzkUCUm0Fq047mN6qWqa2q00.jpg","v":7.2,"ep":"","sn":"","g":"كوميديا","l":""},{"t":"The Crow","p":"https://image.tmdb.org/t/p/w500/58Nsugk8m1B9t2F1R7X5b9L.jpg","v":5.8,"ep":"","sn":"","g":"فانتازيا","l":""},{"t":"Blink Twice","p":"https://image.tmdb.org/t/p/w500/lP53mgI0h3X7t2F1R7X5b9L.jpg","v":6.7,"ep":"","sn":"","g":"غموض","l":""},{"t":"It Ends with Us","p":"https://image.tmdb.org/t/p/w500/4TzwDWpLqaPt9DRHO2gFSxGrV2C.jpg","v":7.2,"ep":"","sn":"","g":"رومانسية","l":""},{"t":"Speak No Evil","p":"https://image.tmdb.org/t/p/w500/fDtp1P1eM5bC1Z8X2f9L5.jpg","v":7.3,"ep":"","sn":"","g":"رعب","l":""}]},{"tp":"posters","tt":"أفضل الأفلام العربية","it":[{"t":"ولاد رزق 3","p":"https://image.tmdb.org/t/p/w500/gK7Z3c5b8L9X2f9L5.jpg","v":7.8,"ep":"","sn":"","g":"أكشن وجريمة","l":""},{"t":"أهل الكهف","p":"https://image.tmdb.org/t/p/w500/hR8X2f9L5mB9t2F1R7.jpg","v":6.9,"ep":"","sn":"","g":"مغامرات وتاريخ","l":""},{"t":"اللعب مع العيال","p":"https://image.tmdb.org/t/p/w500/jL5mB9t2F1R7X5b9L.jpg","v":7.4,"ep":"","sn":"","g":"كوميديا","l":""},{"t":"عصابة الماكس","p":"https://image.tmdb.org/t/p/w500/kM9t2F1R7X5b9L5.jpg","v":6.5,"ep":"","sn":"","g":"كوميديا","l":""},{"t":"بيت الروبي","p":"https://image.tmdb.org/t/p/w500/lP9t2F1R7X5b9L5.jpg","v":7.6,"ep":"","sn":"","g":"كوميديا ودراما","l":""},{"t":"تاج","p":"https://image.tmdb.org/t/p/w500/mQ9t2F1R7X5b9L5.jpg","v":5.9,"ep":"","sn":"","g":"كوميديا وفانتازيا","l":""}]},{"tp":"posters","tt":"أفضل الأفلام الأجنبية","it":[{"t":"Oppenheimer","p":"https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg","v":8.1,"ep":"","sn":"","g":"دراما وتاريخ","l":""},{"t":"Dune: Part Two","p":"https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg","v":8.2,"ep":"","sn":"","g":"خيال علمي ومغامرة","l":""},{"t":"Interstellar","p":"https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg","v":8.4,"ep":"","sn":"","g":"خيال علمي ومغامرة","l":""},{"t":"The Dark Knight","p":"https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg","v":8.5,"ep":"","sn":"","g":"أكشن وجريمة","l":""},{"t":"Inception","p":"https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg","v":8.4,"ep":"","sn":"","g":"خيال علمي ومغامرة","l":""},{"t":"Gladiator","p":"https://image.tmdb.org/t/p/w500/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg","v":8.2,"ep":"","sn":"","g":"أكشن ودراما","l":""}]},{"tp":"collections","tt":"سلاسل الأفلام","it":[{"t":"John Wick Collection","p":"https://image.tmdb.org/t/p/w500/p2mD2q1B5C1Z8X2f9L5.jpg","v":8.2,"ep":"","sn":"","g":"أكشن","l":""},{"t":"Fast & Furious Collection","p":"https://image.tmdb.org/t/p/w500/q3mD2q1B5C1Z8X2f9L5.jpg","v":7.5,"ep":"","sn":"","g":"أكشن ومغامرات","l":""},{"t":"The Avengers Collection","p":"https://image.tmdb.org/t/p/w500/r4mD2q1B5C1Z8X2f9L5.jpg","v":8.3,"ep":"","sn":"","g":"خيال علمي وبطولات","l":""},{"t":"Harry Potter Collection","p":"https://image.tmdb.org/t/p/w500/s5mD2q1B5C1Z8X2f9L5.jpg","v":8.1,"ep":"","sn":"","g":"فانتازيا ومغامرات","l":""},{"t":"Mission: Impossible Collection","p":"https://image.tmdb.org/t/p/w500/t6mD2q1B5C1Z8X2f9L5.jpg","v":7.9,"ep":"","sn":"","g":"أكشن وتجسس","l":""},{"t":"The Lord of the Rings Collection","p":"https://image.tmdb.org/t/p/w500/u7mD2q1B5C1Z8X2f9L5.jpg","v":8.6,"ep":"","sn":"","g":"فانتازيا ومغامرات","l":""}]},{"tp":"posters","tt":"أفضل المسلسلات الأجنبية","it":[{"t":"Breaking Bad","p":"https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg","v":8.9,"ep":"","sn":"","g":"دراما وجريمة","l":""},{"t":"Game of Thrones","p":"https://image.tmdb.org/t/p/w500/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg","v":8.4,"ep":"","sn":"","g":"فانتازيا ودراما","l":""},{"t":"Chernobyl","p":"https://image.tmdb.org/t/p/w500/hlLXt2tOPT6RRnjiUmoxyG9LTFi.jpg","v":8.7,"ep":"","sn":"","g":"تاريخ ودراما","l":""},{"t":"Stranger Things","p":"https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg","v":8.6,"ep":"","sn":"","g":"خيال ورعب","l":""},{"t":"The Boys","p":"https://image.tmdb.org/t/p/w500/2ZmAVwwAlmbtqzyNeewfnW0Xjth.jpg","v":8.5,"ep":"","sn":"","g":"أكشن وخيال علمي","l":""},{"t":"Peaky Blinders","p":"https://image.tmdb.org/t/p/w500/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg","v":8.5,"ep":"","sn":"","g":"دراما وجريمة","l":""}]},{"tp":"episodes","tt":"أحدث الحلقات الأجنبية","it":[{"t":"9-1-1","p":"https://image.tmdb.org/t/p/w500/3Urtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"الحلقة 2","sn":"الموسم 8","g":"دراما وحركة","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"FROM","p":"https://image.tmdb.org/t/p/w500/4Vrtj58K3o2P1v2a3b4c5.jpg","v":8.2,"ep":"الحلقة 3","sn":"الموسم 3","g":"غموض ورعب","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"Penguin","p":"https://image.tmdb.org/t/p/w500/5Wrtj58K3o2P1v2a3b4c5.jpg","v":8.8,"ep":"الحلقة 4","sn":"الموسم 1","g":"جريمة ودراما","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"Tulsa King","p":"https://image.tmdb.org/t/p/w500/6Xrtj58K3o2P1v2a3b4c5.jpg","v":8.5,"ep":"الحلقة 5","sn":"الموسم 2","g":"جريمة وكوميديا","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"Slow Horses","p":"https://image.tmdb.org/t/p/w500/7Yrtj58K3o2P1v2a3b4c5.jpg","v":8.3,"ep":"الحلقة 6","sn":"الموسم 4","g":"تجسس وإثارة","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"Agatha All Along","p":"https://image.tmdb.org/t/p/w500/8Zrtj58K3o2P1v2a3b4c5.jpg","v":7.4,"ep":"الحلقة 5","sn":"الموسم 1","g":"فانتازيا وكوميديا","l":"https://stmruby.com/embed-8kqg781rflj7.html"}]},{"tp":"episodes","tt":"أحدث الحلقات العربية","it":[{"t":"حب ع ورق","p":"https://admin.dramaramadan.net/uploads/images/episodes/2024-03-24/1711285000.jpg","v":7.3,"ep":"الحلقة 15","sn":"الموسم 1","g":"دراما ورومانسية","l":"https://admin.dramaramadan.net/api/episodes/show.php?id=43634"},{"t":"عمر أفندي","p":"https://image.tmdb.org/t/p/w500/9Artj58K3o2P1v2a3b4c5.jpg","v":8,"ep":"الحلقة 12","sn":"الموسم 1","g":"كوميديا وفانتازيا","l":"https://admin.dramaramadan.net/api/episodes/show.php?id=43634"},{"t":"مفترق طرق","p":"https://image.tmdb.org/t/p/w500/0Brtj58K3o2P1v2a3b4c5.jpg","v":7.6,"ep":"الحلقة 30","sn":"الموسم 1","g":"دراما وقانون","l":"https://admin.dramaramadan.net/api/episodes/show.php?id=43634"},{"t":"البيت بيتي","p":"https://image.tmdb.org/t/p/w500/1Crtj58K3o2P1v2a3b4c5.jpg","v":8.2,"ep":"الحلقة 10","sn":"الموسم 2","g":"رعب وكوميديا","l":"https://admin.dramaramadan.net/api/episodes/show.php?id=43634"},{"t":"سفاح الجيزة","p":"https://image.tmdb.org/t/p/w500/2Drtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"الحلقة 8","sn":"الموسم 1","g":"جريمة وغموض","l":"https://admin.dramaramadan.net/api/episodes/show.php?id=43634"},{"t":"موضوع عائلي","p":"https://image.tmdb.org/t/p/w500/3Ertj58K3o2P1v2a3b4c5.jpg","v":8.4,"ep":"الحلقة 10","sn":"الموسم 2","g":"كوميديا ودراما","l":"https://admin.dramaramadan.net/api/episodes/show.php?id=43634"}]},{"tp":"posters","tt":"أفضل المسلسلات العربية","it":[{"t":"الحشاشين","p":"https://image.tmdb.org/t/p/w500/4Frtj58K3o2P1v2a3b4c5.jpg","v":8.3,"ep":"","sn":"","g":"تاريخ وإثارة","l":""},{"t":"جعفر العمدة","p":"https://image.tmdb.org/t/p/w500/5Grtj58K3o2P1v2a3b4c5.jpg","v":7.9,"ep":"","sn":"","g":"دراما وتشويق","l":""},{"t":"الاختيار","p":"https://image.tmdb.org/t/p/w500/6Hrtj58K3o2P1v2a3b4c5.jpg","v":8.2,"ep":"","sn":"","g":"حرب وأكشن","l":""},{"t":"الكبير أوي","p":"https://image.tmdb.org/t/p/w500/7Irtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"","sn":"","g":"كوميديا","l":""},{"t":"رشيد","p":"https://image.tmdb.org/t/p/w500/8Jrtj58K3o2P1v2a3b4c5.jpg","v":7.5,"ep":"","sn":"","g":"إثارة وجريمة","l":""},{"t":"تحت الوصاية","p":"https://image.tmdb.org/t/p/w500/9Krtj58K3o2P1v2a3b4c5.jpg","v":8.4,"ep":"","sn":"","g":"دراما إنسانية","l":""}]},{"tp":"posters","tt":"أفضل المسلسلات التركية المترجمة","it":[{"t":"المؤسس عثمان","p":"https://image.tmdb.org/t/p/w500/0Lrtj58K3o2P1v2a3b4c5.jpg","v":8.3,"ep":"","sn":"","g":"تاريخ وحروب","l":""},{"t":"صلاح الدين الأيوبي","p":"https://image.tmdb.org/t/p/w500/1Mrtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"","sn":"","g":"تاريخ ومغامرات","l":""},{"t":"الطائر الرفراف","p":"https://image.tmdb.org/t/p/w500/2Nrtj58K3o2P1v2a3b4c5.jpg","v":7.8,"ep":"","sn":"","g":"دراما ورومانسية","l":""},{"t":"حب بلا حدود","p":"https://image.tmdb.org/t/p/w500/3Prtj58K3o2P1v2a3b4c5.jpg","v":7.7,"ep":"","sn":"","g":"أكشن وانتقام","l":""},{"t":"القضاء","p":"https://image.tmdb.org/t/p/w500/4Qrtj58K3o2P1v2a3b4c5.jpg","v":8.4,"ep":"","sn":"","g":"جريمة وغموض","l":""},{"t":"شراب التوت","p":"https://image.tmdb.org/t/p/w500/5Rrtj58K3o2P1v2a3b4c5.jpg","v":7.9,"ep":"","sn":"","g":"دراما عائلية","l":""}]},{"tp":"episodes","tt":"أحدث الحلقات التركية المترجمة","it":[{"t":"الخليفة","p":"https://image.tmdb.org/t/p/w500/6Srtj58K3o2P1v2a3b4c5.jpg","v":7.8,"ep":"الحلقة 2","sn":"الموسم 1","g":"تاريخ ودراما","l":"https://anafast.cyou/1fnzoj1y95b8.html"},{"t":"حجر الأمنيات","p":"https://image.tmdb.org/t/p/w500/7Trtj58K3o2P1v2a3b4c5.jpg","v":7.6,"ep":"الحلقة 14","sn":"الموسم 1","g":"دراما وحزن","l":"https://anafast.cyou/1fnzoj1y95b8.html"},{"t":"السلة المتسخة","p":"https://image.tmdb.org/t/p/w500/8Urtj58K3o2P1v2a3b4c5.jpg","v":7.5,"ep":"الحلقة 35","sn":"الموسم 2","g":"دراما وكوميديا","l":"https://anafast.cyou/1fnzoj1y95b8.html"},{"t":"البراعم الحمراء","p":"https://image.tmdb.org/t/p/w500/9Vrtj58K3o2P1v2a3b4c5.jpg","v":8.2,"ep":"الحلقة 20","sn":"الموسم 2","g":"دراما وفكر","l":"https://anafast.cyou/1fnzoj1y95b8.html"},{"t":"حكاية ليلة","p":"https://image.tmdb.org/t/p/w500/0Wrtj58K3o2P1v2a3b4c5.jpg","v":7.7,"ep":"الحلقة 6","sn":"الموسم 1","g":"رومانسية وأكشن","l":"https://anafast.cyou/1fnzoj1y95b8.html"},{"t":"العبقري","p":"https://image.tmdb.org/t/p/w500/1Xrtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"الحلقة 4","sn":"الموسم 1","g":"غموض ورياضيات","l":"https://anafast.cyou/1fnzoj1y95b8.html"}]},{"tp":"posters","tt":"أفضل المسلسلات التركية المدبلجة","it":[{"t":"فريد","p":"https://image.tmdb.org/t/p/w500/2Yrtj58K3o2P1v2a3b4c5.jpg","v":7.8,"ep":"","sn":"","g":"دراما ورومانسية","l":""},{"t":"الثمن","p":"https://image.tmdb.org/t/p/w500/3Zrtj58K3o2P1v2a3b4c5.jpg","v":7.6,"ep":"","sn":"","g":"دراما عاطفية","l":""},{"t":"كريستال","p":"https://image.tmdb.org/t/p/w500/4Artj58K3o2P1v2a3b4c5.jpg","v":7.7,"ep":"","sn":"","g":"صراع وموضة","l":""},{"t":"ستيلتو","p":"https://image.tmdb.org/t/p/w500/5Brtj58K3o2P1v2a3b4c5.jpg","v":7.9,"ep":"","sn":"","g":"جريمة وغموض","l":""},{"t":"عروس بيروت","p":"https://image.tmdb.org/t/p/w500/6Crtj58K3o2P1v2a3b4c5.jpg","v":7.8,"ep":"","sn":"","g":"عائلي ورومانسي","l":""},{"t":"ابنة السفير","p":"https://image.tmdb.org/t/p/w500/7Drtj58K3o2P1v2a3b4c5.jpg","v":7.4,"ep":"","sn":"","g":"دراما وألم","l":""}]},{"tp":"episodes","tt":"أحدث الحلقات التركية المدبلجة","it":[{"t":"قدر مدبلج","p":"https://image.tmdb.org/t/p/w500/8Ertj58K3o2P1v2a3b4c5.jpg","v":7.5,"ep":"الحلقة 45","sn":"الموسم 1","g":"دراما ورومانسية","l":"https://miravd.com/embed-trw1vj9t227w.html"},{"t":"أمانة مدبلج","p":"https://image.tmdb.org/t/p/w500/9Frtj58K3o2P1v2a3b4c5.jpg","v":7.3,"ep":"الحلقة 112","sn":"الموسم 3","g":"دراما وانتقام","l":"https://miravd.com/embed-trw1vj9t227w.html"},{"t":"زهور الدم مدبلج","p":"https://image.tmdb.org/t/p/w500/0Grtj58K3o2P1v2a3b4c5.jpg","v":7.6,"ep":"الحلقة 88","sn":"الموسم 2","g":"عائلي وثأر","l":"https://miravd.com/embed-trw1vj9t227w.html"},{"t":"رياح الحب مدبلج","p":"https://image.tmdb.org/t/p/w500/1Hrtj58K3o2P1v2a3b4c5.jpg","v":7.4,"ep":"الحلقة 25","sn":"الموسم 1","g":"رومانسية وشباب","l":"https://miravd.com/embed-trw1vj9t227w.html"},{"t":"تل الرياح مدبلج","p":"https://image.tmdb.org/t/p/w500/2Irtj58K3o2P1v2a3b4c5.jpg","v":7.5,"ep":"الحلقة 60","sn":"الموسم 1","g":"دراما وصراع","l":"https://miravd.com/embed-trw1vj9t227w.html"},{"t":"الأرض الطيبة مدبلج","p":"https://image.tmdb.org/t/p/w500/3Jrtj58K3o2P1v2a3b4c5.jpg","v":7.2,"ep":"الحلقة 15","sn":"الموسم 4","g":"أكشن وقرية","l":"https://miravd.com/embed-trw1vj9t227w.html"}]},{"tp":"posters","tt":"أفضل الإنمي المترجم","it":[{"t":"Attack on Titan","p":"https://image.tmdb.org/t/p/w500/8Crtj58K3o2P1v2a3b4c5.jpg","v":8.9,"ep":"","sn":"","g":"أنمي وأكشن","l":""},{"t":"Demon Slayer","p":"https://image.tmdb.org/t/p/w500/9Drtj58K3o2P1v2a3b4c5.jpg","v":8.7,"ep":"","sn":"","g":"أنمي وفانتازيا","l":""},{"t":"Jujutsu Kaisen","p":"https://image.tmdb.org/t/p/w500/0Ertj58K3o2P1v2a3b4c5.jpg","v":8.6,"ep":"","sn":"","g":"أنمي وسحر","l":""},{"t":"Solo Leveling","p":"https://image.tmdb.org/t/p/w500/1Frtj58K3o2P1v2a3b4c5.jpg","v":8.5,"ep":"","sn":"","g":"أنمي وقوة خارقة","l":""},{"t":"One Piece","p":"https://image.tmdb.org/t/p/w500/2Grtj58K3o2P1v2a3b4c5.jpg","v":8.8,"ep":"","sn":"","g":"أنمي وقراصنة","l":""},{"t":"Bleach: Thousand-Year Blood War","p":"https://image.tmdb.org/t/p/w500/3Hrtj58K3o2P1v2a3b4c5.jpg","v":8.8,"ep":"","sn":"","g":"أنمي وسيوف","l":""}]},{"tp":"episodes","tt":"أحدث حلقات الإنمي المترجم","it":[{"t":"Magical★Explorer","p":"https://image.tmdb.org/t/p/w500/4Irtj58K3o2P1v2a3b4c5.jpg","v":7.6,"ep":"الحلقة 3","sn":"الموسم 1","g":"أنمي وفانتازيا","l":"https://test-stream.developer-pro.workers.dev/video?url=17097110129279"},{"t":"شياطين عالم الظلال","p":"https://image.tmdb.org/t/p/w500/5Jrtj58K3o2P1v2a3b4c5.jpg","v":7.8,"ep":"الحلقة 5","sn":"الموسم 1","g":"أنمي وأكشن","l":"https://test-stream.developer-pro.workers.dev/video?url=17101047532159"},{"t":"برج الإله","p":"https://image.tmdb.org/t/p/w500/6Krtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"الحلقة 14","sn":"الموسم 2","g":"أنمي وتحديات","l":"https://test-stream.developer-pro.workers.dev/video?url=17097110129279"},{"t":"حكاية الجني الخالد","p":"https://image.tmdb.org/t/p/w500/7Lrtj58K3o2P1v2a3b4c5.jpg","v":7.9,"ep":"الحلقة 8","sn":"الموسم 1","g":"أنمي أسطوري","l":"https://test-stream.developer-pro.workers.dev/video?url=17101047532159"},{"t":"فجر السحرة","p":"https://image.tmdb.org/t/p/w500/8Mrtj58K3o2P1v2a3b4c5.jpg","v":7.5,"ep":"الحلقة 11","sn":"الموسم 1","g":"أنمي وخيال","l":"https://test-stream.developer-pro.workers.dev/video?url=17097110129279"},{"t":"طارد الأرواح الأزرق","p":"https://image.tmdb.org/t/p/w500/9Nrtj58K3o2P1v2a3b4c5.jpg","v":8,"ep":"الحلقة 2","sn":"الموسم 4","g":"أنمي وشياطين","l":"https://test-stream.developer-pro.workers.dev/video?url=17101047532159"}]},{"tp":"episodes","tt":"أحدث حلقات الإنمي المدبلج","it":[{"t":"المحقق كونان مدبلج","p":"https://image.tmdb.org/t/p/w500/0Prtj58K3o2P1v2a3b4c5.jpg","v":8.4,"ep":"الحلقة 450","sn":"الجزء 9","g":"غموض وذكاء","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"سبيس باور مدبلج","p":"https://image.tmdb.org/t/p/w500/1Qrtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"الحلقة 22","sn":"الموسم 1","g":"مغامرات كلاسيكية","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"دراغون بول سوبر مدبلج","p":"https://image.tmdb.org/t/p/w500/2Rrtj58K3o2P1v2a3b4c5.jpg","v":8.3,"ep":"الحلقة 85","sn":"الموسم 1","g":"قتال وقوى","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"بي بليد المعركة الحديدية","p":"https://image.tmdb.org/t/p/w500/3Srtj58K3o2P1v2a3b4c5.jpg","v":7.9,"ep":"الحلقة 40","sn":"الجزء 2","g":"تحديات وبلابل","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"أبطال الديجيتال مدبلج","p":"https://image.tmdb.org/t/p/w500/4Trtj58K3o2P1v2a3b4c5.jpg","v":8.5,"ep":"الحلقة 30","sn":"الجزء 1","g":"عوالم رقمية","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"القناص مدبلج","p":"https://image.tmdb.org/t/p/w500/5Urtj58K3o2P1v2a3b4c5.jpg","v":8.9,"ep":"الحلقة 62","sn":"الجزء 1","g":"صيد ومغامرات","l":"https://stmruby.com/embed-8kqg781rflj7.html"}]}];
+
+    let currentHeroIndex = 0;
+    let heroItems = [];
+
+    function init() {
+      const sliderSec = SECTIONS_DATA.find(s => s.tp === 'slider');
+      if (sliderSec && sliderSec.it.length > 0) {
+        heroItems = sliderSec.it;
+        renderHero(0);
+        setInterval(() => {
+          currentHeroIndex = (currentHeroIndex + 1) % heroItems.length;
+          renderHero(currentHeroIndex);
+        }, 6000);
+      }
+      renderRows(SECTIONS_DATA);
+    }
+
+    function renderHero(idx) {
+      const item = heroItems[idx];
+      if (!item) return;
+      document.getElementById('hero-img').src = item.p;
+      document.getElementById('hero-title').textContent = item.t;
+      document.getElementById('hero-meta').innerHTML = `
+        <span>★ ${item.v || '8.5'}</span>
+        <span>${item.g || 'عمل سينمائي'}</span>
+        <span style="border:1px solid #444;padding:1px 5px;border-radius:3px;font-size:10px;">1080p</span>
+      `;
+      const btn = document.getElementById('hero-btn');
+      btn.textContent = item.l ? '▶ تشغيل الآن' : 'تفاصيل العمل';
+    }
+
+    function playHero() {
+      const item = heroItems[currentHeroIndex];
+      if (item) handleItemClick(item);
+    }
+
+    function renderRows(sections) {
+      const container = document.getElementById('content-rows');
+      container.innerHTML = '';
+
+      sections.forEach(sec => {
+        if (sec.tp === 'slider' || !sec.it || !sec.it.length) return;
+
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.setAttribute('data-type', sec.tp);
+
+        let itemsHtml = '';
+        sec.it.forEach((item, idx) => {
+          const isChannel = sec.tp === 'channels';
+          const subText = item.ep ? (item.sn ? item.sn + ' - ' : '') + item.ep : (item.g || '');
+          const ratingBadge = item.v > 0 ? `<div class="card-badge">★ ${item.v}</div>` : '';
+          const playIcon = item.l ? `<div class="card-play-icon">▶</div>` : '';
+          
+          itemsHtml += `
+            <div class="card ${isChannel ? 'channel' : ''}" data-row="${sec.tt}" data-idx="${idx}">
+              <div class="card-img-wrap">
+                <img class="card-img" src="${item.p}" alt="${item.t}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/111/444?text=No+Image'">
+                ${ratingBadge}
+                ${playIcon}
+              </div>
+              <div class="card-body">
+                <div class="card-title">${item.t}</div>
+                ${subText ? `<div class="card-sub">${subText}</div>` : ''}
+              </div>
+            </div>
+          `;
+        });
+
+        row.innerHTML = `
+          <div class="row-header">
+            <div class="row-title">${sec.tt}</div>
+          </div>
+          <div class="items-track">${itemsHtml}</div>
+        `;
+        container.appendChild(row);
+      });
+
+      container.onclick = (e) => {
+        const card = e.target.closest('.card');
+        if (!card) return;
+        const rowTitle = card.getAttribute('data-row');
+        const idx = parseInt(card.getAttribute('data-idx'), 10);
+        const sec = SECTIONS_DATA.find(s => s.tt === rowTitle);
+        if (sec && sec.it[idx]) handleItemClick(sec.it[idx]);
+      };
+    }
+
+    function handleItemClick(item) {
+      const modal = document.getElementById('playerModal');
+      const frame = document.getElementById('modalFrame');
+      const poster = document.getElementById('modalPoster');
+      const title = document.getElementById('modalTitle');
+      const desc = document.getElementById('modalDesc');
+
+      title.textContent = item.t;
+
+      if (item.l) {
+        frame.style.display = 'block';
+        frame.src = item.l;
+        poster.style.display = 'none';
+        desc.textContent = (item.sn ? item.sn + ' - ' : '') + (item.ep || item.g || '');
+      } else {
+        frame.style.display = 'none';
+        frame.src = '';
+        poster.style.display = 'block';
+        poster.src = item.p;
+        desc.innerHTML = `
+          <div style="font-size:14px;color:#eee;margin-bottom:4px;"><b>التقييم:</b> ★ ${item.v || 'غير متوفر'}</div>
+          <div style="font-size:14px;color:#eee;margin-bottom:8px;"><b>التصنيف:</b> ${item.g || 'أفلام ومسلسلات'}</div>
+          <div style="color:#777;font-size:11px;">هذا العمل للعرض والكتالوج (لا يتوفر سيرفر تشغيل مباشر له حالياً).</div>
+        `;
+      }
+
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('playerModal');
+      const frame = document.getElementById('modalFrame');
+      frame.src = '';
+      modal.classList.remove('active');
+    }
+
+    function filterCategory(cat, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const rows = document.querySelectorAll('.row');
+      rows.forEach(r => {
+        const type = r.getAttribute('data-type');
+        if (cat === 'all') {
+          r.style.display = 'block';
+        } else if (cat === 'channels' && type === 'channels') {
+          r.style.display = 'block';
+        } else if (cat === 'episodes' && type === 'episodes') {
+          r.style.display = 'block';
+        } else if (cat === 'posters' && (type === 'posters' || type === 'collections' || type === 'actors')) {
+          r.style.display = 'block';
+        } else {
+          r.style.display = 'none';
+        }
+      });
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
