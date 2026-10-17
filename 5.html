@@ -165,8 +165,14 @@ updateClock(); setInterval(updateClock, 1000);
 
 /* Standby */
 const sb = $("#standby");
-function enter(){ if (sb.classList.contains("hide")) return; sb.classList.add("hide"); setTimeout(() => $(".tab").focus(), 300); }
+function enter(){ 
+  if (sb.classList.contains("hide")) return; 
+  sb.classList.add("hide"); 
+  setTimeout(() => $(".tab").focus(), 300); 
+}
+// دعم النقر واللمس المباشر لضمان الاستجابة الفورية
 sb.addEventListener("click", enter);
+sb.addEventListener("touchstart", enter, { passive: true });
 
 /* Tabs */
 document.querySelectorAll("[data-t]").forEach(b => b.onclick = () => {
@@ -302,7 +308,7 @@ function recoverPlayback(){
 function play(url, title, live){
   lastFocus = document.activeElement; clearTimeout(recoveryTimer); recoveryAttempts = 0; nativeFallback = false; playbackFailed = false; externalPlayback = false;
   $("#failure").classList.add("hid"); $("#time").textContent = "00:00"; $("#seek").value = 0;
-  P.classList.add("open"); $("#ptitle").textContent = title; $("#seek").style.style = live ? "none" : "";
+  P.classList.add("open"); $("#ptitle").textContent = title; $("#seek").style.display = live ? "none" : "";
   $("#spin").classList.add("on"); closeMenu();
   curUrl = url; P.classList.toggle("isLive", live);
   $("#bExt").classList.toggle("hid", server !== "s2");
