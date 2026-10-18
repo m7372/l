@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>AlameeereTv</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;background:#000000;color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;overflow:hidden;user-select:none}
+button,input{font:inherit;color:inherit;border:0;background:none}
+
+/* Focus rings for Smart TV / Keyboard */
+.f:focus,.f.sel{outline:2px solid #ffffff;outline-offset:2px;box-shadow:0 0 12px rgba(255,255,255,0.4)}
+.f{outline:none}
+
+/* Standby / Splash Screen */
+#standby{
+  position:fixed;
+  inset:0;
+  background:#000000;
+  z-index:50;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:opacity .4s ease;
+}
+#standby.hide{opacity:0;pointer-events:none}
+.glow{
+  position:absolute;
+  width:50vw;
+  height:50vw;
+  max-width:400px;
+  max-height:400px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.12) 0%,transparent 70%);
+  animation:pulse 3.2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.25);opacity:1}}
+
+.beam{position:absolute;top:50%;height:2px;width:45vw;transform:translateY(-50%);filter:blur(1px)}
+.beam.r{background:linear-gradient(90deg,transparent,#ffffff);animation:beamR 3.2s ease-in-out infinite}
+.beam.l{background:linear-gradient(270deg,transparent,#ffffff);animation:beamL 3.2s ease-in-out infinite}
+@keyframes beamR{0%{right:100%}100%{right:-45vw}}
+@keyframes beamL{0%{left:100%}100%{left:-45vw}}
+
+.logo{
+  position:relative;
+  font-size:clamp(36px,8vw,110px);
+  font-weight:800;
+  letter-spacing:.04em;
+  color:#ffffff;
+  direction:ltr;
+}
+.logo span{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,transparent 35%,rgba(255,255,255,.95) 50%,transparent 65%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  background-size:200% 100%;
+}
+.logo .a{animation:sweepR 3.2s ease-in-out infinite}
+.logo .b{animation:sweepL 3.2s ease-in-out infinite}
+@keyframes sweepR{0%{background-position:150% 0}100%{background-position:-50% 0}}
+@keyframes sweepL{0%{background-position:-50% 0}100%{background-position:150% 0}}
+
+.hint{
+  position:absolute;
+  bottom:40px;
+  font-size:14px;
+  color:#888888;
+  letter-spacing:1px;
+}
+
+/* Main App Layout */
+header{
+  background:#050505;
+  border-bottom:1px solid #1a1a1a;
+  padding:8px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+/* Top Row: Date | Animated Logo | Clock */
+.top-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  gap:8px;
+}
+.header-widget{
+  font-size:12px;
+  color:#aaaaaa;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+  flex:1;
+  display:flex;
+  align-items:center;
+}
+.header-widget.date{justify-content:flex-start}
+.header-widget.time{justify-content:flex-end;color:#4ade80;font-weight:600}
+
+.brand-wrap{
+  position:relative;
+  display:inline-block;
+  text-align:center;
+}
+.brand-logo{
+  position:relative;
+  font-size:clamp(20px, 4.5vw, 26px);
+  font-weight:800;
+  letter-spacing:.04em;
+  color:#ffffff;
+  direction:ltr;
+  display:inline-block;
+  user-select:none;
+}
+.brand-logo .sweep{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg, transparent 35%, rgba(255,255,255,0.98) 50%, transparent 65%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  background-size:200% 100%;
+  pointer-events:none;
+}
+.brand-logo .sweep.a{animation:sweepR 3.2s ease-in-out infinite}
+.brand-logo .sweep.b{animation:sweepL 3.2s ease-in-out infinite}
+
+/* 5 Main Navigation Tabs in 1 Row */
+.header-tabs{
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:6px;
+  width:100%;
+}
+.tab{
+  padding:7px 4px;
+  font-size:12px;
+  border-radius:999px;
+  background:#141414;
+  color:#bbbbbb;
+  text-align:center;
+  white-space:nowrap;
+  cursor:pointer;
+  border:1px solid #222222;
+  transition:all .15s ease;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.tab:hover{background:#1f1f1f;color:#ffffff}
+.tab.on{
+  background:#ffffff;
+  color:#000000;
+  font-weight:700;
+  border-color:#ffffff;
+}
+
+/* Server & Search Bar Row */
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:100%;
+}
+#srv{
+  padding:7px 14px;
+  font-size:12px;
+  font-weight:600;
+  border-radius:999px;
+  background:#161616;
+  color:#60a5fa;
+  border:1px solid #252525;
+  white-space:nowrap;
+  cursor:pointer;
+}
+#srv:hover{background:#202020}
+.search-box{
+  position:relative;
+  flex:1;
+  display:flex;
+  align-items:center;
+}
+#search{
+  width:100%;
+  padding:7px 32px 7px 12px;
+  background:#121212;
+  border:1px solid #252525;
+  border-radius:999px;
+  font-size:12px;
+  color:#ffffff;
+}
+#search:focus{border-color:#444444;background:#181818}
+.search-clear{
+  position:absolute;
+  left:10px;
+  width:20px;
+  height:20px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  color:#888888;
+  cursor:pointer;
+  font-size:12px;
+}
+.search-clear:hover{color:#ffffff}
+
+/* Main Container */
+main{
+  display:flex;
+  flex-direction:column;
+  height:calc(100% - 138px);
+  background:#000000;
+  overflow:hidden;
+}
+
+/* Categories Bar (Horizontal Scrolling) */
+#cats{
+  width:100%;
+  min-height:44px;
+  max-height:44px;
+  display:flex;
+  align-items:center;
+  overflow-x:auto;
+  overflow-y:hidden;
+  border-bottom:1px solid #141414;
+  padding:4px 10px;
+  gap:6px;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  flex-shrink:0;
+}
+#cats::-webkit-scrollbar{display:none}
+.cat{
+  flex-shrink:0;
+  padding:5px 12px;
+  border-radius:999px;
+  font-size:12px;
+  background:#121212;
+  color:#aaaaaa;
+  cursor:pointer;
+  border:1px solid #222222;
+  white-space:nowrap;
+  transition:all .15s ease;
+}
+.cat:hover{background:#1c1c1c;color:#ffffff}
+.cat.on{
+  background:#ffffff;
+  color:#000000;
+  font-weight:700;
+  border-color:#ffffff;
+}
+
+/* Grid & Cards */
+#grid{
+  flex:1;
+  min-height:0;
+  min-width:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:12px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  grid-auto-rows:max-content;
+  gap:12px;
+  align-content:start;
+  scrollbar-width:thin;
+  scrollbar-color:#2a2a2a transparent;
+  -webkit-overflow-scrolling:touch;
+  background:#000000;
+}
+#grid.live-mode{
+  grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
+}
+#grid::-webkit-scrollbar{width:6px}
+#grid::-webkit-scrollbar-thumb{background:#222222;border-radius:3px}
+
+/* Poster Cards */
+.card{
+  background:#0d0d0d;
+  border-radius:10px;
+  overflow:hidden;
+  text-align:start;
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  height:auto;
+  min-height:fit-content;
+  border:1px solid #1c1c1c;
+  transition:transform .15s ease,border-color .15s ease;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+.card:hover{transform:translateY(-2px);border-color:#383838}
+
+.card img{
+  width:100%;
+  max-width:100%;
+  aspect-ratio:2/3;
+  object-fit:cover;
+  background:#151515;
+  display:block;
+  min-height:120px;
+  flex-shrink:0;
+}
+.card.live img{
+  aspect-ratio:16/9;
+  object-fit:contain;
+  padding:8px;
+  background:#0a0a0a;
+  min-height:75px;
+}
+.card p{
+  padding:8px 10px;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin:0;
+  line-height:1.3;
+  color:#e0e0e0;
+  flex-shrink:0;
+}
+.msg{color:#777777;padding:30px;grid-column:1/-1;text-align:center;font-size:14px}
+
+/* Matches Mode */
+#grid.matches-mode{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+@media(min-width:650px){
+  #grid.matches-mode{
+    grid-template-columns:repeat(auto-fill,minmax(310px,1fr));
+  }
+}
+.match-card{
+  background:#0d0d0d;
+  border:1px solid #1e1e1e;
+  border-radius:12px;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.match-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid #181818;
+  padding-bottom:6px;
+  font-size:11px;
+  color:#888888;
+}
+.match-badge-live{
+  background:#ef4444;
+  color:#ffffff;
+  padding:2px 8px;
+  border-radius:6px;
+  font-weight:700;
+  font-size:10px;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.match-badge-wait{
+  background:#1e1e1e;
+  color:#aaaaaa;
+  padding:2px 8px;
+  border-radius:6px;
+  font-size:10px;
+}
+.match-body{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:4px 0;
+}
+.team-side{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  width:38%;
+  text-align:center;
+}
+.team-side img{
+  width:42px;
+  height:42px;
+  object-fit:contain;
+}
+.team-side span{
+  font-size:12px;
+  font-weight:600;
+  line-height:1.2;
+}
+.match-center{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  width:24%;
+}
+.match-score{
+  background:#181818;
+  padding:4px 10px;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:800;
+  letter-spacing:2px;
+  font-variant-numeric:tabular-nums;
+}
+.match-time-tag{
+  font-size:10px;
+  color:#60a5fa;
+  direction:ltr;
+}
+.match-foot{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-top:1px solid #181818;
+  padding-top:8px;
+  gap:8px;
+}
+.btn-watch{
+  padding:6px 12px;
+  background:#ffffff;
+  color:#000000;
+  font-size:11px;
+  font-weight:700;
+  border-radius:6px;
+  cursor:pointer;
+}
+.btn-channel{
+  font-size:11px;
+  color:#60a5fa;
+  background:#141414;
+  padding:5px 8px;
+  border-radius:6px;
+  border:1px solid #222222;
+}
+
+/* News Mode */
+#grid.news-mode{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+@media(min-width:650px){
+  #grid.news-mode{
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  }
+}
+.news-card{
+  background:#0d0d0d;
+  border:1px solid #1c1c1c;
+  border-radius:10px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.news-card img{
+  width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
+  background:#141414;
+}
+.news-body{padding:10px}
+.news-body h3{font-size:13px;line-height:1.4;margin-bottom:6px}
+.news-body .meta{font-size:10px;color:#777777;display:flex;justify-content:space-between}
+
+/* Responsive Adjustments for Mobile */
+@media(max-width:768px){
+  header{padding:6px 8px;gap:6px}
+  main{height:calc(100% - 128px)}
+  #grid{padding:8px;gap:8px;grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}
+  #grid.live-mode{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+  .card img{min-height:100px}
+  .card.live img{min-height:65px}
+}
+
+/* Player */
+#player{position:fixed;inset:0;background:#000000;z-index:100;display:none}
+#player.open{display:block}
+video{width:100%;height:100%;background:#000000}
+#ctrl{position:absolute;inset:auto 0 0 0;padding:16px;background:linear-gradient(transparent,rgba(0,0,0,.92));transition:opacity .3s;direction:ltr}
+#player.idle #ctrl,#player.idle #ptitle{opacity:0;pointer-events:none}
+#ptitle{position:absolute;top:0;inset-inline:0;padding:16px;background:linear-gradient(rgba(0,0,0,.85),transparent);font-size:16px;transition:opacity .3s;direction:rtl;pointer-events:none}
+#seek{width:100%;accent-color:#ffffff;margin-bottom:10px;cursor:pointer}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cb{padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.1);font-size:13px;min-width:44px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.cb:hover{background:rgba(255,255,255,.2)}
+#vol{width:80px;accent-color:#ffffff;cursor:pointer}
+#time{font-size:13px;color:#cccccc;margin-inline-end:auto;font-variant-numeric:tabular-nums}
+.menu{position:absolute;bottom:90px;right:16px;background:#111111;border:1px solid #333333;border-radius:10px;padding:6px;min-width:180px;max-height:50vh;overflow:auto;display:none;z-index:105}
+.menu.open{display:block}
+.menu h4{font-size:12px;color:#888888;padding:6px 10px}
+.mi{display:block;width:100%;text-align:right;padding:8px 10px;border-radius:6px;font-size:13px;cursor:pointer}
+.mi:hover{background:#222222}
+.mi.on{background:#ffffff;color:#000000}
+#spin{position:absolute;inset:0;display:none;align-items:center;justify-content:center;pointer-events:none}
+#spin.on{display:flex}
+#spin div{width:48px;height:48px;border:3px solid #333333;border-top-color:#ffffff;border-radius:50%;animation:rot 0.8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- Standby / Splash Screen -->
+<div id="standby">
+  <div class="glow"></div>
+  <div class="beam r"></div>
+  <div class="beam l"></div>
+  <div class="logo">AlameeereTv<span class="a">AlameeereTv</span><span class="b">AlameeereTv</span></div>
+  <div class="hint">اضغط OK أو المس الشاشة للدخول</div>
+</div>
+
+<!-- Header -->
+<header>
+  <!-- Row 1: Date | Animated AlameeereTv | Live Clock -->
+  <div class="top-bar">
+    <div class="header-widget date" id="header-date">--:--</div>
+    <div class="brand-wrap">
+      <div class="brand-logo">
+        AlameeereTv
+        <span class="sweep a">AlameeereTv</span>
+        <span class="sweep b">AlameeereTv</span>
+      </div>
+    </div>
+    <div class="header-widget time" id="header-time">--:--:--</div>
+  </div>
+
+  <!-- Row 2: 5 Main Navigation Tabs -->
+  <div class="header-tabs">
+    <button class="tab f on" data-t="live">📺 قنوات</button>
+    <button class="tab f" data-t="vod">🎬 أفلام</button>
+    <button class="tab f" data-t="series">🍿 مسلسلات</button>
+    <button class="tab f" data-t="matches">⚽ مباريات</button>
+    <button class="tab f" data-t="news">📰 أخبار</button>
+  </div>
+
+  <!-- Row 3: Server Switch & Universal Search -->
+  <div class="header-actions">
+    <button class="tab f" id="srv">سيرفر 1</button>
+    <div class="search-box">
+      <input type="text" id="search" class="f" placeholder="🔍 بحث عام..." autocomplete="off" spellcheck="false">
+      <button id="clearSearch" class="search-clear" type="button" title="مسح">✕</button>
+    </div>
+  </div>
+</header>
+
+<!-- Main Workspace -->
+<main>
+  <nav id="cats"></nav>
+  <section id="grid"></section>
+</main>
+
+<!-- Video Player -->
+<div id="player">
+  <video id="v" playsinline webkit-playsinline preload="metadata"></video>
+  <div id="spin"><div></div></div>
+  <div id="ptitle"></div>
+  <div class="menu" id="menu"></div>
+  <div id="ctrl">
+    <input type="range" id="seek" class="f" min="0" max="1000" value="0">
+    <div class="row">
+      <button class="cb f" id="bPlay" title="تشغيل / إيقاف">⏸</button>
+      <button class="cb f" id="bMute" title="كتم الصوت">🔊</button>
+      <input type="range" id="vol" class="f" min="0" max="1" step="0.05" value="1">
+      <span id="time">00:00</span>
+      <button class="cb f" id="bExt" title="فتح برابط مباشر خارجي">↗ خارجي</button>
+      <button class="cb f" id="bQual" title="الجودة">⚙ الجودة</button>
+      <button class="cb f" id="bFull" title="شاشة كاملة">⛶</button>
+      <button class="cb f" id="bClose" title="إغلاق">✕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORKER = "https://i.m737217130.workers.dev";
+let server = "s1", type = "live", cat = null, hls = null, stack = [];
+let allCache = { live: null, vod: null, series: null };
+let currentList = [];
+let searchT = null;
+let activeDirectUrl = "";
+
+/* Sports Schedule & News Data */
+const MATCHES_DATA = {"status": true, "status_code": 200, "message": "successful request", "matches_live": 1, "data": [{"match_id": 5868049, "championship_id": 938652, "championship": {"id": 1933, "url_id": 938652, "title": "الدوري الإسباني", "image": "8641690196626.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 9, "status": 1, "followed": 1}, "home_team": {"row_id": 10267, "title": "فالنسيا", "image": "7881690196747.png"}, "away_team": {"row_id": 8634, "title": "برشلونة", "image": "9541690196746.png"}, "type": 1, "match_type": 0, "rank": 1, "live": 1, "status": 1, "ht_time": null, "match_date": "2026-10-13", "match_time": "20:45:00", "match_timestamp": 1788704100, "home_scores": 1, "away_scores": 1, "ex_time": null, "score_time": "68'", "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5868041, "championship_id": 938652, "championship": {"id": 1933, "url_id": 938652, "title": "الدوري الإسباني", "image": "8641690196626.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 9, "status": 1, "followed": 1}, "home_team": {"row_id": 9866, "title": "ألافيس", "image": "2381690196746.png"}, "away_team": {"row_id": 8371, "title": "أوساسونا", "image": "7961690196745.png"}, "type": 1, "match_type": 0, "rank": 0, "live": 0, "status": 1, "ht_time": null, "match_date": "2026-10-13", "match_time": "22:00:00", "match_timestamp": 1788712200, "home_scores": null, "away_scores": null, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5868047, "championship_id": 938652, "championship": {"id": 1933, "url_id": 938652, "title": "الدوري الإسباني", "image": "8641690196626.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 9, "status": 1, "followed": 1}, "home_team": {"row_id": 9864, "title": "ملقا", "image": "1171690458315.png"}, "away_team": {"row_id": 8581, "title": "ليفانتي", "image": "2601690370530.png"}, "type": 1, "match_type": 0, "rank": 0, "live": 0, "status": 1, "ht_time": null, "match_date": "2026-10-13", "match_time": "22:00:00", "match_timestamp": 1788712200, "home_scores": null, "away_scores": null, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5868045, "championship_id": 938652, "championship": {"id": 1933, "url_id": 938652, "title": "الدوري الإسباني", "image": "8641690196626.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 9, "status": 1, "followed": 1}, "home_team": {"row_id": 8558, "title": "إسبانيول", "image": "4481690370529.png"}, "away_team": {"row_id": 8302, "title": "إشبيلية", "image": "6931690196743.png"}, "type": 1, "match_type": 0, "rank": 0, "live": 0, "status": 1, "ht_time": null, "match_date": "2026-10-13", "match_time": "23:00:00", "match_timestamp": 1788721200, "home_scores": null, "away_scores": null, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5802927, "championship_id": 937873, "championship": {"id": 1985, "url_id": 937873, "title": "الدوري الفرنسي", "image": "9551719862665.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 21, "status": 1, "followed": 1}, "home_team": {"row_id": 10242, "title": "تروا", "image": "6871690370557.png"}, "away_team": {"row_id": 9848, "title": "ستراسبورغ", "image": "8951690287872.png"}, "type": 1, "match_type": 0, "rank": 0, "live": 1, "status": 1, "ht_time": null, "match_date": "2026-10-13", "match_time": "20:45:00", "match_timestamp": 1788699600, "home_scores": 1, "away_scores": 1, "ex_time": null, "score_time": "68'", "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5802919, "championship_id": 937873, "championship": {"id": 1985, "url_id": 937873, "title": "الدوري الفرنسي", "image": "9551719862665.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 21, "status": 1, "followed": 1}, "home_team": {"row_id": 8121, "title": "أنجيه", "image": "1121690370513.png"}, "away_team": {"row_id": 9851, "title": "رين", "image": "5061690287944.png"}, "type": 1, "match_type": 0, "rank": 0, "live": 0, "status": 1, "ht_time": null, "match_date": "2026-10-13", "match_time": "22:00:00", "match_timestamp": 1788707700, "home_scores": null, "away_scores": null, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 0, "penalties": null, "channel_commm": []}, {"match_id": 5802923, "championship_id": 937873, "championship": {"id": 1985, "url_id": 937873, "title": "الدوري الفرنسي", "image": "9551719862665.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 21, "status": 1, "followed": 1}, "home_team": {"row_id": 8592, "title": "مارسيليا", "image": "17816370094121.png"}, "away_team": {"row_id": 6379, "title": "نادي باريس", "image": "6551690370501.png"}, "type": 1, "match_type": 0, "rank": 1, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788720300, "home_scores": 2, "away_scores": 3, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 0, "penalties": null, "channel_commm": []}, {"match_id": 5881155, "championship_id": 938769, "championship": {"id": 2606, "url_id": 938769, "title": "الدوري الألماني", "image": "6171690288722.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 20, "status": 1, "followed": 1}, "home_team": {"row_id": 9790, "title": "هامبورغ", "image": "261690370540.png"}, "away_team": {"row_id": 9905, "title": "ماينتس", "image": "8131690288819.png"}, "type": 1, "match_type": 0, "rank": 0, "live": 0, "status": 1, "ht_time": null, "match_date": "2026-10-13", "match_time": "23:00:00", "match_timestamp": 1788701400, "home_scores": null, "away_scores": null, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5881154, "championship_id": 938769, "championship": {"id": 2606, "url_id": 938769, "title": "الدوري الألماني", "image": "6171690288722.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 20, "status": 1, "followed": 1}, "home_team": {"row_id": 9810, "title": "فرانكفورت", "image": "231690288818.png"}, "away_team": {"row_id": 8406, "title": "أوجسبورغ", "image": "7221690288817.png"}, "type": 1, "match_type": 0, "rank": 0, "live": 0, "status": 1, "ht_time": null, "match_date": "2026-10-13", "match_time": "22:00:00", "match_timestamp": 1788708600, "home_scores": null, "away_scores": null, "ex_time": 3, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5749664, "championship_id": 936357, "championship": {"id": 3734, "url_id": 936357, "title": "الدوري الإيطالي", "image": "6281692568873.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 17, "status": 1, "followed": 1}, "home_team": {"row_id": 9891, "title": "فروزينوني", "image": "5761690283004.png"}, "away_team": {"row_id": 7881, "title": "فينيسا", "image": "771690370510.png"}, "type": 1, "match_type": 0, "rank": 0, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788699600, "home_scores": 3, "away_scores": 2, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5749668, "championship_id": 936357, "championship": {"id": 3734, "url_id": 936357, "title": "الدوري الإيطالي", "image": "6281692568873.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 17, "status": 1, "followed": 1}, "home_team": {"row_id": 10167, "title": "بارما", "image": "4061690823331.png"}, "away_team": {"row_id": 6504, "title": "مونزا", "image": "5671690283001.png"}, "type": 1, "match_type": 0, "rank": 0, "live": 0, "status": 1, "ht_time": null, "match_date": "2026-10-13", "match_time": "23:00:00", "match_timestamp": 1788699600, "home_scores": null, "away_scores": null, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5749661, "championship_id": 936357, "championship": {"id": 3734, "url_id": 936357, "title": "الدوري الإيطالي", "image": "6281692568873.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 17, "status": 1, "followed": 1}, "home_team": {"row_id": 9857, "title": "بولوغنيا", "image": "4281690283003.png"}, "away_team": {"row_id": 7943, "title": "ساسولو", "image": "731690283001.png"}, "type": 1, "match_type": 0, "rank": 0, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788710400, "home_scores": 2, "away_scores": 2, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5749667, "championship_id": 936357, "championship": {"id": 3734, "url_id": 936357, "title": "الدوري الإيطالي", "image": "6281692568873.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 17, "status": 1, "followed": 1}, "home_team": {"row_id": 9885, "title": "يوفنتوس", "image": "9331690283003.png"}, "away_team": {"row_id": 8564, "title": "ميلان", "image": "3181690283002.png"}, "type": 1, "match_type": 0, "rank": 2, "live": 0, "status": 1, "ht_time": null, "match_date": "2026-10-13", "match_time": "22:00:00", "match_timestamp": 1788720300, "home_scores": null, "away_scores": null, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5795438, "championship_id": 937599, "championship": {"id": 6811, "url_id": 937599, "title": "الدوري الإنجليزي", "image": "3411694791422.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 7, "status": 1, "followed": 1}, "home_team": {"row_id": 8668, "title": "إيفرتون", "image": "8461690118694.png"}, "away_team": {"row_id": 10260, "title": "مان يونايتد", "image": "4871690119302.png"}, "type": 1, "match_type": 0, "rank": 1, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788699600, "home_scores": 2, "away_scores": 2, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5795435, "championship_id": 937599, "championship": {"id": 6811, "url_id": 937599, "title": "الدوري الإنجليزي", "image": "3411694791422.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 7, "status": 1, "followed": 1}, "home_team": {"row_id": 9825, "title": "أرسنال", "image": "1701690118820.png"}, "away_team": {"row_id": 8455, "title": "تشيلسي", "image": "2571690118280.png"}, "type": 1, "match_type": 0, "rank": 2, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788708600, "home_scores": 2, "away_scores": 1, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5961837, "championship_id": 939531, "championship": {"id": 9468, "url_id": 939531, "title": "دوري أدنوك للمحترفين", "image": "6401690296766.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 84, "status": 1, "followed": 1}, "home_team": {"row_id": 102123, "title": "النصر", "image": "7031758628390.png"}, "away_team": {"row_id": 149994, "title": "عجمان", "image": "6021690300867.png"}, "type": 1, "match_type": 0, "rank": 0, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788702300, "home_scores": 1, "away_scores": 2, "ex_time": 6, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 5961838, "championship_id": 939531, "championship": {"id": 9468, "url_id": 939531, "title": "دوري أدنوك للمحترفين", "image": "6401690296766.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 84, "status": 1, "followed": 1}, "home_team": {"row_id": 102118, "title": "الظفرة", "image": "7361755293874.png"}, "away_team": {"row_id": 102122, "title": "الوحدة", "image": "8811690300661.png"}, "type": 1, "match_type": 0, "rank": 0, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788711300, "home_scores": 0, "away_scores": 1, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 51918350, "championship_id": 41791876, "championship": {"id": 44444, "url_id": 41791876, "title": "كأس الكونفيدرالية", "image": "17638085863023.png", "image_light": "17638085806160.png", "type": 2, "players_st": 0, "standings": null, "cups": null, "active_bar": 0, "ranking": null, "status": 1, "followed": 1}, "home_team": {"row_id": 75121631, "title": "الأهلي", "image": "441755826814.png"}, "away_team": {"row_id": 6748935, "title": "توسكر", "image": "8911744419087.png"}, "type": 1, "match_type": 1, "rank": 0, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788703200, "home_scores": 2, "away_scores": 2, "ex_time": null, "score_time": null, "events": 1, "lineup": 0, "statics": 1, "video": 0, "penalties": null, "channel_commm": []}, {"match_id": 45067484, "championship_id": 41791876, "championship": {"id": 44444, "url_id": 41791876, "title": "كأس الكونفيدرالية", "image": "17638085863023.png", "image_light": "17638085806160.png", "type": 2, "players_st": 0, "standings": null, "cups": null, "active_bar": 0, "ranking": null, "status": 1, "followed": 1}, "home_team": {"row_id": 585662, "title": "نادي زد", "image": "8411694619351.png"}, "away_team": {"row_id": 558372, "title": "جيبوتي تيليكوم", "image": "4931692540888.png"}, "type": 1, "match_type": 1, "rank": 1, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788714000, "home_scores": 4, "away_scores": 0, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 71955062, "championship_id": 97887515, "championship": {"id": 76040, "url_id": 97887515, "title": "الرابطة التونسية", "image": "5641693174914.png", "image_light": null, "type": 1, "players_st": 1, "standings": 1, "cups": null, "active_bar": 0, "ranking": 77, "status": 1, "followed": 1}, "home_team": {"row_id": 8153, "title": "الترجي", "image": "9451695299186.png"}, "away_team": {"row_id": 102105, "title": "المرسى", "image": "4311753401308.png"}, "type": 1, "match_type": 0, "rank": 1, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788708600, "home_scores": 2, "away_scores": 1, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 0, "penalties": null, "channel_commm": []}, {"match_id": 6019491, "championship_id": 943487, "championship": {"id": 97533, "url_id": 943487, "title": "دوري أبطال أفريقيا", "image": "17638081914419.png", "image_light": "17638081961987.png", "type": 2, "players_st": 0, "standings": null, "cups": null, "active_bar": 0, "ranking": null, "status": 1, "followed": 1}, "home_team": {"row_id": 164931, "title": "غور ماهيا", "image": "2981720801428.png"}, "away_team": {"row_id": 517894, "title": "بيراميدز", "image": "5771692283569.png"}, "type": 1, "match_type": 1, "rank": 1, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788696000, "home_scores": 0, "away_scores": 2, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}, {"match_id": 6019509, "championship_id": 943487, "championship": {"id": 97533, "url_id": 943487, "title": "دوري أبطال أفريقيا", "image": "17638081914419.png", "image_light": "17638081961987.png", "type": 2, "players_st": 0, "standings": null, "cups": null, "active_bar": 0, "ranking": null, "status": 1, "followed": 1}, "home_team": {"row_id": 1419931, "title": "نيجيليك", "image": "17869925581408.png"}, "away_team": {"row_id": 6353, "title": "مولودية الجزائر", "image": "7391693665631.png"}, "type": 1, "match_type": 1, "rank": 1, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788708600, "home_scores": 0, "away_scores": 0, "ex_time": null, "score_time": null, "events": 0, "lineup": 1, "statics": 0, "video": 0, "penalties": null, "channel_commm": []}, {"match_id": 6019499, "championship_id": 943487, "championship": {"id": 97533, "url_id": 943487, "title": "دوري أبطال أفريقيا", "image": "17638081914419.png", "image_light": "17638081961987.png", "type": 2, "players_st": 0, "standings": null, "cups": null, "active_bar": 0, "ranking": null, "status": 1, "followed": 1}, "home_team": {"row_id": 102043, "title": "المغرب الفاسي", "image": "17869850204497.png"}, "away_team": {"row_id": 1404987, "title": "راهيمو", "image": "1611739528925.png"}, "type": 1, "match_type": 1, "rank": 0, "live": 0, "status": 4, "ht_time": null, "match_date": "2026-10-13", "match_time": "18:00:00", "match_timestamp": 1788721200, "home_scores": 4, "away_scores": 1, "ex_time": null, "score_time": null, "events": 1, "lineup": 1, "statics": 1, "video": 1, "penalties": null, "channel_commm": []}]};
+const NEWS_DATA = [{"Id": 569015, "Title": "قرارات منتظرة.. أول إجراء من الأعلى للإعلام تجاه شكوى الزمالك ضد مخرج القمة", "Description": null, "Date": "2026-10-13T11:48:00", "Tour": {"ID": 3031, "Name": "الدوري المصري", "Logo": "https://mediayk.gemini.media/img/yallakora/tourlogo/EPLLogo19-9-2023-16-31-21.png"}, "Picture": {"Title": "مباراة الأهلي والزمالك", "SmallPath": "https://mediayk.gemini.media/img/yallakora/thumb/2026/10/11/image-2026-10-11t222401-9072026_10_11_22_24.webp", "ArabiaLargePath": "https://mediayk.gemini.media/img/yallakora/normal/2026/10/11/image-2026-10-11t222401-9072026_10_11_22_24.webp"}}, {"Id": 569014, "Title": "أزمة خارج الملعب.. تقارير: سيارة فارهة تورط عمر مرموش في غرامة مالية", "Description": null, "Date": "2026-10-13T11:35:00", "Tour": {"ID": 3033, "Name": "الدوري الإنجليزي", "Logo": "https://mediayk.gemini.media/img/yallakora/tourlogo/Premier-League-Symbol (1)28-01-2025-12-24-46.webp"}, "Picture": {"Title": "عمر مرموش", "SmallPath": "https://mediayk.gemini.media/img/yallakora/thumb/2026/9/10/image-2026-09-10t232655-1252026_9_10_23_23.webp", "ArabiaLargePath": "https://mediayk.gemini.media/img/yallakora/normal/2026/9/10/image-2026-09-10t232655-1252026_9_10_23_23.webp"}}, {"Id": 569013, "Title": "عودة إلى مدريد.. خيتافي يعلن تعاقده مع كارفاخال", "Description": null, "Date": "2026-10-13T11:33:00", "Tour": {"ID": 3034, "Name": "الدوري الإسباني", "Logo": "https://mediayk.gemini.media/img/yallakora/tourlogo/354466675_177497535300975_2290177074408202728_n3-7-2023-21-58-53.png"}, "Picture": {"Title": "داني كارفاخال", "SmallPath": "https://mediayk.gemini.media/img/yallakora/thumb/2026/5/16/image-2026-05-16t154106-6592026_5_16_15_52.webp", "ArabiaLargePath": "https://mediayk.gemini.media/img/yallakora/normal/2026/5/16/image-2026-05-16t154106-6592026_5_16_15_52.webp"}}, {"Id": 569012, "Title": "مدرب القناة يوضح حقيقة مفاوضات الأهلي لضم إبراهيم سامي", "Description": null, "Date": "2026-10-13T11:01:00", "Tour": {"ID": 3031, "Name": "الدوري المصري", "Logo": "https://mediayk.gemini.media/img/yallakora/tourlogo/EPLLogo19-9-2023-16-31-21.png"}, "Picture": {"Title": "إبراهيم سامي", "SmallPath": "https://mediayk.gemini.media/img/yallakora/thumb/2026/10/13/إبراهيم-سامي-2026_10_13_10_46.webp", "ArabiaLargePath": "https://mediayk.gemini.media/img/yallakora/normal/2026/10/13/إبراهيم-سامي-2026_10_13_10_46.webp"}}, {"Id": 569011, "Title": "بالمواعيد.. مباريات الجولة الثانية من دوري أبطال أوروبا 2026-2027", "Description": null, "Date": "2026-10-13T10:56:00", "Tour": {"ID": 3049, "Name": "دوري أبطال أوروبا", "Logo": "https://mediayk.gemini.media/img/yallakora/tourlogo/UEFAChampionsLeague30-7-2018-14-58-54.png"}, "Picture": {"Title": "دوري أبطال أوروبا", "SmallPath": "https://mediayk.gemini.media/img/yallakora/thumb/2026/8/27/دوري2026_8_27_19_16.webp", "ArabiaLargePath": "https://mediayk.gemini.media/img/yallakora/normal/2026/8/27/دوري2026_8_27_19_16.webp"}}, {"Id": 569010, "Title": "في مباراة روما وريال مدريد.. مبابي يسعى لتحطيم رقم ميسي", "Description": null, "Date": "2026-10-13T10:42:00", "Tour": {"ID": 3049, "Name": "دوري أبطال أوروبا", "Logo": "https://mediayk.gemini.media/img/yallakora/tourlogo/UEFAChampionsLeague30-7-2018-14-58-54.png"}, "Picture": {"Title": "مبابي", "SmallPath": "https://mediayk.gemini.media/img/yallakora/thumb/2026/9/7/gettyimages-2293530380-612x612-easy-resize-com2026_9_7_18_42.webp", "ArabiaLargePath": "https://mediayk.gemini.media/img/yallakora/normal/2026/9/7/gettyimages-2293530380-612x612-easy-resize-com2026_9_7_18_42.webp"}}, {"Id": 569008, "Title": "تشكيل برشلونة المتوقع لمباراة جالاتا سراي.. موقف حمزة عبد الكريم", "Description": null, "Date": "2026-10-13T10:22:00", "Tour": {"ID": 3049, "Name": "دوري أبطال أوروبا", "Logo": "https://mediayk.gemini.media/img/yallakora/tourlogo/UEFAChampionsLeague30-7-2018-14-58-54.png"}, "Picture": {"Title": "حمزة عبد الكريم", "SmallPath": "https://mediayk.gemini.media/img/yallakora/thumb/2026/10/12/12026_10_12_10_48.webp", "ArabiaLargePath": "https://mediayk.gemini.media/img/yallakora/normal/2026/10/12/12026_10_12_10_48.webp"}}, {"Id": 569007, "Title": "مواعيد مباريات الثلاثاء.. برشلونة أمام جالاتا سراي.. ومواجهات قوية بالدوري المصري", "Description": null, "Date": "2026-10-13T10:19:00", "Tour": {"ID": 3049, "Name": "دوري أبطال أوروبا", "Logo": "https://mediayk.gemini.media/img/yallakora/tourlogo/UEFAChampionsLeague30-7-2018-14-58-54.png"}, "Picture": {"Title": "برشلونة حمزة عبد الكريم", "SmallPath": "https://mediayk.gemini.media/img/yallakora/thumb/2026/7/31/حمزةة2026_7_31_23_3.webp", "ArabiaLargePath": "https://mediayk.gemini.media/img/yallakora/normal/2026/7/31/حمزةة2026_7_31_23_3.webp"}}, {"Id": 569006, "Title": "وصول بعثة الزمالك إلى رواندا لمواجهة الجيش", "Description": null, "Date": "2026-10-13T10:16:00", "Tour": {"ID": 3031, "Name": "الدوري المصري", "Logo": "https://mediayk.gemini.media/img/yallakora/tourlogo/EPLLogo19-9-2023-16-31-21.png"}, "Picture": {"Title": "الزمالك", "SmallPath": "https://mediayk.gemini.media/img/yallakora/thumb/2026/10/10/1-2026-10-10t205113-2362026_10_10_21_1.webp", "ArabiaLargePath": "https://mediayk.gemini.media/img/yallakora/normal/2026/10/10/1-2026-10-10t205113-2362026_10_10_21_1.webp"}}, {"Id": 569005, "Title": "صباحك أوروبي.. نصيحة إيراولا.. اعتذار فينيسيوس.. وموقف كوناتي من الكلاسيكو", "Description": null, "Date": "2026-10-13T09:48:00", "Tour": {"ID": 3034, "Name": "الدوري الإسباني", "Logo": "https://mediayk.gemini.media/img/yallakora/tourlogo/354466675_177497535300975_2290177074408202728_n3-7-2023-21-58-53.png"}, "Picture": {"Title": "اعتراض فينيسيوس جونيور", "SmallPath": "https://mediayk.gemini.media/img/yallakora/thumb/2026/10/11/gettyimages-2299571118-612x6122026_10_11_11_8.webp", "ArabiaLargePath": "https://mediayk.gemini.media/img/yallakora/normal/2026/10/11/gettyimages-2299571118-612x6122026_10_11_11_8.webp"}}, {"Id": 569004, "Title": "ملف يلا كورة.. فوز بيراميدز.. شكاوى الزمالك.. وتطورات حالة معتمد جمال", "Description": null, "Date": "2026-10-13T01:21:00", "Tour": {"ID": 3031, "Name": "الدوري المصري", "Logo": "https://mediayk.gemini.media/img/yallakora/tourlogo/EPLLogo19-9-2023-16-31-21.png"}, "Picture": {"Title": "غرفة ملابس الزمالك", "SmallPath": "https://mediayk.gemini.media/img/yallakora/thumb/2026/10/11/843976387-1407026251645742-6481756576140508229-n-easy-resize-com-1-2026_10_11_17_40.webp", "ArabiaLargePath": "https://mediayk.gemini.media/img/yallakora/normal/2026/10/11/843976387-1407026251645742-6481756576140508229-n-easy-resize-com-1-2026_10_11_17_40.webp"}}];
+
+const $ = s => document.querySelector(s);
+const grid = $("#grid"), cats = $("#cats"), v = $("#v"), P = $("#player");
+const sInput = $("#search"), sClear = $("#clearSearch");
+
+const api = a => fetch(`${WORKER}/${server}/player_api.php?action=${a}`).then(r => r.json());
+const img = u => u ? (u.startsWith("https") ? u : `${WORKER}/proxy?url=${encodeURIComponent(u)}`) : "";
+const esc = s => String(s || "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm = s => String(s || "").toLowerCase().replace(/[إأآا]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/[ً-ٟ]/g, "").trim();
+
+/* Live Date & Clock Widget */
+function updateDateTime(){
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("ar-SA", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+  const timeStr = now.toLocaleTimeString("ar-SA", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  });
+  const dEl = $("#header-date"), tEl = $("#header-time");
+  if(dEl) dEl.textContent = dateStr;
+  if(tEl) tEl.textContent = timeStr;
+}
+setInterval(updateDateTime, 1000);
+updateDateTime();
+
+/* Standby Screen Enter */
+const sb = $("#standby");
+function enter(){
+  if(sb.classList.contains("hide")) return;
+  sb.classList.add("hide");
+  setTimeout(() => $(".tab").focus(), 300);
+}
+sb.addEventListener("click", enter);
+sb.addEventListener("touchstart", enter, {passive: true});
+window.addEventListener("keydown", e => {
+  if(!sb.classList.contains("hide") && (e.key === "Enter" || e.key === " ")) {
+    enter();
+  }
+});
+
+/* Cache for fast universal search */
+async function getAllItems(t){
+  if(allCache[t]) return allCache[t];
+  const a = { live: "get_live_streams", vod: "get_vod_streams", series: "get_series" }[t];
+  if(!a) return null;
+  try {
+    const list = await api(a);
+    if(Array.isArray(list)) {
+      allCache[t] = list;
+      return list;
+    }
+  } catch(e){}
+  return null;
+}
+
+/* Navigation Tabs */
+document.querySelectorAll(".tab[data-t]").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll(".tab[data-t]").forEach(x => x.classList.toggle("on", x === b));
+    type = b.dataset.t;
+    stack = [];
+    sInput.value = "";
+    sClear.style.display = "none";
+    if(type === "matches"){
+      loadMatches();
+    } else if(type === "news"){
+      loadNews();
+    } else {
+      loadCats();
+      getAllItems(type);
+    }
+  };
+});
+
+/* Server Switch */
+$("#srv").onclick = () => {
+  server = (server === "s1") ? "s2" : "s1";
+  $("#srv").textContent = (server === "s1") ? "سيرفر 1" : "سيرفر 2";
+  allCache = { live: null, vod: null, series: null };
+  stack = [];
+  sInput.value = "";
+  sClear.style.display = "none";
+  if(type === "matches") loadMatches();
+  else if(type === "news") loadNews();
+  else loadCats();
+};
+
+/* Load Categories & Automatically Select the First Real Category */
+async function loadCats(){
+  grid.className = (type === "live" ? "live-mode" : "");
+  cats.style.display = "flex";
+  cats.innerHTML = "";
+  grid.innerHTML = '<div class="msg">جاري التحميل...</div>';
+  const a = { live: "get_live_categories", vod: "get_vod_categories", series: "get_series_categories" }[type];
+  try {
+    const list = await api(a);
+    if(!Array.isArray(list) || !list.length) throw 0;
+    list.forEach((c, i) => {
+      const b = document.createElement("button");
+      b.className = "cat f" + (i === 0 ? " on" : "");
+      b.textContent = c.category_name;
+      b.onclick = () => {
+        document.querySelectorAll(".cat").forEach(x => x.classList.remove("on"));
+        b.classList.add("on");
+        sInput.value = "";
+        sClear.style.display = "none";
+        loadItems(c.category_id);
+      };
+      cats.appendChild(b);
+    });
+    // Immediately load first category items without delay
+    loadItems(list[0].category_id);
+  } catch(e){
+    grid.innerHTML = '<div class="msg">تعذر تحميل المحتوى من هذا السيرفر</div>';
+  }
+}
+
+/* Load Category Items */
+async function loadItems(id){
+  cat = id;
+  stack = [];
+  grid.className = (type === "live" ? "live-mode" : "");
+  grid.innerHTML = '<div class="msg">جاري التحميل...</div>';
+  const a = { live: "get_live_streams", vod: "get_vod_streams", series: "get_series" }[type];
+  try {
+    const list = await api(`${a}&category_id=${id}`);
+    if(cat !== id) return;
+    if(!list || !list.length){
+      currentList = [];
+      grid.innerHTML = '<div class="msg">لا يوجد محتوى في هذا القسم</div>';
+      return;
+    }
+    currentList = list;
+    renderCards(list.map(x => mapItem(x, type === "live")), type === "live");
+  } catch(e){
+    grid.innerHTML = '<div class="msg">خطأ في التحميل</div>';
+  }
+}
+
+function mapItem(x, isLive){
+  return {
+    name: x.name,
+    pic: x.stream_icon || x.cover,
+    go: () => {
+      if(isLive){
+        play(`${WORKER}/${server}/live/${x.stream_id}.m3u8`, x.name, true, `http://so.ta2al.us/live/MH12ARBMH12/MH12ARBMH12/${x.stream_id}.m3u8`);
+      } else if(type === "vod"){
+        const ext = (server === "s2") ? "m3u8" : (x.container_extension || "mp4");
+        const streamUrl = `${WORKER}/${server}/movie/${x.stream_id}.${ext}`;
+        const directUrl = `http://so.ta2al.us/movie/MH12ARBMH12/MH12ARBMH12/${x.stream_id}.mp4`;
+        play(streamUrl, x.name, false, directUrl);
+      } else {
+        openSeries(x);
+      }
+    }
+  };
+}
+
+function renderCards(items, isLive){
+  grid.innerHTML = "";
+  grid.className = (isLive ? "live-mode" : "");
+  if(!items || !items.length){
+    grid.innerHTML = '<div class="msg">لا توجد عناصر</div>';
+    return;
+  }
+  items.forEach(it => {
+    const b = document.createElement("button");
+    b.className = "card f" + (isLive ? " live" : "");
+    const fallback = isLive
+      ? "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90' fill='%23141414'><text x='50%25' y='50%25' fill='%23666' font-size='14' text-anchor='middle' dominant-baseline='middle'>📺</text></svg>"
+      : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 150' fill='%23141414'><text x='50%25' y='50%25' fill='%23666' font-size='14' text-anchor='middle' dominant-baseline='middle'>🎬</text></svg>";
+    b.innerHTML = `<img loading="lazy" src="${esc(img(it.pic))}" onerror="this.src='${fallback}'"><p title="${esc(it.name)}">${esc(it.name)}</p>`;
+    b.onclick = it.go;
+    grid.appendChild(b);
+  });
+}
+
+/* Universal Smooth Search */
+function doSearch(){
+  const raw = sInput.value.trim();
+  const q = norm(raw);
+  sClear.style.display = raw ? "block" : "none";
+
+  if(type === "matches"){
+    renderMatchesFiltered(q);
+    return;
+  }
+  if(type === "news"){
+    renderNewsFiltered(q);
+    return;
+  }
+
+  if(!q){
+    if(currentList.length) renderCards(currentList.map(x => mapItem(x, type === "live")), type === "live");
+    else if(cat) loadItems(cat);
+    return;
+  }
+
+  const filterAndShow = (pool) => {
+    const matches = [];
+    for(let i = 0; i < pool.length; i++){
+      if(norm(pool[i].name).includes(q)){
+        matches.push(pool[i]);
+        if(matches.length >= 150) break;
+      }
+    }
+    if(!matches.length){
+      grid.innerHTML = `<div class="msg">لا توجد نتائج تطابق: "${esc(raw)}"</div>`;
+    } else {
+      renderCards(matches.map(x => mapItem(x, type === "live")), type === "live");
+    }
+  };
+
+  if(allCache[type]){
+    filterAndShow(allCache[type]);
+  } else {
+    if(currentList && currentList.length) filterAndShow(currentList);
+    else grid.innerHTML = '<div class="msg">جاري البحث الشامل...</div>';
+    getAllItems(type).then(all => {
+      if(all && norm(sInput.value.trim()) === q){
+        filterAndShow(all);
+      }
+    });
+  }
+}
+
+sInput.addEventListener("input", () => {
+  clearTimeout(searchT);
+  searchT = setTimeout(doSearch, 80);
+});
+sInput.addEventListener("focus", () => getAllItems(type));
+sClear.onclick = () => {
+  sInput.value = "";
+  sClear.style.display = "none";
+  doSearch();
+  sInput.focus();
+};
+
+/* Open Series Seasons and Episodes */
+async function openSeries(s){
+  grid.className = "";
+  grid.innerHTML = '<div class="msg">جاري التحميل...</div>';
+  try {
+    const info = await api(`get_series_info&series_id=${s.series_id}`);
+    stack.push(() => loadItems(cat));
+    const seasons = Object.keys(info.episodes || {});
+    const showSeason = k => {
+      renderCards(info.episodes[k].map(e => {
+        const ext = (server === "s2") ? "m3u8" : (e.container_extension || "mp4");
+        const streamUrl = `${WORKER}/${server}/series/${e.id}.${ext}`;
+        const directUrl = `http://so.ta2al.us/series/MH12ARBMH12/MH12ARBMH12/${e.id}.mp4`;
+        return {
+          name: `الموسم ${k} - ${e.title}`,
+          pic: (e.info && e.info.movie_image) || s.cover,
+          go: () => play(streamUrl, `${s.name} - ${e.title}`, false, directUrl)
+        };
+      }), false);
+      grid.firstChild && grid.firstChild.focus();
+    };
+    if(seasons.length === 1) return showSeason(seasons[0]);
+    renderCards(seasons.map(k => ({
+      name: `الموسم ${k}`,
+      pic: s.cover,
+      go: () => {
+        stack.push(() => openSeries(s));
+        showSeason(k);
+      }
+    })), false);
+    grid.firstChild && grid.firstChild.focus();
+  } catch(e){
+    grid.innerHTML = '<div class="msg">تعذر تحميل تفاصيل المسلسل</div>';
+  }
+}
+
+/* Matches Section */
+let activeMatchCat = "all";
+function loadMatches(){
+  grid.className = "matches-mode";
+  cats.style.display = "flex";
+  cats.innerHTML = "";
+
+  const list = (MATCHES_DATA && MATCHES_DATA.data) || [];
+  const championships = {};
+  list.forEach(m => {
+    const c = m.championship ? m.championship.title : "أخرى";
+    championships[c] = (championships[c] || 0) + 1;
+  });
+
+  let catBtns = `<button class="cat f on" data-c="all">🏆 كل المباريات (${list.length})</button>`;
+  Object.keys(championships).forEach(cName => {
+    catBtns += `<button class="cat f" data-c="${esc(cName)}">${esc(cName)} (${championships[cName]})</button>`;
+  });
+  cats.innerHTML = catBtns;
+
+  cats.querySelectorAll(".cat").forEach(b => {
+    b.onclick = () => {
+      cats.querySelectorAll(".cat").forEach(x => x.classList.remove("on"));
+      b.classList.add("on");
+      activeMatchCat = b.dataset.c;
+      sInput.value = "";
+      sClear.style.display = "none";
+      renderMatchesFiltered("");
+    };
+  });
+
+  activeMatchCat = "all";
+  renderMatchesFiltered("");
+}
+
+function renderMatchesFiltered(query){
+  grid.className = "matches-mode";
+  const list = (MATCHES_DATA && MATCHES_DATA.data) || [];
+  let filtered = list;
+
+  if(activeMatchCat !== "all"){
+    filtered = filtered.filter(m => (m.championship && m.championship.title) === activeMatchCat);
+  }
+  if(query){
+    const q = norm(query);
+    filtered = filtered.filter(m => {
+      const home = norm(m.home_team && m.home_team.title);
+      const away = norm(m.away_team && m.away_team.title);
+      const champ = norm(m.championship && m.championship.title);
+      return home.includes(q) || away.includes(q) || champ.includes(q);
+    });
+  }
+
+  if(!filtered.length){
+    grid.innerHTML = '<div class="msg">لا توجد مباريات مطابقة</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(m => {
+    const home = m.home_team || {};
+    const away = m.away_team || {};
+    const champ = m.championship || {};
+    const isLive = m.live === 1;
+    const homeScore = m.home_scores !== null ? m.home_scores : "-";
+    const awayScore = m.away_scores !== null ? m.away_scores : "-";
+    const timeDisplay = isLive ? (m.score_time || "مباشر") : (m.match_time ? m.match_time.slice(0, 5) : "");
+    const dateDisplay = m.match_date || "";
+
+    const homeImg = home.image ? (home.image.startsWith("http") ? home.image : `https://imgs.ysscores.com/teams/64/${home.image}`) : "";
+    const awayImg = away.image ? (away.image.startsWith("http") ? away.image : `https://imgs.ysscores.com/teams/64/${away.image}`) : "";
+
+    return `
+      <div class="match-card">
+        <div class="match-head">
+          <span>${esc(champ.title || "مباراة")}</span>
+          ${isLive ? '<span class="match-badge-live">● مباشر</span>' : `<span class="match-badge-wait">${dateDisplay ? dateDisplay + ' ' : ''}${timeDisplay}</span>`}
+        </div>
+        <div class="match-body">
+          <div class="team-side">
+            <img src="${esc(homeImg)}" onerror="this.style.opacity='0.3'" alt="${esc(home.title)}">
+            <span>${esc(home.title || "مستضيف")}</span>
+          </div>
+          <div class="match-center">
+            <div class="match-score">${homeScore} - ${awayScore}</div>
+            <div class="match-time-tag">${timeDisplay}</div>
+          </div>
+          <div class="team-side">
+            <img src="${esc(awayImg)}" onerror="this.style.opacity='0.3'" alt="${esc(away.title)}">
+            <span>${esc(away.title || "ضيف")}</span>
+          </div>
+        </div>
+        <div class="match-foot">
+          <button class="btn-watch f" onclick="playMatchLive('${esc(champ.title)}', '${esc(home.title)}', '${esc(away.title)}')">▶ مشاهدة البث</button>
+          <span class="btn-channel">beIN Sports 1</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function playMatchLive(champ, home, away){
+  const channelStream = `${WORKER}/${server}/live/569493.m3u8`;
+  const direct = `http://so.ta2al.us/live/MH12ARBMH12/MH12ARBMH12/569493.m3u8`;
+  play(channelStream, `${home} vs ${away} (${champ})`, true, direct);
+}
+
+/* News Section */
+function loadNews(){
+  grid.className = "news-mode";
+  cats.style.display = "none";
+  renderNewsFiltered("");
+}
+
+function renderNewsFiltered(query){
+  grid.className = "news-mode";
+  const list = NEWS_DATA || [];
+  let filtered = list;
+  if(query){
+    const q = norm(query);
+    filtered = filtered.filter(n => norm(n.Title).includes(q));
+  }
+  if(!filtered.length){
+    grid.innerHTML = '<div class="msg">لا توجد أخبار مطابقة</div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(n => {
+    const pic = n.Image || n.Image_small || "";
+    const imgUrl = pic ? (pic.startsWith("http") ? pic : `https://imgs.ysscores.com/news/320/${pic}`) : "";
+    return `
+      <div class="news-card">
+        <img loading="lazy" src="${esc(imgUrl)}" onerror="this.style.display='none'">
+        <div class="news-body">
+          <h3>${esc(n.Title)}</h3>
+          <div class="meta">
+            <span>${esc(n.Championship_title || "كرة قدم")}</span>
+            <span>${esc(n.Date_ar || "")}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* Video Player Engine */
+let lastFocus = null, idleT = null;
+function play(url, title, live, directUrl){
+  lastFocus = document.activeElement;
+  activeDirectUrl = directUrl || url;
+  P.classList.add("open");
+  $("#ptitle").textContent = title;
+  $("#seek").style.display = live ? "none" : "";
+  $("#spin").classList.add("on");
+  closeMenu();
+  if(hls){
+    hls.destroy();
+    hls = null;
+  }
+  const isHls = url.includes(".m3u8");
+  if(isHls && window.Hls && Hls.isSupported()){
+    hls = new Hls({
+      capLevelToPlayerSize: true,
+      startLevel: 0,
+      autoStartLoad: true,
+      maxBufferLength: 10,
+      maxMaxBufferLength: 20
+    });
+    hls.loadSource(url);
+    hls.attachMedia(v);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      v.play().catch(() => {});
+      buildQualMenu();
+    });
+    hls.on(Hls.Events.ERROR, (e, data) => {
+      if(data.fatal){
+        if(data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+        else if(data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+        else closePlayer();
+      }
+    });
+  } else {
+    v.src = url;
+    v.play().catch(() => {});
+  }
+  resetIdle();
+}
+
+function closePlayer(){
+  if(hls){ hls.destroy(); hls = null; }
+  v.pause();
+  v.removeAttribute("src");
+  v.load();
+  P.classList.remove("open");
+  $("#spin").classList.remove("on");
+  closeMenu();
+  if(lastFocus) lastFocus.focus();
+}
+
+/* Player Controls & Event Listeners */
+$("#bPlay").onclick = () => v.paused ? v.play() : v.pause();
+v.onplay = () => { $("#bPlay").textContent = "⏸"; $("#spin").classList.remove("on"); };
+v.onpause = () => { $("#bPlay").textContent = "▶"; };
+v.onwaiting = () => $("#spin").classList.add("on");
+v.onplaying = () => $("#spin").classList.remove("on");
+
+$("#bMute").onclick = () => {
+  v.muted = !v.muted;
+  $("#bMute").textContent = v.muted ? "🔇" : "🔊";
+};
+$("#vol").oninput = e => {
+  v.volume = e.target.value;
+  v.muted = false;
+  $("#bMute").textContent = "🔊";
+};
+
+v.ontimeupdate = () => {
+  if(!v.duration) return;
+  $("#seek").value = (v.currentTime / v.duration) * 1000;
+  const c = fmt(v.currentTime), d = fmt(v.duration);
+  $("#time").textContent = `${c} / ${d}`;
+};
+$("#seek").oninput = e => {
+  if(v.duration) v.currentTime = (e.target.value / 1000) * v.duration;
+};
+
+function fmt(s){
+  s = Math.floor(s || 0);
+  const m = Math.floor(s / 60), sec = s % 60;
+  return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+}
+
+$("#bExt").onclick = () => {
+  if(activeDirectUrl) window.open(activeDirectUrl, "_blank");
+};
+
+$("#bFull").onclick = () => {
+  if(document.fullscreenElement) document.exitFullscreen();
+  else P.requestFullscreen().catch(() => {});
+};
+
+$("#bClose").onclick = closePlayer;
+
+function resetIdle(){
+  P.classList.remove("idle");
+  clearTimeout(idleT);
+  idleT = setTimeout(() => { if(!v.paused) P.classList.add("idle"); }, 4000);
+}
+P.onmousemove = resetIdle;
+P.ontouchstart = resetIdle;
+
+/* Quality Menu */
+const menu = $("#menu");
+function closeMenu(){ menu.classList.remove("open"); }
+$("#bQual").onclick = () => {
+  if(menu.classList.contains("open")) return closeMenu();
+  menu.classList.add("open");
+};
+
+function buildQualMenu(){
+  if(!hls || !hls.levels || !hls.levels.length){
+    menu.innerHTML = '<h4>الجودة غير قابلة للتغيير</h4>';
+    return;
+  }
+  menu.innerHTML = '<h4>اختر الجودة (الأقل = الأسرع)</h4>';
+  const autoBtn = document.createElement("button");
+  autoBtn.className = "mi f" + (hls.currentLevel === -1 ? " on" : "");
+  autoBtn.textContent = "تلقائي (الأسرع)";
+  autoBtn.onclick = () => { hls.currentLevel = -1; closeMenu(); };
+  menu.appendChild(autoBtn);
+
+  hls.levels.forEach((l, i) => {
+    const b = document.createElement("button");
+    b.className = "mi f" + (hls.currentLevel === i ? " on" : "");
+    b.textContent = `${l.height || l.name || i}p (${Math.round(l.bitrate / 1000)}k)`;
+    b.onclick = () => { hls.currentLevel = i; closeMenu(); };
+    menu.appendChild(b);
+  });
+}
+
+/* Keyboard & Remote Navigation */
+window.addEventListener("keydown", e => {
+  if(P.classList.contains("open")){
+    resetIdle();
+    if(e.key === "Escape" || e.key === "Backspace"){
+      e.preventDefault();
+      closePlayer();
+    } else if(e.key === " " || e.key === "Enter"){
+      if(e.target === v || e.target === P) {
+        v.paused ? v.play() : v.pause();
+      }
+    }
+    return;
+  }
+  if(e.key === "Backspace"){
+    if(stack.length){
+      e.preventDefault();
+      stack.pop()();
+    }
+  }
+});
+
+// Start with live channels on first load
+loadCats();
+</script>
+</body>
+</html>
