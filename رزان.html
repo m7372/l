@@ -361,58 +361,199 @@ async function openSeries(s){
 }
 
 /* Player */
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
 let lastFocus=null,idleT,recoveryTimer,recoveryAttempts=0,nativeFallback=false,playbackFailed=false,externalPlayback=false;
-function armRecovery(){clearTimeout(recoveryTimer);if(P.classList.contains("open")&&!playbackFailed&&!externalPlayback)recoveryTimer=setTimeout(recoverPlayback,15000)}
-function failPlayback(){
-  if(playbackFailed||!P.classList.contains("open"))return;
-  playbackFailed=true;clearTimeout(recoveryTimer);clearTimeout(idleT);
-  if(hls){hls.destroy();hls=null}if(ts){try{ts.destroy()}catch(e){}ts=null}v.pause();v.removeAttribute("src");v.load();
-  $("#spin").classList.remove("on");$("#failure").classList.remove("hid");P.classList.remove("idle");closeMenu();
-}
-function attemptPlay(){v.play().catch(e=>{if(e.name==="NotAllowedError"){clearTimeout(recoveryTimer);$("#spin").classList.remove("on");wake()}else if(e.name!=="AbortError")recoverPlayback()})}
-function recoverPlayback(){
-  if(playbackFailed||externalPlayback||!P.classList.contains("open"))return;
+let curUrl="";
+
+function armRecovery(){
   clearTimeout(recoveryTimer);
-  if(recoveryAttempts>=3){
-    if(hls&&!nativeFallback&&v.canPlayType("application/vnd.apple.mpegurl")){nativeFallback=true;hls.destroy();hls=null;v.src=curUrl;armRecovery();attemptPlay();return}
-    failPlayback();return;
+  if(P.classList.contains("open") && !playbackFailed && !externalPlayback) {
+    recoveryTimer = setTimeout(recoverPlayback, 15000);
   }
-  recoveryAttempts++;armRecovery();
-  if(ts){try{ts.unload();ts.load()}catch(e){}}
-  else if(hls){hls.startLoad();hls.recoverMediaError()}
-  else{const position=v.currentTime;v.load();if(position>0)v.addEventListener("loadedmetadata",()=>{if(isFinite(v.duration))v.currentTime=Math.min(position,v.duration)},{once:true})}
+}
+
+function failPlayback(){
+  if(playbackFailed || !P.classList.contains("open")) return;
+  playbackFailed = true;
+  clearTimeout(recoveryTimer);
+  clearTimeout(idleT);
+  if(hls){ hls.destroy(); hls = null; }
+  if(ts){ try{ ts.destroy(); }catch(e){} ts = null; }
+  v.pause();
+  v.removeAttribute("src");
+  v.load();
+  $("#spin").classList.remove("on");
+
+  // رسالة واضحة للمستخدم حسب نوع جهازه مع زر مباشر للتشغيل الخارجي
+  const failP = $("#failure p");
+  if(failP){
+    const msg = isIOS
+      ? `هذه القناة غير مدعومة في متصفح iPhone<br><button class="cb f" style="margin-top:12px;padding:8px 16px;background:#252525;color:#fff;border:1px solid #444;border-radius:999px;font-size:14px;cursor:pointer" onclick="$('#bExt').click()">تشغيل عبر VLC ↗</button>`
+      : `تعذر تشغيل القناة في المتصفح<br><button class="cb f" style="margin-top:12px;padding:8px 16px;background:#252525;color:#fff;border:1px solid #444;border-radius:999px;font-size:14px;cursor:pointer" onclick="$('#bExt').click()">تشغيل بمشغل خارجي ↗</button>`;
+    failP.innerHTML = msg;
+  }
+  $("#failure").classList.remove("hid");
+  $("#bExt").classList.remove("hid");
+  P.classList.remove("idle");
+  closeMenu();
+}
+
+function attemptPlay(){
+  v.play().catch(e => {
+    if(e.name === "NotAllowedError"){
+      clearTimeout(recoveryTimer);
+      $("#spin").classList.remove("on");
+      wake();
+    } else if(e.name !== "AbortError"){
+      recoverPlayback();
+    }
+  });
+}
+
+function recoverPlayback(){
+  if(playbackFailed || externalPlayback || !P.classList.contains("open")) return;
+  clearTimeout(recoveryTimer);
+
+  // مسار احتياطي ذكي قبل إعلان الفشل: تجربة تحويل الرابط إلى .m3u8 المتوافق مع المتصفحات
+  if(!nativeFallback && curUrl && (curUrl.endsWith(".ts") || (!curUrl.includes(".m3u8") && curUrl.includes("/live/")))){
+    nativeFallback = true;
+    const fallbackUrl = curUrl.endsWith(".ts") ? curUrl.replace(/\.ts$/, ".m3u8") : (curUrl + ".m3u8");
+    curUrl = fallbackUrl;
+    toast("🔄 جاري تجربة صيغة HLS متوافقة...");
+    if(ts){ try{ ts.destroy(); }catch(e){} ts = null; }
+    if(hls){ try{ hls.destroy(); }catch(e){} hls = null; }
+    if(window.Hls && Hls.isSupported()){
+      hls = new Hls({enableWorker:true,startLevel:0,maxBufferLength:10});
+      hls.loadSource(fallbackUrl);
+      hls.attachMedia(v);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => attemptPlay());
+      hls.on(Hls.Events.ERROR, (e, d) => { if(d.fatal) failPlayback(); });
+    } else {
+      v.preload = "auto";
+      v.src = fallbackUrl;
+      attemptPlay();
+    }
+    armRecovery();
+    return;
+  }
+
+  if(recoveryAttempts >= 3){
+    if(hls && !nativeFallback && v.canPlayType("application/vnd.apple.mpegurl")){
+      nativeFallback = true;
+      hls.destroy();
+      hls = null;
+      v.src = curUrl;
+      armRecovery();
+      attemptPlay();
+      return;
+    }
+    failPlayback();
+    return;
+  }
+
+  recoveryAttempts++;
+  armRecovery();
+  if(ts){ try{ ts.unload(); ts.load(); }catch(e){} }
+  else if(hls){ hls.startLoad(); hls.recoverMediaError(); }
+  else {
+    const position = v.currentTime;
+    v.load();
+    if(position > 0) v.addEventListener("loadedmetadata", () => {
+      if(isFinite(v.duration)) v.currentTime = Math.min(position, v.duration);
+    }, {once:true});
+  }
   attemptPlay();
 }
-function play(url,title,live){
-  lastFocus=document.activeElement;clearTimeout(recoveryTimer);recoveryAttempts=0;nativeFallback=false;playbackFailed=false;externalPlayback=false;$("#failure").classList.add("hid");$("#time").textContent="00:00";$("#seek").value=0;
-  P.classList.add("open");$("#ptitle").textContent=title;$("#seek").style.display=live?"none":"";
-  $("#spin").classList.add("on");closeMenu();
-  curUrl=url;P.classList.toggle("isLive",live);
-  $("#bExt").classList.toggle("hid",server!=="s2");
-  $("#bQ").classList.add("hid");$("#bA").classList.add("hid");
-  if(hls){hls.destroy();hls=null}
-  if(ts){try{ts.destroy()}catch(e){}ts=null}
-  if(server==="s3"&&live&&window.mpegts&&mpegts.isSupported()){
-    ts=mpegts.createPlayer({type:"mpegts",isLive:true,url},{enableStashBuffer:true,stashInitialSize:384*1024,liveBufferLatencyChasing:false,lazyLoad:false});
-    ts.attachMediaElement(v);ts.load();ts.on(mpegts.Events.ERROR,()=>recoverPlayback());attemptPlay();armRecovery();wake();setTimeout(()=>$("#bPlay").focus(),100);return;
+
+function play(url, title, live){
+  lastFocus = document.activeElement;
+  clearTimeout(recoveryTimer);
+  recoveryAttempts = 0;
+  nativeFallback = false;
+  playbackFailed = false;
+  externalPlayback = false;
+
+  // إعادة ضبط واجهة الفشل
+  const failP = $("#failure p");
+  if(failP) failP.textContent = "جرب قناة اخرى";
+  $("#failure").classList.add("hid");
+  $("#time").textContent = "00:00";
+  $("#seek").value = 0;
+
+  P.classList.add("open");
+  $("#ptitle").textContent = title;
+  $("#seek").style.display = live ? "none" : "";
+  $("#spin").classList.add("on");
+  closeMenu();
+
+  // إظهار زر المشغل الخارجي دائما على iPhone لتسهيل الوصول إليه
+  $("#bExt").classList.toggle("hid", server !== "s2" && !isIOS);
+  $("#bQ").classList.add("hid");
+  $("#bA").classList.add("hid");
+
+  if(hls){ hls.destroy(); hls = null; }
+  if(ts){ try{ ts.destroy(); }catch(e){} ts = null; }
+
+  // 1. التعرف على iPhone وتجهيز رابط HLS متوافق (.m3u8) عند توفره
+  let playUrl = url;
+  if(isIOS && live){
+    if(playUrl.endsWith(".ts")){
+      playUrl = playUrl.replace(/\.ts$/, ".m3u8");
+    } else if(!playUrl.includes(".m3u8") && !playUrl.includes(".")){
+      playUrl = playUrl + ".m3u8";
+    }
   }
-  const isHls=url.includes(".m3u8");
-  if(isHls&&window.Hls&&Hls.isSupported()){
-    hls=new Hls({enableWorker:true,lowLatencyMode:live,startLevel:0,capLevelToPlayerSize:true,
+  curUrl = playUrl;
+  P.classList.toggle("isLive", live);
+
+  // 2. إذا كان السيرفر s3 ومكتبة mpegts مدعومة (غير مدعومة على iPhone)
+  if(!isIOS && server === "s3" && live && window.mpegts && mpegts.isSupported()){
+    ts = mpegts.createPlayer({type:"mpegts",isLive:true,url:playUrl},{
+      enableStashBuffer:true,stashInitialSize:384*1024,liveBufferLatencyChasing:false,lazyLoad:false
+    });
+    ts.attachMediaElement(v);
+    ts.load();
+    ts.on(mpegts.Events.ERROR, () => recoverPlayback());
+    attemptPlay();
+    armRecovery();
+    wake();
+    setTimeout(() => $("#bPlay").focus(), 100);
+    return;
+  }
+
+  // 3. مسار Hls.js للمتصفحات المدعومة
+  const isHls = playUrl.includes(".m3u8");
+  if(isHls && window.Hls && Hls.isSupported()){
+    hls = new Hls({
+      enableWorker:true,lowLatencyMode:live,startLevel:0,capLevelToPlayerSize:true,
       maxBufferLength:live?6:10,maxMaxBufferLength:live?10:20,backBufferLength:0,maxBufferSize:10*1000*1000,
       liveSyncDurationCount:2,liveMaxLatencyDurationCount:5,startFragPrefetch:true,
-      manifestLoadingMaxRetry:4,fragLoadingMaxRetry:6,abrEwmaDefaultEstimate:300000});
-    hls.loadSource(url);hls.attachMedia(v);
-    hls.on(Hls.Events.MANIFEST_PARSED,()=>{
-      $("#bQ").classList.toggle("hid",hls.levels.length<2);
-      if(hls.levels.length>1){hls.currentLevel=0}
-      attemptPlay()});
-    hls.on(Hls.Events.AUDIO_TRACKS_UPDATED,()=>$("#bA").classList.toggle("hid",hls.audioTracks.length<2));
-    hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal)recoverPlayback()});
-  }else{v.preload="auto";v.src=url;attemptPlay()}
-  armRecovery();wake();setTimeout(()=>$("#bPlay").focus(),100);
+      manifestLoadingMaxRetry:4,fragLoadingMaxRetry:6,abrEwmaDefaultEstimate:300000
+    });
+    hls.loadSource(playUrl);
+    hls.attachMedia(v);
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      $("#bQ").classList.toggle("hid", hls.levels.length < 2);
+      if(hls.levels.length > 1){ hls.currentLevel = 0; }
+      attemptPlay();
+    });
+    hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, () => $("#bA").classList.toggle("hid", hls.audioTracks.length < 2));
+    hls.on(Hls.Events.ERROR, (e, d) => { if(d.fatal) recoverPlayback(); });
+  } 
+  // 4. مسار Native HLS لمتصفح Safari على iPhone و iPad، أو الفيديو المباشر
+  else {
+    v.preload = "auto";
+    v.src = playUrl;
+    attemptPlay();
+  }
+
+  armRecovery();
+  wake();
+  setTimeout(() => $("#bPlay").focus(), 100);
 }
-let curUrl="";
+
 v.addEventListener("loadedmetadata",()=>{if(!hls&&v.audioTracks&&v.audioTracks.length>1)$("#bA").classList.remove("hid")});
 function closePlayer(){if(ts){try{ts.destroy()}catch(e){}ts=null}clearTimeout(recoveryTimer);clearTimeout(idleT);clearTimeout(tapT);playbackFailed=true;if(hls){hls.destroy();hls=null}v.pause();v.removeAttribute("src");v.load();P.classList.remove("open");closeMenu();if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});lastFocus&&lastFocus.focus()}
 const fmt=t=>isFinite(t)?new Date(t*1000).toISOString().substr(t>=3600?11:14,t>=3600?8:5):"مباشر";
