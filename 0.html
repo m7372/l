@@ -384,8 +384,6 @@ function recoverPlayback(){
   attemptPlay();
 }
 function play(url,title,live){
-  const t=await tr(list.map(c=>c.category_name));
-  list.forEach((c,i)=>{const b=document.createElement("button");b.className="cat f";b.textContent=t(c.category_name);
   lastFocus=document.activeElement;clearTimeout(recoveryTimer);recoveryAttempts=0;nativeFallback=false;playbackFailed=false;externalPlayback=false;$("#failure").classList.add("hid");$("#time").textContent="00:00";$("#seek").value=0;
   P.classList.add("open");$("#ptitle").textContent=title;$("#seek").style.display=live?"none":"";
   $("#spin").classList.add("on");closeMenu();
@@ -398,7 +396,7 @@ function play(url,title,live){
   if(location.protocol==="https:"&&url.startsWith("http://"))url="https://"+url.slice(7);
   if(isIOS&&live&&/\.ts(\?|$)/.test(url))url=url.replace(/\.ts(\?|$)/,".m3u8$1");
   curUrl=url;
-  iif(!isIOS&&["s3","s4","s5"].includes(server)&&live&&window.mpegts&&mpegts.isSupported()){
+  if(!isIOS&&["s3","s4","s5"].includes(server)&&live&&window.mpegts&&mpegts.isSupported()){
     ts=mpegts.createPlayer({type:"mpegts",isLive:true,url},{enableStashBuffer:true,stashInitialSize:384*1024,liveBufferLatencyChasing:false,lazyLoad:false});
     ts.attachMediaElement(v);ts.load();ts.on(mpegts.Events.ERROR,()=>recoverPlayback());attemptPlay();armRecovery();wake();setTimeout(()=>$("#bPlay").focus(),100);return;
   }
