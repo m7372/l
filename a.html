@@ -392,7 +392,7 @@ function play(url,title,live){
   P.classList.add("open");$("#ptitle").textContent=title;$("#seek").style.display=live?"none":"";
   $("#spin").classList.add("on");closeMenu();
   curUrl=url;P.classList.toggle("isLive",live);
-  $("#bExt").classList.toggle("hid",server!=="s2");
+  $("#bExt").classList.toggle("hid",!(server==="s2"||(!live&&/iPhone|iPad|iPod/.test(navigator.userAgent))));
   $("#bQ").classList.add("hid");$("#bA").classList.add("hid");
   if(hls){hls.destroy();hls=null}
   if(ts){try{ts.destroy()}catch(e){}ts=null}
@@ -400,7 +400,6 @@ function play(url,title,live){
   if(location.protocol==="https:"&&url.startsWith("http://"))url="https://"+url.slice(7);
   if(isIOS&&live&&/\.ts(\?|$)/.test(url))url=url.replace(/\.ts(\?|$)/,".m3u8$1");
   if(isIOS&&live&&!/\.(m3u8|ts)(\?|$)/.test(url))url+=".m3u8";
-  if(isIOS&&!live&&!/\.(mp4|m3u8|mov)(\?|$)/.test(url))url=url.replace(/\.\w+$/,".m3u8");
   curUrl=url;
   if(!isIOS&&["s3","s4","s5"].includes(server)&&live&&window.mpegts&&mpegts.isSupported()){
     ts=mpegts.createPlayer({type:"mpegts",isLive:true,url},{enableStashBuffer:true,stashInitialSize:384*1024,liveBufferLatencyChasing:false,lazyLoad:false});
