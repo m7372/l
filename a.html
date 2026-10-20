@@ -14,7 +14,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .f:focus,.f.sel{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 24px rgba(255,255,255,.35)}
 .f{outline:none}
 /* Standby */
-#standby{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:50;overflow:hidden;transition:opacity .6s}
+#standby{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:50;overflow:hidden;transition:opacity .6s;cursor:pointer}
 #standby.hide{opacity:0;pointer-events:none}
 .logo{position:relative;font-size:clamp(40px,9vw,120px);font-weight:800;letter-spacing:0;color:#fff;direction:ltr}
 .logo span{position:absolute;inset:0;background:linear-gradient(90deg,transparent 40%,rgba(255,255,255,.95) 50%,transparent 60%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;mix-blend-mode:screen}
@@ -89,8 +89,8 @@ video.ar-43{width:auto;aspect-ratio:4/3;height:100%;object-fit:fill;display:bloc
 #spin.on{display:flex}
 #spin div{width:48px;height:48px;border:3px solid #333;border-top-color:#fff;border-radius:50%;animation:rot 1s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
-#failure{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none;color:var(--danger);text-align:center}
-#failure .sad{font-size:64px;line-height:1}#failure strong{font-size:32px;font-weight:800;direction:ltr;text-shadow:var(--failure-glow)}#failure p{font-size:17px;color:var(--muted)}
+#failure{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none;color:var(--danger);text-align:center;padding:0 16px}
+#failure .sad{font-size:64px;line-height:1}#failure strong{font-size:32px;font-weight:800;direction:ltr;text-shadow:var(--failure-glow)}#failure p{font-size:17px;color:var(--muted);word-break:break-all}
 /* Header like reference */
 header{padding:14px 12px 12px!important}
 .masthead{margin-bottom:12px!important}
@@ -123,7 +123,7 @@ header{padding:14px 12px 12px!important}
   <div class="glow"></div>
   <div class="beam r"></div><div class="beam l"></div>
   <div class="logo">AlameeereTv<span class="a">AlameeereTv</span><span class="b">AlameeereTv</span></div>
-  <div class="hint">ط§ط¶ط؛ط· OK ط £ظˆ ط§ظ„ظ…ط³ ط§ظ„ط´ط§ط´ط© ظظ„ط¯ط®ظˆظ„</div>
+  <div class="hint">اضغط OK أو المس الشاشة للدخول</div>
 </div>
 
 <header>
@@ -133,17 +133,17 @@ header{padding:14px 12px 12px!important}
     <div class="calendar"><strong id="dateDay"></strong><time id="dateValue"></time></div>
   </div>
   <nav class="navigation">
-    <button class="tab f on" data-t="live">وں“; ظ‚ظ†ظˆط§طھ</button>
-    <button class="tab f" data-t="vod">ًںژ¬ ط£ظپظ„ط§ظ…</button>
-    <button class="tab f" data-t="series">ًںچ؟ ظ…ط³ظ‹ط³ظ‹ط§طھ</button>
-    <button class="tab f" data-x="matches">âڑ½ ظ…ط¨ط§ط±ظٹط§طھ</button>
-    <button class="tab f" data-x="news">ًں“° ط£ط®ط¨ط§ط±</button>
+    <button class="tab f on" data-t="live">📺 قنوات</button>
+    <button class="tab f" data-t="vod">🎬 أفلام</button>
+    <button class="tab f" data-t="series">🍿 مسلسلات</button>
+    <button class="tab f" data-x="matches">⚽ مباريات</button>
+    <button class="tab f" data-x="news">📰 أخبار</button>
   </nav>
   <div class="searchrow">
-    <div class="server-picker"><button class="f" id="srv" aria-expanded="false">ط³ظٹط±ظپط± 1</button>
-      <div id="srvMenu"><button class="mi f" data-s="s1">ط³ظٹط±ظپط± 1</button><button class="mi f" data-s="s2">ط³ظٹط±ظپط± 2</button><button class="mi f" data-s="s3">ط³ظٹط±ظپط± 3</button><button class="mi f" data-s="s4">ط³ظٹط±ظپط± 4</button><button class="mi f" data-s="s5">ط³ظٹط±ظپط± 5</button></div>
+    <div class="server-picker"><button class="f" id="srv" aria-expanded="false">سيرفر 1</button>
+      <div id="srvMenu"><button class="mi f" data-s="s1">سيرفر 1</button><button class="mi f" data-s="s2">سيرفر 2</button><button class="mi f" data-s="s3">سيرفر 3</button><button class="mi f" data-s="s4">سيرفر 4</button><button class="mi f" data-s="s5">سيرفر 5</button></div>
     </div>
-    <input id="q" class="f" type="search" placeholder="ًں”چ ط¨ط­ط« ط¹ط§ظ…..." autocomplete="off">
+    <input id="q" class="f" type="search" placeholder="🔍 بحث عام..." autocomplete="off">
   </div>
 </header>
 <main><nav id="cats"></nav><section id="grid"></section><section id="extra" class="hid"></section></main>
@@ -152,25 +152,25 @@ header{padding:14px 12px 12px!important}
   <video id="v" playsinline></video>
   <div id="spin"><div></div></div>
   <div id="ptitle"></div>
-  <div id="failure" class="hid" role="status"><div class="sad" aria-hidden="true">âک¹</div><strong>AlameeereTv</strong><p>ط¬ط±ط¨ ظ‚ظ†ط§ط© ط§ط®ط±ظ‰</p></div>
+  <div id="failure" class="hid" role="status"><div class="sad" aria-hidden="true">☹</div><strong>AlameeereTv</strong><p>جرب قناة اخرى</p></div>
   <div id="toast" role="status"></div>
   <div id="ctrl">
     <div class="menu" id="menu"></div>
     <input type="range" id="seek" class="f" min="0" max="1000" value="0">
     <div class="row">
-      <button class="cb f" id="bPlay">âڈ¸</button>
-      <button class="cb f" id="bMute">ًں”ٹ</button>
+      <button class="cb f" id="bPlay">⏸</button>
+      <button class="cb f" id="bMute">🔊</button>
       <input type="range" id="vol" class="f" min="0" max="1" step="0.05" value="1">
-      <button class="cb f vodonly" id="bRw">âڈھ 10</button>
-      <button class="cb f vodonly" id="bFf">10 âڈ©</button>
+      <button class="cb f vodonly" id="bRw">⏪ 10</button>
+      <button class="cb f vodonly" id="bFf">10 ⏩</button>
       <span id="time">00:00</span>
-      <button class="cb f hid" id="bQ">âڑ™ ط§ظ„ط¬ظˆط¯ط©</button>
-      <button class="cb f hid" id="bA">ًںژ§ ط§ظ„طµظˆطھ</button>
-      <button class="cb f" id="bS">ط§ظ„طھط±ط¬ظ…ط©</button>
-      <button class="cb f" id="bAR">â–­ ط§ظ„ظ…ظ‚ط§ط³</button>
-      <button class="cb f hid" id="bExt">â†— ظ…ط´ط؛ظ„ ط®ط§ط±ط¬ظٹ</button>
-      <button class="cb f" id="bFs">â›¶</button>
-      <button class="cb f" id="bX">âœ•</button>
+      <button class="cb f hid" id="bQ">⚙ الجودة</button>
+      <button class="cb f hid" id="bA">🎧 الصوت</button>
+      <button class="cb f" id="bS">الترجمة</button>
+      <button class="cb f" id="bAR">▭ المقاس</button>
+      <button class="cb f hid" id="bExt">↗ مشغل خارجي</button>
+      <button class="cb f" id="bFs">⛶</button>
+      <button class="cb f" id="bX">✕</button>
     </div>
   </div>
 </div>
@@ -186,17 +186,18 @@ const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 
 function updateClock(){
   const now=new Date();
-  $("#dateDay").textContent=new Intl.DateTimeFormat("ar",{weekday:"long"}).format(now)+"طŒ ";
+  $("#dateDay").textContent=new Intl.DateTimeFormat("ar",{weekday:"long"}).format(now)+"، ";
   $("#dateValue").textContent=new Intl.DateTimeFormat("ar-EG",{day:"numeric",month:"long",year:"numeric"}).format(now);
   const h=now.getHours()%12||12,p=n=>String(n).padStart(2,"0");
-  $("#clockTime").textContent=`${p(h)}:${p(now.getMinutes())}:${p(now.getSeconds())}`.replace(/\d/g,d=>"ظ ظ،ظ¢ظ£ظ¤ظ¥ظ¦ظ§ظ¨ظ©"[d]);
-  $("#clockPeriod").textContent=now.getHours()<12?"طµ":"ظ…";
+  $("#clockTime").textContent=`${p(h)}:${p(now.getMinutes())}:${p(now.getSeconds())}`.replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
+  $("#clockPeriod").textContent=now.getHours()<12?"ص":"م";
 }
 updateClock();setInterval(updateClock,1000);
 /* Standby */
 const sb=$("#standby");
 function enter(){if(sb.classList.contains("hide"))return;sb.classList.add("hide");setTimeout(()=>$(".tab").focus(),300)}
 sb.addEventListener("click",enter);
+sb.addEventListener("touchend",enter);
 
 /* Tabs */
 let section="media";
@@ -211,7 +212,7 @@ srvMenu.querySelectorAll(".mi").forEach(b=>b.onclick=()=>{srvMenu.style.display=
 
 /* Arabic translation (cached) */
 const trCache=(()=>{try{return JSON.parse(localStorage.getItem("trAr")||"{}")}catch(e){return{}}})();
-const TEAM_AR={"Real Madrid":"ط±ظٹط§ظ„ ظ…ط¯ط±ظٹط¯","Barcelona":"ط¨ط±ط´ظ„ظˆظ†ط©","Atletico Madrid":"ط£طھظ„طھظٹظƒظˆ ظ…ط¯ط±ظٹط¯","Manchester City":"ظ…ط§ظ†ط´ط³طھط± ط³ظٹطھظٹ","Manchester United":"ظ…ط§ظ†ط´ط³طھط± ظٹظˆظ†ط§ظٹطھط¯","Liverpool":"ظ„ظٹظپط±ط¨ظˆظ„","Arsenal":"ط¢ط±ط³ظ†ط§ظ„","Chelsea":"طھط´ظٹظ„ط³ظٹ","Tottenham":"طھظˆطھظ†ظ‡ط§ظ…","Bayern Mأ¼nchen":"ط¨ط§ظٹط±ظ† ظ…ظٹظˆظ†ط®","Borussia Dortmund":"ط¨ظˆط±ظˆط³ظٹط§ ط¯ظˆط±طھظ…ظˆظ†ط¯","Paris Saint Germain":"ط¨ط§ط±ظٹط³ ط³ط§ظ† ط¬ظٹط±ظ…ط§ظ†","Juventus":"ظٹظˆظپظ†طھظˆط³","Inter":"ط¥ظ†طھط± ظ…ظٹظ„ط§ظ†","AC Milan":"ظ…ظٹظ„ط§ظ†","Napoli":"ظ†ط§ط¨ظˆظ„ظٹ","AS Roma":"ط±ظˆظ…ط§","Al-Hilal Saudi FC":"ط§ظ„ظ‡ظ„ط§ظ„","Al-Nassr":"ط§ظ„ظ†طµط±","Al-Ittihad FC":"ط§ظ„ط§طھط­ط§ط¯","Al-Ahli Jeddah":"ط§ظ„ط£ظ‡ظ„ظٹ","Al Shabab":"ط§ظ„ط´ط¨ط§ط¨","Al Ahly":"ط§ظ„ط£ظ‡ظ„ظٹ ط§ظ„ظ…طµط±ظٹ","Zamalek SC":"ط§ظ„ط²ظ…ط§ظ„ظƒ","Pyramids FC":"ط¨ظٹط±ط§ظ…ظٹط¯ط²"};
+const TEAM_AR={"Real Madrid":"ريال مدريد","Barcelona":"برشلونة","Atletico Madrid":"أتلتيكو مدريد","Manchester City":"مانشستر سيتي","Manchester United":"مانشستر يونايتد","Liverpool":"ليفربول","Arsenal":"آرسنال","Chelsea":"تشيلسي","Tottenham":"توتنهام","Bayern München":"بايرن ميونخ","Borussia Dortmund":"بوروسيا دورتموند","Paris Saint Germain":"باريس سان جيرمان","Juventus":"يوفنتوس","Inter":"إنتر ميلان","AC Milan":"ميلان","Napoli":"نابولي","AS Roma":"روما","Al-Hilal Saudi FC":"الهلال","Al-Nassr":"النصر","Al-Ittihad FC":"الاتحاد","Al-Ahli Jeddah":"الأهلي","Al Shabab":"الشباب","Al Ahly":"الأهلي المصري","Zamalek SC":"الزمالك","Pyramids FC":"بيراميدز"};
 async function trOne(s){
   const r=await fetch("https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ar&dt=t&q="+encodeURIComponent(s));
   const j=await r.json();return j[0].map(x=>x[0]).join("");
@@ -223,24 +224,24 @@ async function tr(list){
   if(need.length)try{localStorage.setItem("trAr",JSON.stringify(trCache))}catch(e){}
   return s=>TEAM_AR[s]||trCache[s]||s;
 }
-const arNum=s=>String(s).replace(/\d/g,d=>"ظ ظ،ظظ £ظ¤ظ¥ظ¦ظ§ظ¨ظ©"[d]);
+const arNum=s=>String(s).replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 
-/* مباريات (API-كرة القدم) */
+/* Matches (API-Football) */
 const FB_KEY="31cb6151025a32e4a5833842169908a0";
-const LEAGUES={2:"ط¯ظˆط±ظٹ ط £ط¨ط·ط§ظ„ ط £ظˆط±ظˆط¨ط§",3:"ط§ظ"ط¯ظˆط±ظٹ ط§ظ"ط £ظˆط±ظˆط¨ظٹ",4:"ط¯ظˆط±ظٹ ط§ظ„ظ…ط¤طھظ…ط± ط§ظ„ط £ظˆط±ظˆط¨ظٹ”،39:”ط§ظ„ط¯ظˆط±ظٹ ط§ظ„ط¥ظ†ط¬ظ„ظٹط²ظٹ ط§ظ„ظ…ظ…طھط§ط²",140:"ط§ظ„ط¯ظˆط±ظٹ ط§ظ„ط¥ط³ط¨ط§ظ†ظٹ (ظط§ ظ„ظٹط؛ط§)”،135:”ط§ظ„ط¯ظˆط±ظٹ ط§ظ„ط¥ظٹط·ط§ظٹ (ط³ظٹط±ظٹ ط)”،78:"ط§ظ„ط¯ظˆط±ظٹ ط§ظ„ط £ظ„ظ…ط§ظ†ظٹ (ط¨ظˆظ†ط¯ط³ظ„ظٹط؛ط§)”،61:”ط§ظ„ط¯ظˆط±ظٹ ط§ظ„ظپط±ظ†ط³ظٹ”،307:”ط¯ظˆط±ظٹ ط±ظˆط´ظ† ط§ظ„ط³ط¹ظˆط¯ظٹ”،233:”ط§ظ„ط¯ظˆط±ظٹ ط§ظ„ظ…ط¯ظˆط±ظٹ ط £ط¨ط·ط§ظ„ ط £ظپط±ظٹظ‚ظٹط§",17:"ط¯ظˆط±ظٹ ط £ط¨ط·ط§ظ„ ط™ط³ظٹط§",531:"ظƒط £ط³ ط§ظ„ط³ظˆط¨ط± ط§ظ„ط¥ط³ط¨ط§ظ†ظٹ",528:"ظƒط £ط³ ط§ظ"ط§طھطط§ط¯ ط§ظ"ط¥ظ†ط¬ظ„ظٹط²ظٹ",529:"ظƒط £ط³ ط§ظ„ط±ط§ط¨ط·ط© ط§ظ„ط¥ظ†ط¬ظ„ظٹط²ظٹط©",143:"ظƒط £ط³ ظ…ظ„ظƒ ط¥ط³ط¨ط§ظ†ظٹط§",137:"ظƒط £ط³ ط¥ظٹط·ط§ظ„ظٹط§",81:"ظƒط £ط³ ط £ظ„ظ…ط§ظ†ظٹط§",66:"ظƒط £ط³ ظپط±ظ†ط³ط§",548:"ظƒط £ط³ ط®ط§ط¯ظ… ط§ظ„طط±ظ…ظٹظ† ط§ظ„ط´ط±ظٹظپظٹظ†",1:"ظƒط £ط³ ط§ظ„ط¹ط§ظ„ظ…"};
+const LEAGUES={2:"دوري أبطال أوروبا",3:"الدوري الأوروبي",4:"دوري المؤتمر الأوروبي",39:"الدوري الإنجليزي الممتاز",140:"الدوري الإسباني (لا ليغا)",135:"الدوري الإيطالي (سيري آ)",78:"الدوري الألماني (بوندسليغا)",61:"الدوري الفرنسي",307:"دوري روشن السعودي",233:"الدوري المصري الممتاز",12:"دوري أبطال أفريقيا",17:"دوري أبطال آسيا",531:"كأس السوبر الإسباني",528:"كأس الاتحاد الإنجليزي",529:"كأس الرابطة الإنجليزية",143:"كأس ملك إسبانيا",137:"كأس إيطاليا",81:"كأس ألمانيا",66:"كأس فرنسا",548:"كأس خادم الحرمين الشريفين",1:"كأس العالم"};
 const LORDER=[2,3,4,39,140,135,78,61,307,233,12,17,531,528,529,143,137,81,66,548,1];
-const STATUS={TBD:"ظ„ظ… ظٹطط¯ط¯ ط§ظظ„ظ…ظˆط¹ط¯”،NS:”ظ„ظ… طھط¨ط¯ط £”،1H″ط§ظ„ط´ظˆط· ط§ظ„ط £ظˆظ„,HT:"ط§ط³طھط±ط§طط©",2H":ط§طظ„ط´ظˆط· ط§ظ„ط«ط§ظ†ظٹ),ET:"ظˆظ‚طھ ط¥ط¶ط§ظپظٹ),BT:"ط§ط³طھط±ط§طط©,P:"ط±ظƒظ„ط§طھ ط§ظ„طھط±ط¬ظٹط),SUSP:"ظ…ط¹ظ„ظ‚ط©",INT:"ظ…طھظˆظ‚ظپط©",FT:"ط§ظ†طھظ‡طھ",AET:"ط§ظ†طھظ‡طھ ط¨ط¹ط¯ ط§ظ„ط¥ط¶ط§ظپظٹ),PEN:"ط§ظ†طھظ‡طھ ط¨ط§ظ„طھط±ط¬ظٹط),PST:"ظ…ط¤ط¬ظ„ط©",CANC:"ظ…ظ†ط§ط©",ABD:"ط £ظ„ط;ظٹطھ",AWD:"ظپظˆط² ط¥ط¯ط§ط±ظٹ",WO:"ط§ظ†ط³طط§ط¨",LIVE:"ظ…ط¨ط§ط´ط±"};
+const STATUS={TBD:"لم يحدد الموعد",NS:"لم تبدأ","1H":"الشوط الأول",HT:"استراحة","2H":"الشوط الثاني",ET:"وقت إضافي",BT:"استراحة",P:"ركلات الترجيح",SUSP:"معلقة",INT:"متوقفة",FT:"انتهت",AET:"انتهت بعد الإضافي",PEN:"انتهت بالترجيح",PST:"مؤجلة",CANC:"ملغاة",ABD:"ألغيت",AWD:"فوز إداري",WO:"انسحاب",LIVE:"مباشر"};
 const LIVE_S=["1H","HT","2H","ET","BT","P","LIVE","INT","SUSP"];
 let mDay=0,mTimer=null;
 const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-دالة quota(){const k="fbq"+ymd(new Date());return{n:+(localStorage.getItem(k)||0),inc(){localStorage.setItem(k,String(this.n+1))}}}
-دالة غير متزامنة getFixtures(day,force){
+function quota(){const k="fbq"+ymd(new Date());return{n:+(localStorage.getItem(k)||0),inc(){localStorage.setItem(k,String(this.n+1))}}}
+async function getFixtures(day,force){
   const d=new Date();d.setDate(d.getDate()+day);const date=ymd(d),key="fb_"+date;
   let c=null;try{c=JSON.parse(localStorage.getItem(key)||"null")}catch(e){}
   const hasLive=c&&c.list.some(f=>LIVE_S.includes(f.fixture.status.short));
   const ttl=day!==0?30*60e3:hasLive?2*60e3:10*60e3;
-  إذا كان (c&&Date.now()-ct<ttl&&!force) فأرجع c؛
-  const q=quota();if(qn>=95&&c)return c;
+  if(c&&Date.now()-c.t<ttl&&!force)return c;
+  const q=quota();if(q.n>=95&&c)return c;
   const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||"Asia/Riyadh";
   const r=await fetch(`https://v3.football.api-sports.io/fixtures?date=${date}&timezone=${encodeURIComponent(tz)}`,{headers:{"x-apisports-key":FB_KEY}});
   const j=await r.json();q.inc();
@@ -252,13 +253,13 @@ const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${Str
 async function renderMatches(first){
   clearTimeout(mTimer);if(section!=="matches")return;
   const box=$("#extra");
-  if(first)box.innerHTML='<div class="msg">ط¬ط§ط±ظٹ طھط­ظ…ظٹظ„ ط§ظ„ظ…ط¨ط§ط±ظٹط§طھ...</div>';
+  if(first)box.innerHTML='<div class="msg">جاري تحميل المباريات...</div>';
   try{
     const c=await getFixtures(mDay);if(section!=="matches")return;
     const t=await tr(c.list.flatMap(f=>[f.teams.home.name,f.teams.away.name]));
-    let h=`<div class="daybar">${[["ط£ظ…ط³",-1],["ط§ظ„ظٹظˆظ…",0],["ط؛ط¯ط§ظ‹",1]].map(([l,d])=>`<button class="f${d===mDay?" on":""}" data-d="${d}">${l}</button>`).join("")}</div>`;
-    h+=`<div class="upd">ط¢ط®ط± طھط­ط¯ظٹط«: ${arNum(new Date(c.t).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}))} â€” ظٹطھط­ط¯ط« طھظ„ظ‚ط§ط¦ظٹط§ظ‹</div>`;
-    if(!c.list.length)h+='<div class="msg">ظ„ط§ طھظˆط¬ط¯ ظ…ط¨ط§ط±ظٹط§طھ ظ„ظ„ط¨ط·ظˆظ„ط§طھ ط§ظ„ظ…ط®طھط§ط±ط© ظپظٹ ظ‡ط°ط§ ط§ظ„ظٹظˆظ…</div>';
+    let h=`<div class="daybar">${[["أمس",-1],["اليوم",0],["غداً",1]].map(([l,d])=>`<button class="f${d===mDay?" on":""}" data-d="${d}">${l}</button>`).join("")}</div>`;
+    h+=`<div class="upd">آخر تحديث: ${arNum(new Date(c.t).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}))} — يتحدث تلقائياً</div>`;
+    if(!c.list.length)h+='<div class="msg">لا توجد مباريات للبطولات المختارة في هذا اليوم</div>';
     LORDER.forEach(id=>{const fs=c.list.filter(f=>f.league.id===id).sort((a,b)=>a.fixture.timestamp-b.fixture.timestamp);if(!fs.length)return;
       h+=`<div class="lg"><img src="${esc(fs[0].league.logo)}" onerror="this.remove()">${LEAGUES[id]}</div>`;
       fs.forEach(f=>{const s=f.fixture.status.short,live=LIVE_S.includes(s),ns=s==="NS"||s==="TBD";
@@ -270,52 +271,52 @@ async function renderMatches(first){
     box.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{mDay=+b.dataset.d;renderMatches(true)});
     const hasLive=c.list.some(f=>LIVE_S.includes(f.fixture.status.short));
     mTimer=setTimeout(()=>renderMatches(false),mDay===0&&hasLive?120e3:600e3);
-  }catch(e){if(first)box.innerHTML='<div class="msg">طھط¹ط°ط± طھطظ…ظٹظ„ ط§ظ„ظ…ط¨ط§ط±ظٹط§ طھطŒ ط³ظٹط¹ط§ط¯ ط§ظ„ظ…طط§ظˆظ„ط© طھظ„ظ‚ط§ط¦ظٹط§ظ‹</div>';mTimer=setTimeout(()=>renderMatches(false),60e3)}
+  }catch(e){if(first)box.innerHTML='<div class="msg">تعذر تحميل المباريات، سيعاد المحاولة تلقائياً</div>';mTimer=setTimeout(()=>renderMatches(false),60e3)}
 }
 
-/* أخبار (ESPN) */
+/* News (ESPN) */
 let nTimer=null;
 async function renderNews(first){
   clearTimeout(nTimer);if(section!=="news")return;
-  const box=$("#extra");if(first)box.innerHTML='<div class="msg">ط¬ط§ط±ظٹ طھطظ…ظٹظ„ ط§ظ„ط £ط®ط¨ط§ط±...</div>';
-  يحاول{
+  const box=$("#extra");if(first)box.innerHTML='<div class="msg">جاري تحميل الأخبار...</div>';
+  try{
     const NU="https://site.api.espn.com/apis/site/v2/sports/soccer/all/news?limit=20";
     let j;try{j=await (await fetch(NU)).json()}catch(e){j=await (await fetch(`${WORKERS.s1}/proxy?url=${encodeURIComponent(NU)}`)).json()}
     const _x=0,arts=j.articles||[];if(section!=="news")return;
     const t=await tr(arts.flatMap(a=>[a.headline,a.description]));
-    Let h=`<div class="upd">ط™ط®ط± طھطط¯ظٹط«: ${arNum(new Date().toLocaleTimeString("en-GB",{hour:"2-digit",دقيقة:"2-digit"}))} — ظٹطھطط¯ط« ظƒظ« ط¯ظ‚ظٹظ‚طھظٹظ†</div>`;
-    if(!arts.length)h+='<div class="msg">ظ„ط§ طھظˆط¬ط¯ ط£ط®ط¨ط§ط±</div>';
+    let h=`<div class="upd">آخر تحديث: ${arNum(new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}))} — يتحدث كل دقيقتين</div>`;
+    if(!arts.length)h+='<div class="msg">لا توجد أخبار</div>';
     arts.forEach((a,i)=>{const im=(a.images&&a.images[0]&&a.images[0].url)||"",link=(a.links&&a.links.web&&a.links.web.href)||"";
       h+=`<button class="nw f" data-i="${i}">${im?`<img loading="lazy" src="${esc(im)}" onerror="this.remove()">`:""}<div><h3>${esc(t(a.headline))}</h3><p>${esc(t(a.description||""))}</p><time>${a.published?new Date(a.published).toLocaleString("ar-EG",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):""}</time></div></button>`});
     box.innerHTML=h;
     box.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{const a=arts[+b.dataset.i],l=a.links&&a.links.web&&a.links.web.href;if(l)window.open(l,"_blank","noopener")});
-  }catch(e){if(first)box.innerHTML='<div class="msg">طھط¹ط°ط± طھط­ظ…ظٹظ„ ط§ظ„ط£ط®ط¨ط§ط±طŒ ط³ظٹط¹ط§ط¯ ط§ظ„ظ…ط­ط§ظˆظ„ط© طھظ„ظ‚ط§ط¦ظٹط§ظ‹</div>'}
+  }catch(e){if(first)box.innerHTML='<div class="msg">تعذر تحميل الأخبار، سيعاد المحاولة تلقائياً</div>'}
   nTimer=setTimeout(()=>renderNews(false),120e3);
 }
 document.addEventListener("click",()=>{srvMenu.style.display="none";$("#srv").setAttribute("aria-expanded","false")});
 
 async function loadCats(){
-  catList=[];$("#q").value="";searchRun++;cats.innerHTML="";grid.innerHTML='<div class="msg">ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...</div>';
+  catList=[];$("#q").value="";searchRun++;cats.innerHTML="";grid.innerHTML='<div class="msg">جاري التحميل...</div>';
   const a={live:"get_live_categories",vod:"get_vod_categories",series:"get_series_categories"}[type];
   try{
     const list=await api(a);
     if(!Array.isArray(list)||!list.length)throw 0;catList=list;
     list.forEach((c,i)=>{const b=document.createElement("button");b.className="cat f";b.textContent=c.category_name;b.onclick=()=>{document.querySelectorAll(".cat").forEach(x=>x.classList.remove("on"));b.classList.add("on");loadItems(c.category_id)};cats.appendChild(b);if(!i)b.click()});
-  }catch(e){grid.innerHTML='<div class="msg">طھط¹ط°ط± طھط­ظ…ظٹظ„ ط§ظ„ظ…ط­طھظˆظ‰ ظ…ظ† ظ‡ط°ط§ ط§ظ„ط³ظٹط±ظپط±</div>'}
+  }catch(e){grid.innerHTML='<div class="msg">تعذر تحميل المحتوى من هذا السيرفر</div>'}
 }
 async function loadItems(id){
-  cat=id;stack=[];$("#q").value="";searchRun++;grid.innerHTML='<div class="msg">ط¬ط§ط±ظٹ ط§ظ„طھط­ظ…ظٹظ„...</div>';
+  cat=id;stack=[];$("#q").value="";searchRun++;grid.innerHTML='<div class="msg">جاري التحميل...</div>';
   const a={live:"get_live_streams",vod:"get_vod_streams",series:"get_series"}[type];
   try{
     const list=await api(`${a}&category_id=${id}`);
     if(cat!==id)return;
-    if(!list.length){grid.innerHTML='<div class="msg">ظ„ط§ ظٹظˆط¬ط¯ ظ…ط­طھظˆظ‰</div>';return}
+    if(!list.length){grid.innerHTML='<div class="msg">لا يوجد محتوى</div>';return}
     itemCache[server+type+id]=list;
     renderCards(list.map(toItem),type==="live");
-  }catch(e){grid.innerHTML='<div class="msg">ط®ط·ط£ ظپظٹ ط§ظ„طھط­ظ…ظٹظ„</div>'}
+  }catch(e){grid.innerHTML='<div class="msg">خطأ في التحميل</div>'}
 }
 let lastItems=[],lastLive=false;
-const norm=t=>String(t||"").toLowerCase().replace(/[\u064B-\u0652\u0640]/g,"").replace(/[ط£ط¥ط¢ط§]/g,"ط§").replace(/ط©/g,"ظ‡").replace(/ظ‰/g,"ظٹ").replace(/\s+/g," ").trim();
+const norm=t=>String(t||"").toLowerCase().replace(/[\u064B-\u0652\u0640]/g,"").replace(/[أإآا]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/\s+/g," ").trim();
 let catList=[],itemCache={},searchRun=0,searchT;
 const toItem=x=>({name:x.name,pic:x.stream_icon||x.cover,go:()=>{
   if(type==="live")play(["s3","s4","s5"].includes(server)?`${WORKER}/${server}/live/${x.stream_id}`:`${WORKER}/${server}/live/${x.stream_id}.m3u8`,x.name,true);
@@ -329,9 +330,9 @@ async function globalSearch(){
   searchMode=true;const a={live:"get_live_streams",vod:"get_vod_streams",series:"get_series"}[type];
   const keyBase=server+type,found=[],seen=new Set();let done=0;
   const show=()=>{if(run!==searchRun)return;grid.innerHTML="";
-    if(!found.length){grid.innerHTML=`<div class="msg">${done<catList.length?"ط¬ط§ط±ظٹ ط§ظ„ط¨ط­ط« ظپظٹ ظƒظ„ ط§ظ„ظ…ط¬ظ…ظˆط¹ط§طھ... "+done+"/"+catList.length:"ظ„ط§ طھظˆط¬ط¯ ظ†طھط§ط¦ط¬"}</div>`;return}
+    if(!found.length){grid.innerHTML=`<div class="msg">${done<catList.length?"جاري البحث في كل المجموعات... "+done+"/"+catList.length:"لا توجد نتائج"}</div>`;return}
     found.forEach(it=>{const b=document.createElement("button");b.className="card f"+(type==="live"?" live":"");b.innerHTML=`<div class="ph"><img loading="lazy" src="${esc(img(it.pic))}" onerror="this.style.visibility='hidden'"></div><p>${esc(it.name)}</p>`;b.onclick=it.go;grid.appendChild(b)});
-    if(done<catList.length)grid.insertAdjacentHTML("beforeend",`<div class="msg">ط¬ط§ط±ظٹ ط§ظ„ط¨ط­ط«... ${done}/${catList.length}</div>`)};
+    if(done<catList.length)grid.insertAdjacentHTML("beforeend",`<div class="msg">جاري البحث... ${done}/${catList.length}</div>`)};
   const add=list=>{(list||[]).forEach(x=>{const k=x.stream_id||x.series_id||x.name;if(!seen.has(k)&&norm(x.name).includes(q)){seen.add(k);found.push(toItem(x))}})};
   show();const queue=[...catList];
   const worker=async()=>{while(queue.length&&run===searchRun){const c=queue.shift(),k=keyBase+c.category_id;
@@ -343,47 +344,48 @@ $("#q").addEventListener("input",()=>{clearTimeout(searchT);searchT=setTimeout(g
 function renderCards(items,live){lastItems=items;lastLive=live;drawCards()}
 function drawCards(){
   const live=lastLive,items=lastItems;
-  grid.innerHTML="";if(!items.length){grid.innerHTML='<div class="msg">ظ„ط§ طھظˆط¬ط¯ ظ†طھط§ط¦ط¬</div>';return}
+  grid.innerHTML="";if(!items.length){grid.innerHTML='<div class="msg">لا توجد نتائج</div>';return}
   items.forEach(it=>{const b=document.createElement("button");b.className="card f"+(live?" live":"");b.innerHTML=`<div class="ph"><img loading="lazy" src="${esc(img(it.pic))}" onerror="this.style.visibility='hidden'"></div><p>${esc(it.name)}</p>`;b.onclick=it.go;grid.appendChild(b)});
 }
 async function openSeries(s){
-  Grid.innerHTML='<div class="msg">ط¬ط§ط±ظٹ ط§ظ„طھطظ…ظٹظ„...</div>';
+  grid.innerHTML='<div class="msg">جاري التحميل...</div>';
   const info=await api(`get_series_info&series_id=${s.series_id}`);
   stack.push(()=>loadItems(cat));
   const seasons=Object.keys(info.episodes||{});
   const showSeason=k=>{
-    renderCards(info.episodes[k].map(e=>({name:`ط§ظ„ظ…ظˆط³ظ… ${k} - ${e.title}`,pic:(e.info&&e.info.movie_image)||s.cover,go:()=>play(`${WORKER}/${server}/series/${e.id}.${e.container_extension||"mp4"}`,`${s.name} - ${e.title}`,false)})),false);
+    renderCards(info.episodes[k].map(e=>({name:`الموسم ${k} - ${e.title}`,pic:(e.info&&e.info.movie_image)||s.cover,go:()=>play(`${WORKER}/${server}/series/${e.id}.${e.container_extension||"mp4"}`,`${s.name} - ${e.title}`,false)})),false);
     grid.firstChild&&grid.firstChild.focus();
   };
-  إذا كان طول قائمة المواسم يساوي 1، فسيتم إرجاع عرض الموسم (المواسم[0]).
-  renderCards(seasons.map(k=>({name:`ط§ظ„ظ…ظˆط³ظ… ${k}`,pic:s.cover,go:()=>{stack.push(()=>openSeries(s));showSeason(k)}})),false);
+  if(seasons.length===1)return showSeason(seasons[0]);
+  renderCards(seasons.map(k=>({name:`الموسم ${k}`,pic:s.cover,go:()=>{stack.push(()=>openSeries(s));showSeason(k)}})),false);
   grid.firstChild&&grid.firstChild.focus();
 }
 
-/* اللاعب */
+/* Player */
 let lastFocus=null,idleT,recoveryTimer,recoveryAttempts=0,nativeFallback=false,playbackFailed=false,externalPlayback=false;
+let curUrl="";
 function armRecovery(){clearTimeout(recoveryTimer);if(P.classList.contains("open")&&!playbackFailed&&!externalPlayback)recoveryTimer=setTimeout(recoverPlayback,15000)}
-دالة فشل التشغيل (){
-  إذا فشلت عملية التشغيل أو لم تكن قائمة فئات P تحتوي على كلمة "open"، فسيتم إنهاء العملية.
-  فشل التشغيل = صحيح؛
-  $("#failure p").textContent="ط®ط·ط£ "+(v.error?v.error.code+" "+(v.error.message||""):"?")+" | "+curUrl;
+function failPlayback(){
+  if(playbackFailed||!P.classList.contains("open"))return;
+  playbackFailed=true;
+  $("#failure p").textContent="خطأ "+(v.error?v.error.code+" "+(v.error.message||""):"?")+" | "+curUrl;
   clearTimeout(recoveryTimer);clearTimeout(idleT);
-  إذا كان hls موجودًا، فسيتم حذفه وتعيينه إلى null. إذا كان ts موجودًا، فسيتم حذفه وتعيينه إلى null. سيتم إيقاف v مؤقتًا مؤقتًا، وإزالة السمة "src"، ثم تحميل v.
+  if(hls){hls.destroy();hls=null}if(ts){try{ts.destroy()}catch(e){}ts=null}v.pause();v.removeAttribute("src");v.load();
   $("#spin").classList.remove("on");$("#failure").classList.remove("hid");P.classList.remove("idle");closeMenu();
 }
-دالة attemptPlay(){v.play().catch(e=>{if(e.name==="NotAllowedError"){clearTimeout(recoveryTimer);v.muted=true;$("#bMute").textContent=""ں"‡";v.play().then(()=>toast("ط§ط¶ط;ط· ًں"‡ ظ„طھط´ط;ظٹظ„ ط§ظ„طµظˆطھ")).catch(()=>{$("#spin").classList.remove("on");wake()})}else if(e.name!=="AbortError")recoverPlayback()})}
-دالة استعادة التشغيل (){
-  إذا فشلت عملية التشغيل أو تم تشغيلها خارجياً أو لم تكن قائمة فئات P تحتوي على كلمة "open"، فسيتم إنهاء العملية.
+function attemptPlay(){v.play().catch(e=>{if(e.name==="NotAllowedError"){clearTimeout(recoveryTimer);v.muted=true;$("#bMute").textContent="🔇";v.play().then(()=>toast("اضغط 🔇 لتشغيل الصوت")).catch(()=>{$("#spin").classList.remove("on");wake()})}else if(e.name!=="AbortError")recoverPlayback()})}
+function recoverPlayback(){
+  if(playbackFailed||externalPlayback||!P.classList.contains("open"))return;
   clearTimeout(recoveryTimer);
-  إذا كانت محاولات الاسترداد أكبر من أو تساوي 3 {
-    إذا كان (hls&&!nativeFallback&&v.canPlayType("application/vnd.apple.mpegurl")){nativeFallback=true;hls.destroy();hls=null;v.src=curUrl;armRecovery();attemptPlay();return}
-    فشل التشغيل(); العودة؛
+  if(recoveryAttempts>=3){
+    if(hls&&!nativeFallback&&v.canPlayType("application/vnd.apple.mpegurl")){nativeFallback=true;hls.destroy();hls=null;v.src=curUrl;armRecovery();attemptPlay();return}
+    failPlayback();return;
   }
   recoveryAttempts++;armRecovery();
-  إذا كان (ts) { حاول { ts.unload(); ts.load()} catch(e) {} }
-  وإلا إذا كان (hls) {hls.startLoad();hls.recoverMediaError()}
-  وإلا { const position = v.currentTime; v.load(); if (position > 0) v.addEventListener("loadedmetadata",() => { if (isFinite(v.duration)) v.currentTime = Math.min(position, v.duration) }, {once: true})}
-  محاولة تشغيل();
+  if(ts){try{ts.unload();ts.load()}catch(e){}}
+  else if(hls){hls.startLoad();hls.recoverMediaError()}
+  else{const position=v.currentTime;v.load();if(position>0)v.addEventListener("loadedmetadata",()=>{if(isFinite(v.duration))v.currentTime=Math.min(position,v.duration)},{once:true})}
+  attemptPlay();
 }
 function play(url,title,live){
   lastFocus=document.activeElement;clearTimeout(recoveryTimer);recoveryAttempts=0;nativeFallback=false;playbackFailed=false;externalPlayback=false;$("#failure").classList.add("hid");$("#time").textContent="00:00";$("#seek").value=0;
@@ -421,52 +423,51 @@ function play(url,title,live){
   }else{v.preload="auto";v.src=url;attemptPlay()}
   armRecovery();wake();setTimeout(()=>$("#bPlay").focus(),100);
 }
-let curUrl="";
 v.addEventListener("loadedmetadata",()=>{if(!hls&&v.audioTracks&&v.audioTracks.length>1)$("#bA").classList.remove("hid")});
 function closePlayer(){if(ts){try{ts.destroy()}catch(e){}ts=null}clearTimeout(recoveryTimer);clearTimeout(idleT);clearTimeout(tapT);playbackFailed=true;if(hls){hls.destroy();hls=null}v.pause();v.removeAttribute("src");v.load();P.classList.remove("open");closeMenu();if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});lastFocus&&lastFocus.focus()}
-const fmt=t=>isFinite(t)?new Date(t*1000).toISOString().substr(t>=3600?11:14,t>=3600?8:5):"ظ…ط¨ط§ط´ط±";
+const fmt=t=>isFinite(t)?new Date(t*1000).toISOString().substr(t>=3600?11:14,t>=3600?8:5):"مباشر";
 v.addEventListener("waiting",()=>{if(!playbackFailed&&!externalPlayback){$("#spin").classList.add("on");armRecovery()}});
 v.addEventListener("stalled",()=>{if(!recoveryTimer)armRecovery()});
 v.addEventListener("error",()=>{if(!hls&&!ts)recoverPlayback()});
 v.addEventListener("playing",()=>{clearTimeout(recoveryTimer);recoveryTimer=null;$("#spin").classList.remove("on")});
-v.addEventListener("play",()=>$("#bPlay").textContent="âڈ¸");
-v.addEventListener("pause",()=>{$("#bPlay").textContent="â–¶";if(v.readyState>=3){clearTimeout(recoveryTimer);recoveryTimer=null}});
+v.addEventListener("play",()=>$("#bPlay").textContent="⏸");
+v.addEventListener("pause",()=>{$("#bPlay").textContent="▶";if(v.readyState>=3){clearTimeout(recoveryTimer);recoveryTimer=null}});
 v.addEventListener("timeupdate",()=>{$("#time").textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`;if(v.duration&&isFinite(v.duration))$("#seek").value=v.currentTime/v.duration*1000});
 $("#seek").oninput=e=>{if(v.duration)v.currentTime=e.target.value/1000*v.duration};
 $("#bPlay").onclick=()=>{if(playbackFailed)return;if(v.paused){externalPlayback=false;armRecovery();attemptPlay()}else v.pause()};
-$("#bMute").onclick=()=>{v.muted=!v.muted;$("#bMute").textContent=v.muted?"ًں”‡":"ًں”ٹ"};
-$("#vol").oninput=e=>{v.volume=e.target.value;v.muted=false;$("#bMute").textContent=v.volume==0?"ًں”‡":"ًں”ٹ"};
+$("#bMute").onclick=()=>{v.muted=!v.muted;$("#bMute").textContent=v.muted?"🔇":"🔊"};
+$("#vol").oninput=e=>{v.volume=e.target.value;v.muted=false;$("#bMute").textContent=v.volume==0?"🔇":"🔊"};
 function toast(t){const x=$("#toast");x.textContent=t;x.style.display="block";clearTimeout(x._t);x._t=setTimeout(()=>x.style.display="none",900)}
-function skip(s){if(!v.duration||!isFinite(v.duration))return;v.currentTime=Math.max(0,Math.min(v.duration-1,v.currentTime+s));toast(s>0?`âڈ© +${s}`:`âڈھ ${s}`)}
+function skip(s){if(!v.duration||!isFinite(v.duration))return;v.currentTime=Math.max(0,Math.min(v.duration-1,v.currentTime+s));toast(s>0?`⏩ +${s}`:`⏪ ${s}`)}
 $("#bRw").onclick=()=>skip(-10);$("#bFf").onclick=()=>skip(10);
-دالة goFull(){
+function goFull(){
   const done=()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock("landscape").catch(()=>{})}catch(e){}};
-  إذا كان (P.requestFullscreen)P.requestFullscreen({navigationUI:"hide"}).then(done).catch(()=>{});
-  وإلا إذا كان (P.webkitRequestFullscreen) {P.webkitRequestFullscreen(); تم()}
-  وإلا إذا كان (v.webkitEnterFullscreen)v.webkitEnterFullscreen();
+  if(P.requestFullscreen)P.requestFullscreen({navigationUI:"hide"}).then(done).catch(()=>{});
+  else if(P.webkitRequestFullscreen){P.webkitRequestFullscreen();done()}
+  else if(v.webkitEnterFullscreen)v.webkitEnterFullscreen();
 }
-دالة الخروج من وضع ملء الشاشة () { حاول { الشاشة.الاتجاه && الشاشة.الاتجاه.فتح && الشاشة.الاتجاه.فتح()} } catch (خطأ) {} (document.exitFullscreen || document.webkitExitFullscreen).call(document)}
+function exitFull(){try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(e){}(document.exitFullscreen||document.webkitExitFullscreen).call(document)}
 const isFs=()=>document.fullscreenElement||document.webkitFullscreenElement;
 $("#bFs").onclick=()=>isFs()?exitFull():goFull();
-const ARS=[[""،"ط§ظ"ط £طμظ"ظٹ"],["ar-cover"،ظ…ظط، ط§ظ"ط´ط§ط´ط©"],["ar-fill"،طھظ…ط¯ظٹط¯"],["ar-169"،"16:9"],["ar-43"،"4:3"]];let arI=0;
-$("#bAR").onclick=()=>{arI=(arI+1)%ARS.length;v.className=ARS[arI][0];$("#bAR").textContent="â– "+ARS[arI][1];toast(ARS[arI][1])};
+const ARS=[["","الأصلي"],["ar-cover","ملء الشاشة"],["ar-fill","تمديد"],["ar-169","16:9"],["ar-43","4:3"]];let arI=0;
+$("#bAR").onclick=()=>{arI=(arI+1)%ARS.length;v.className=ARS[arI][0];$("#bAR").textContent="▭ "+ARS[arI][1];toast(ARS[arI][1])};
 $("#bExt").onclick=()=>{
   const u=curUrl,ua=navigator.userAgent;
-  const opts=[{id:"vlc",label:"VLC"},{id:"mx,label:"MX Player"},{id:"any",label:"ط £ظٹ ظ…ط´ط;ظ„"},{id:"browser",label:"ظپطھط ظپظٹ ط§ظ„ظ…طھطμظپط"}];
-  openMenu("ظ…ط´ط;ظ„ ط®ط§ط±ط¬ظٹ",opts,null,id=>{
+  const opts=[{id:"vlc",label:"VLC"},{id:"mx",label:"MX Player"},{id:"any",label:"أي مشغل"},{id:"browser",label:"فتح في المتصفح"}];
+  openMenu("مشغل خارجي",opts,null,id=>{
     const noProto=u.replace(/^https?:\/\//,"");
     externalPlayback=true;clearTimeout(recoveryTimer);$("#spin").classList.remove("on");v.pause();
-    إذا كان (id==="browser"){window.open(u,"_blank","noopener,noreferrer");return}
-    إذا كان (/android/i.test(ua)){
+    if(id==="browser"){window.open(u,"_blank","noopener,noreferrer");return}
+    if(/android/i.test(ua)){
       const pkg=id==="vlc"?";package=org.videolan.vlc":id==="mx"?";package=com.mxtech.videoplayer.ad":"";
       location.href=`intent://${noProto}#Intent;scheme=https;type=video/*${pkg};end`;
     }else if(/iphone|ipad|ipod|mac/i.test(ua)&&id==="vlc"){location.href="vlc-x-callback://x-callback-url/stream?url="+encodeURIComponent(u)}
-    وإلا إذا كان (id==="vlc"){location.href="vlc://"+u}
-    وإلا، سيتم فتح النافذة (u,"_blank");
+    else if(id==="vlc"){location.href="vlc://"+u}
+    else window.open(u,"_blank");
   });
 };
 $("#bX").onclick=closePlayer;
-دالة التنبيه() { P.classList.remove("idle"); clearTimeout(idleT); idleT = setTimeout(() => { if(!playbackFailed &&!v.paused &&!$("#menu").classList.contains("open")) P.classList.add("idle") }, 4000)}
+function wake(){P.classList.remove("idle");clearTimeout(idleT);idleT=setTimeout(()=>{if(!playbackFailed&&!v.paused&&!$("#menu").classList.contains("open"))P.classList.add("idle")},4000)}
 ["mousemove","touchstart","keydown"].forEach(ev=>P.addEventListener(ev,wake));
 let tapT=null;
 v.addEventListener("click",e=>{
@@ -483,25 +484,25 @@ function openMenu(title,opts,cur,pick){
   closeMenu();menu.dataset.title=title;
   if(trigger&&trigger.classList.contains("cb"))trigger.setAttribute("aria-expanded","true");
   menu.innerHTML=`<h4>${title}</h4>`;
-  if(!opts.length)menu.innerHTML+='<div class="mi">ط؛ظٹط± ظ…طھظˆظپط±</div>';
+  if(!opts.length)menu.innerHTML+='<div class="mi">غير متوفر</div>';
   opts.forEach(o=>{const b=document.createElement("button");b.className="mi f"+(o.id===cur?" on":"");b.textContent=o.label;b.onclick=()=>{pick(o.id);closeMenu();$("#bPlay").focus()};menu.appendChild(b)});
   wake();menu.classList.add("open");(menu.querySelector(".mi.on")||menu.querySelector(".mi"))?.focus();
 }
 $("#bQ").onclick=()=>{
-  if(!hls)return openMenu("ط§ظ„ط¬ظˆط¯ط©",[{id:-1,label:"طھظ„ظ‚ط§ط¦ظٹ (ط§ظ„ط£طµظ„ظٹط©)"}],-1,()=>{});
-  openMenu("ط§ظ„ط¬ظˆط¯ط©",[{id:-1,label:"طھظ„ظ‚ط§ط¦ظٹ"},...hls.levels.map((l,i)=>({id:i,label:l.height?l.height+"p":Math.round(l.bitrate/1000)+"kbps"}))],hls.autoLevelEnabled?-1:hls.currentLevel,id=>hls.currentLevel=id);
+  if(!hls)return openMenu("الجودة",[{id:-1,label:"تلقائي (الأصلية)"}],-1,()=>{});
+  openMenu("الجودة",[{id:-1,label:"تلقائي"},...hls.levels.map((l,i)=>({id:i,label:l.height?l.height+"p":Math.round(l.bitrate/1000)+"kbps"}))],hls.autoLevelEnabled?-1:hls.currentLevel,id=>hls.currentLevel=id);
 };
 $("#bA").onclick=()=>{
-  if(hls)return openMenu("ظ„ط؛ط© ط§ظ„طµظˆطھ",hls.audioTracks.map((t,i)=>({id:i,label:t.name||t.lang||"ظ…ط³ط§ط± "+(i+1)})),hls.audioTrack,id=>hls.audioTrack=id);
-  const at=v.audioTracks;if(!at)return openMenu("ظ„ط؛ط© ط§ظ„طµظˆطھ",[],0,()=>{});
-  const arr=[...Array(at.length)].map((_,i)=>({id:i,label:at[i].label||at[i].language||"ظ…ط³ط§ط± "+(i+1)}));
-  openMenu("ظ„ط؛ط© ط§ظ„طµظˆطھ",arr,arr.findIndex((_,i)=>at[i].enabled),id=>{for(let i=0;i<at.length;i++)at[i].enabled=i===id});
+  if(hls)return openMenu("لغة الصوت",hls.audioTracks.map((t,i)=>({id:i,label:t.name||t.lang||"مسار "+(i+1)})),hls.audioTrack,id=>hls.audioTrack=id);
+  const at=v.audioTracks;if(!at)return openMenu("لغة الصوت",[],0,()=>{});
+  const arr=[...Array(at.length)].map((_,i)=>({id:i,label:at[i].label||at[i].language||"مسار "+(i+1)}));
+  openMenu("لغة الصوت",arr,arr.findIndex((_,i)=>at[i].enabled),id=>{for(let i=0;i<at.length;i++)at[i].enabled=i===id});
 };
 $("#bS").onclick=()=>{
-  if(hls&&hls.subtitleTracks.length)return openMenu("ط§ظ„طھط±ط¬ظ…ط©",[{id:-1,label:"ط¥ظٹظ‚ط§ظپ"},...hls.subtitleTracks.map((t,i)=>({id:i,label:t.name||t.lang}))],hls.subtitleTrack,id=>{hls.subtitleTrack=id;hls.subtitleDisplay=id>=0});
-  const tt=v.textTracks,arr=[{id:-1,label:"ط¥ظٹظ‚ط§ظپ"}];let cur=-1;
-  for(let i=0;i<tt.length;i++){arr.push({id:i,label:tt[i].label||tt[i].language||"طھط±ط¬ظ…ط© "+(i+1)});if(tt[i].mode==="showing")cur=i}
-  openMenu("ط§ظ„طھط±ط¬ظ…ط©",arr,cur,id=>{for(let i=0;i<tt.length;i++)tt[i].mode=i===id?"showing":"disabled"});
+  if(hls&&hls.subtitleTracks.length)return openMenu("الترجمة",[{id:-1,label:"إيقاف"},...hls.subtitleTracks.map((t,i)=>({id:i,label:t.name||t.lang}))],hls.subtitleTrack,id=>{hls.subtitleTrack=id;hls.subtitleDisplay=id>=0});
+  const tt=v.textTracks,arr=[{id:-1,label:"إيقاف"}];let cur=-1;
+  for(let i=0;i<tt.length;i++){arr.push({id:i,label:tt[i].label||tt[i].language||"ترجمة "+(i+1)});if(tt[i].mode==="showing")cur=i}
+  openMenu("الترجمة",arr,cur,id=>{for(let i=0;i<tt.length;i++)tt[i].mode=i===id?"showing":"disabled"});
 };
 
 /* Remote control / D-pad spatial navigation */
