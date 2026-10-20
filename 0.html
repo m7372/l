@@ -318,7 +318,7 @@ let lastItems=[],lastLive=false;
 const norm=t=>String(t||"").toLowerCase().replace(/[\u064B-\u0652\u0640]/g,"").replace(/[أإآا]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/\s+/g," ").trim();
 let catList=[],itemCache={},searchRun=0,searchT;
 const toItem=x=>({name:x.name,pic:x.stream_icon||x.cover,go:()=>{
-  if(type==="live")play(server==="s3"?`${WORKER}/s3/live/${x.stream_id}`:`${WORKER}/${server}/live/${x.stream_id}.m3u8`,x.name,true);
+  if(type==="live")play(["s3","s4","s5"].includes(server)?`${WORKER}/${server}/live/${x.stream_id}`:`${WORKER}/${server}/live/${x.stream_id}.m3u8`,x.name,true);
   else if(type==="vod")play(`${WORKER}/${server}/movie/${x.stream_id}.${x.container_extension||"mp4"}`,x.name,false);
   else openSeries(x);
 }});
@@ -398,7 +398,7 @@ function play(url,title,live){
   if(location.protocol==="https:"&&url.startsWith("http://"))url="https://"+url.slice(7);
   if(isIOS&&live&&/\.ts(\?|$)/.test(url))url=url.replace(/\.ts(\?|$)/,".m3u8$1");
   curUrl=url;
-  if(!isIOS&&server==="s3"&&live&&window.mpegts&&mpegts.isSupported()){
+  iif(!isIOS&&["s3","s4","s5"].includes(server)&&live&&window.mpegts&&mpegts.isSupported()){
     ts=mpegts.createPlayer({type:"mpegts",isLive:true,url},{enableStashBuffer:true,stashInitialSize:384*1024,liveBufferLatencyChasing:false,lazyLoad:false});
     ts.attachMediaElement(v);ts.load();ts.on(mpegts.Events.ERROR,()=>recoverPlayback());attemptPlay();armRecovery();wake();setTimeout(()=>$("#bPlay").focus(),100);return;
   }
