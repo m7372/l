@@ -392,7 +392,7 @@ function play(url,title,live){
   P.classList.add("open");$("#ptitle").textContent=title;$("#seek").style.display=live?"none":"";
   $("#spin").classList.add("on");closeMenu();
   curUrl=url;P.classList.toggle("isLive",live);
-  $("#bExt").classList.toggle("hid",!(server==="s2"||(!live&&/iPhone|iPad|iPod/.test(navigator.userAgent))));
+  $("#bExt").classList.toggle("hid",!(/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1)));
   $("#bQ").classList.add("hid");$("#bA").classList.add("hid");
   if(hls){hls.destroy();hls=null}
   if(ts){try{ts.destroy()}catch(e){}ts=null}
