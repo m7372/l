@@ -320,7 +320,7 @@ const norm=t=>String(t||"").toLowerCase().replace(/[\u064B-\u0652\u0640]/g,"").r
 let catList=[],itemCache={},searchRun=0,searchT;
 const toItem=x=>({name:x.name,pic:x.stream_icon||x.cover,go:()=>{
   if(type==="live")play(["s3","s4","s5"].includes(server)?`${WORKER}/${server}/live/${x.stream_id}`:`${WORKER}/${server}/live/${x.stream_id}.m3u8`,x.name,true);
-  else if(type==="vod")play(`${WORKER}/${server}/movie/${x.stream_id}.${x.container_extension||"mp4"}`,x.name,false);
+  else if(type==="vod")play(`${WORKER}/${server}/movie/${x.stream_id}.${server==="s2"?"m3u8":(x.container_extension||"mp4")}`,x.name,false);
   else openSeries(x);
 }});
 let searchMode=false;
@@ -353,7 +353,7 @@ async function openSeries(s){
   stack.push(()=>loadItems(cat));
   const seasons=Object.keys(info.episodes||{});
   const showSeason=k=>{
-    renderCards(info.episodes[k].map(e=>({name:`الموسم ${k} - ${e.title}`,pic:(e.info&&e.info.movie_image)||s.cover,go:()=>play(`${WORKER}/${server}/series/${e.id}.${e.container_extension||"mp4"}`,`${s.name} - ${e.title}`,false)})),false);
+    renderCards(info.episodes[k].map(e=>({name:`الموسم ${k} - ${e.title}`,pic:(e.info&&e.info.movie_image)||s.cover,go:()=>play(`${WORKER}/${server}/series/${e.id}.${server==="s2"?"m3u8":(e.container_extension||"mp4")}`,`${s.name} - ${e.title}`,false)})),false);
     grid.firstChild&&grid.firstChild.focus();
   };
   if(seasons.length===1)return showSeason(seasons[0]);
@@ -451,7 +451,8 @@ $("#bFs").onclick=()=>isFs()?exitFull():goFull();
 const ARS=[["","الأصلي"],["ar-cover","ملء الشاشة"],["ar-fill","تمديد"],["ar-169","16:9"],["ar-43","4:3"]];let arI=0;
 $("#bAR").onclick=()=>{arI=(arI+1)%ARS.length;v.className=ARS[arI][0];$("#bAR").textContent="▭ "+ARS[arI][1];toast(ARS[arI][1])};
 $("#bExt").onclick=()=>{
-  const u=curUrl,ua=navigator.userAgent;
+  let u=curUrl;const ua=navigator.userAgent;
+  if(server==="s2"){const m=u.match(/\/s2\/(live|movie|series)\/([^/?]+?)(?:\.\w+)?$/);if(m)u=`http://so.ta2al.us/${m[1]}/MH12ARBMH12/MH12ARBMH12/${m[2]}.${m[1]==="live"?"m3u8":"mp4"}`}
   const opts=[{id:"vlc",label:"VLC"},{id:"mx",label:"MX Player"},{id:"any",label:"أي مشغل"},{id:"browser",label:"فتح في المتصفح"}];
   openMenu("مشغل خارجي",opts,null,id=>{
     const noProto=u.replace(/^https?:\/\//,"");
