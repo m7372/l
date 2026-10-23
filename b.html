@@ -120,7 +120,7 @@ header{padding:14px 12px 12px!important}
 #chList{position:absolute;top:0;bottom:0;right:0;width:min(300px,75vw);background:rgba(10,10,10,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-left:1px solid rgba(255,255,255,.08);z-index:5;transform:translateX(100%);transition:transform .25s;overflow-y:auto;padding:max(12px,env(safe-area-inset-top)) 10px 12px;direction:rtl}
 #chList.open{transform:none}#chList h4{font-size:13px;color:#aaa;padding:4px 6px 10px}
 .chi{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border-radius:10px;text-align:right;font-size:14px;background:transparent}.chi.on{background:rgba(255,255,255,.18)}.chi img{width:40px;height:30px;object-fit:contain;flex:none}.chi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mi2{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;font-size:11px;color:#8a8a8a;margin:-4px 0 8px;padding:0 10px 2px;direction:rtl}
+.mi2{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;font-size:11px;color:#9a9a9a;margin-top:6px;padding-top:8px;border-top:1px solid #1f1f1f;direction:rtl;text-align:center}.mi2 span{background:#181818;border-radius:999px;padding:3px 9px;unicode-bidi:plaintext}
 </style>
 </head>
 <body>
@@ -203,8 +203,12 @@ updateClock();setInterval(updateClock,1000);
 /* Standby */
 const sb=$("#standby");
 function enter(){if(sb.classList.contains("hide"))return;sb.classList.add("hide");setTimeout(()=>$(".tab").focus(),300)}
-sb.addEventListener("click",enter);
-sb.addEventListener("touchend",enter);
+let sbT=0;
+function enterEv(e){e.preventDefault();e.stopPropagation();if(sb.classList.contains("hide"))return;sbT=Date.now();enter()}
+sb.addEventListener("click",enterEv);
+sb.addEventListener("touchend",enterEv,{passive:false});
+/* block the ghost tap that would open a channel right after leaving the welcome screen */
+document.addEventListener("click",e=>{if(Date.now()-sbT<700){e.preventDefault();e.stopPropagation()}},true);
 
 /* Tabs */
 let section="media";
@@ -263,7 +267,7 @@ async function renderMatches(first){
   if(first)box.innerHTML='<div class="msg">جاري تحميل المباريات...</div>';
   try{
     const c=await getFixtures(mDay);if(section!=="matches")return;
-    const t=await tr(c.list.flatMap(f=>[f.teams.home.name,f.teams.away.name]));
+    const t=await tr(c.list.flatMap(f=>[f.teams.home.name,f.teams.away.name,f.fixture.venue&&f.fixture.venue.name,f.fixture.venue&&f.fixture.venue.city,f.fixture.referee]));
     let h=`<div class="daybar">${[["أمس",-1],["اليوم",0],["غداً",1]].map(([l,d])=>`<button class="f${d===mDay?" on":""}" data-d="${d}">${l}</button>`).join("")}</div>`;
     h+=`<div class="upd">آخر تحديث: ${arNum(new Date(c.t).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",hour12:true}))} — يتحدث تلقائياً</div>`;
     if(!c.list.length)h+='<div class="msg">لا توجد مباريات للبطولات المختارة في هذا اليوم</div>';
@@ -271,10 +275,10 @@ async function renderMatches(first){
       h+=`<div class="lg"><img src="${esc(fs[0].league.logo)}" onerror="this.remove()">${LEAGUES[id]}</div>`;
       fs.forEach(f=>{const s=f.fixture.status.short,live=LIVE_S.includes(s),ns=s==="NS"||s==="TBD";
         const _d=new Date(f.fixture.date),time=arNum(`${_d.getHours()%12||12}:${String(_d.getMinutes()).padStart(2,"0")}`)+(_d.getHours()<12?" ص":" م");
-        const vn=f.fixture.venue||{},info=[vn.name&&`🏟 ${esc(vn.name)}${vn.city?"، "+esc(vn.city):""}`,f.league.round&&`🏆 ${esc(String(f.league.round).replace("Regular Season - ","الجولة "))}`,f.fixture.referee&&`🧑‍⚖️ ${esc(f.fixture.referee)}`,(f.tv||f.broadcast)&&`📺 ${esc(f.tv||f.broadcast)}`,!ns&&`⏰ ${time}`].filter(Boolean);
+        const vn=f.fixture.venue||{},info=[vn.name&&`🏟 الملعب: ${esc(t(vn.name))}${vn.city?"، "+esc(t(vn.city)):""}`,f.league.round&&`🏆 ${esc(arRound(f.league.round))}`,f.fixture.referee&&`🧑‍⚖️ الحكم: ${esc(t(f.fixture.referee))}`,(f.tv||f.broadcast)&&`📺 القناة: ${esc(f.tv||f.broadcast)}`,!ns&&`⏰ ${time}`].filter(Boolean);
         const score=ns?time:`${arNum(f.goals.home??0)} - ${arNum(f.goals.away??0)}`;
         const st=(STATUS[s]||"")+(live&&f.fixture.status.elapsed?` ${arNum(f.fixture.status.elapsed)}'`:"");
-        h+=`<div class="mt"><div class="tm"><img src="${esc(f.teams.home.logo)}" onerror="this.style.visibility='hidden'">${esc(t(f.teams.home.name))}</div><div class="sc${live?" live":""}"><b>${score}</b><small>${st}</small></div><div class="tm"><img src="${esc(f.teams.away.logo)}" onerror="this.style.visibility='hidden'">${esc(t(f.teams.away.name))}</div></div>${info.length?`<div class="mi2">${info.map(x=>`<span>${x}</span>`).join("")}</div>`:""}`})});
+        h+=`<div class="mt"><div class="tm"><img src="${esc(f.teams.home.logo)}" onerror="this.style.visibility='hidden'">${esc(t(f.teams.home.name))}</div><div class="sc${live?" live":""}"><b>${score}</b><small>${st}</small></div><div class="tm"><img src="${esc(f.teams.away.logo)}" onerror="this.style.visibility='hidden'">${esc(t(f.teams.away.name))}</div>${info.length?`<div class="mi2">${info.map(x=>`<span>${x}</span>`).join("")}</div>`:""}</div>`})});
     box.innerHTML=h;
     box.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{mDay=+b.dataset.d;renderMatches(true)});
     const hasLive=c.list.some(f=>LIVE_S.includes(f.fixture.status.short));
@@ -282,6 +286,7 @@ async function renderMatches(first){
   }catch(e){if(first)box.innerHTML='<div class="msg">تعذر تحميل المباريات، سيعاد المحاولة تلقائياً</div>';mTimer=setTimeout(()=>renderMatches(false),60e3)}
 }
 
+function arRound(x){x=String(x);const m={"Regular Season":"الجولة","Group Stage":"دور المجموعات","League Stage":"مرحلة الدوري","Round of 16":"دور الـ16","Quarter-finals":"ربع النهائي","Semi-finals":"نصف النهائي","Final":"النهائي","Play-offs":"الملحق","Knockout Round Play-offs":"ملحق خروج المغلوب"};let o=x;for(const k in m)if(x.startsWith(k)){o=x.replace(k,m[k]);break}return arNum(o.replace(/\s*-\s*/," "))}
 /* News (ESPN) */
 let nTimer=null;
 async function renderNews(first){
@@ -370,7 +375,8 @@ async function globalSearch(){
   await Promise.all([1,2,3,4,5,6].map(worker));
 }
 $("#q").addEventListener("input",()=>{clearTimeout(searchT);searchT=setTimeout(globalSearch,300)});
-function renderCards(items,live){lastItems=items;lastLive=live;drawCards()}
+let plItems=[],curIdx=-1,plType="live";
+function renderCards(items,live){items.forEach((it,i)=>{const g=it.go;it.go=()=>{plItems=items;curIdx=i;plType=live?"live":/^الموسم/.test(it.name)?"ep":"vod";g()}});lastItems=items;lastLive=live;drawCards()}
 function drawCards(){
   const live=lastLive,items=lastItems;
   grid.innerHTML="";if(!items.length){grid.innerHTML='<div class="msg">لا توجد نتائج</div>';return}
@@ -417,7 +423,7 @@ function recoverPlayback(){
   attemptPlay();
 }
 function play(url,title,live){
-  curName=title;$("#bList").classList.toggle("hid",!(live&&lastLive&&lastItems.length>1));if(!live)$("#chList").classList.remove("open");
+  curName=title;$("#bList").classList.toggle("hid",!(plItems.length>1));$("#chList h4").textContent=plType==="live"?"القنوات":plType==="ep"?"الحلقات":"أفلام المجموعة";
   lastFocus=document.activeElement;clearTimeout(recoveryTimer);recoveryAttempts=0;nativeFallback=false;playbackFailed=false;externalPlayback=false;$("#failure").classList.add("hid");$("#time").textContent="00:00";$("#seek").value=0;
   P.classList.add("open");$("#ptitle").textContent=title;$("#seek").style.display=live?"none":"";
   $("#spin").classList.add("on");closeMenu();
@@ -548,7 +554,7 @@ function openExt(u){const ua=navigator.userAgent;
 
 /* قائمة القنوات داخل المشغل */
 let curName="";
-function drawChList(){const box=$("#chItems");box.innerHTML="";lastItems.forEach(it=>{const b=document.createElement("button");b.className="chi f"+(it.name===curName?" on":"");b.innerHTML=`<img src="${esc(img(it.pic))}" onerror="this.style.visibility='hidden'"><span>${esc(it.name)}</span>`;b.onclick=e=>{e.stopPropagation();it.go();$("#chList").classList.add("open");drawChList()};box.appendChild(b)});const on=box.querySelector(".on");on&&on.scrollIntoView({block:"center"})}
+function drawChList(){const box=$("#chItems");box.innerHTML="";plItems.forEach((it,i)=>{const b=document.createElement("button");b.className="chi f"+(i===curIdx?" on":"");b.innerHTML=`<img src="${esc(img(it.pic))}" onerror="this.style.visibility='hidden'"><span>${esc(it.name)}</span>`;b.onclick=e=>{e.stopPropagation();it.go();$("#chList").classList.add("open");drawChList()};box.appendChild(b)});const on=box.querySelector(".on");on&&on.scrollIntoView({block:"center"})}
 $("#bList").onclick=e=>{e.stopPropagation();const l=$("#chList");l.classList.toggle("open");if(l.classList.contains("open"))drawChList();wake()};
 $("#chList").addEventListener("click",e=>e.stopPropagation());
 $("#bX").onclick=closePlayer;
