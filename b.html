@@ -116,6 +116,11 @@ header{padding:14px 12px 12px!important}
 .nw{display:flex;gap:10px;background:#111;border:1px solid #1f1f1f;border-radius:12px;overflow:hidden;margin-bottom:10px;width:100%;text-align:right}
 .nw img{width:130px;min-width:130px;height:96px;object-fit:cover;background:#1a1a1a}
 .nw div{padding:8px 4px 8px 10px}.nw h3{font-size:14px;line-height:1.5;margin-bottom:4px}.nw p{font-size:12px;color:#999;line-height:1.5}.nw time{font-size:11px;color:#666}
+.cb.ic{display:inline-flex;align-items:center;justify-content:center;width:44px;height:40px;padding:0;background:rgba(255,255,255,.08);border-radius:50%;backdrop-filter:blur(6px);transition:background .2s,transform .15s}.cb.ic:active{transform:scale(.9)}.cb.ic svg{display:block}
+#chList{position:absolute;top:0;bottom:0;right:0;width:min(300px,75vw);background:rgba(10,10,10,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-left:1px solid rgba(255,255,255,.08);z-index:5;transform:translateX(100%);transition:transform .25s;overflow-y:auto;padding:max(12px,env(safe-area-inset-top)) 10px 12px;direction:rtl}
+#chList.open{transform:none}#chList h4{font-size:13px;color:#aaa;padding:4px 6px 10px}
+.chi{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border-radius:10px;text-align:right;font-size:14px;background:transparent}.chi.on{background:rgba(255,255,255,.18)}.chi img{width:40px;height:30px;object-fit:contain;flex:none}.chi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mi2{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;font-size:11px;color:#8a8a8a;margin:-4px 0 8px;padding:0 10px 2px;direction:rtl}
 </style>
 </head>
 <body>
@@ -154,21 +159,23 @@ header{padding:14px 12px 12px!important}
   <div id="ptitle"></div>
   <div id="failure" class="hid" role="status"><div class="sad" aria-hidden="true">☹</div><strong>AlameeereTv</strong><p>جرب قناة اخرى</p></div>
   <div id="toast" role="status"></div>
+  <div id="chList"><h4>القنوات</h4><div id="chItems"></div></div>
   <div id="ctrl">
     <div class="menu" id="menu"></div>
     <input type="range" id="seek" class="f" min="0" max="1000" value="0">
     <div class="row">
-      <button class="cb f" id="bPlay">⏸</button>
+      <button class="cb f ic" id="bPlay" aria-label="تشغيل/إيقاف"><svg viewBox="0 0 24 24" width="22" height="22"><rect x="7" y="5.5" width="3.2" height="13" rx="1.2" fill="currentColor"/><rect x="13.8" y="5.5" width="3.2" height="13" rx="1.2" fill="currentColor"/></svg></button>
       <button class="cb f" id="bMute">🔊</button>
       <input type="range" id="vol" class="f" min="0" max="1" step="0.05" value="1">
-      <button class="cb f vodonly" id="bRw">⏪ 10</button>
-      <button class="cb f vodonly" id="bFf">10 ⏩</button>
+      <button class="cb f vodonly ic" id="bRw" aria-label="تأخير 10"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/><text x="12" y="15.5" font-size="7.5" text-anchor="middle" fill="currentColor" stroke="none" font-family="system-ui" font-weight="600">10</text></svg></button>
+      <button class="cb f vodonly ic" id="bFf" aria-label="تقديم 10"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v4h-4"/><text x="12" y="15.5" font-size="7.5" text-anchor="middle" fill="currentColor" stroke="none" font-family="system-ui" font-weight="600">10</text></svg></button>
       <span id="time">00:00</span>
       <button class="cb f hid" id="bQ">⚙ الجودة</button>
       <button class="cb f hid" id="bA">🎧 الصوت</button>
       <button class="cb f" id="bS">الترجمة</button>
       <button class="cb f" id="bAR">▭ المقاس</button>
       <button class="cb f hid" id="bExt">↗ مشغل خارجي</button>
+      <button class="cb f ic hid" id="bList" aria-label="القنوات"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
       <button class="cb f" id="bFs">⛶</button>
       <button class="cb f" id="bX">✕</button>
     </div>
@@ -258,15 +265,16 @@ async function renderMatches(first){
     const c=await getFixtures(mDay);if(section!=="matches")return;
     const t=await tr(c.list.flatMap(f=>[f.teams.home.name,f.teams.away.name]));
     let h=`<div class="daybar">${[["أمس",-1],["اليوم",0],["غداً",1]].map(([l,d])=>`<button class="f${d===mDay?" on":""}" data-d="${d}">${l}</button>`).join("")}</div>`;
-    h+=`<div class="upd">آخر تحديث: ${arNum(new Date(c.t).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}))} — يتحدث تلقائياً</div>`;
+    h+=`<div class="upd">آخر تحديث: ${arNum(new Date(c.t).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",hour12:true}))} — يتحدث تلقائياً</div>`;
     if(!c.list.length)h+='<div class="msg">لا توجد مباريات للبطولات المختارة في هذا اليوم</div>';
     LORDER.forEach(id=>{const fs=c.list.filter(f=>f.league.id===id).sort((a,b)=>a.fixture.timestamp-b.fixture.timestamp);if(!fs.length)return;
       h+=`<div class="lg"><img src="${esc(fs[0].league.logo)}" onerror="this.remove()">${LEAGUES[id]}</div>`;
       fs.forEach(f=>{const s=f.fixture.status.short,live=LIVE_S.includes(s),ns=s==="NS"||s==="TBD";
-        const time=arNum(new Date(f.fixture.date).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}));
+        const _d=new Date(f.fixture.date),time=arNum(`${_d.getHours()%12||12}:${String(_d.getMinutes()).padStart(2,"0")}`)+(_d.getHours()<12?" ص":" م");
+        const vn=f.fixture.venue||{},info=[vn.name&&`🏟 ${esc(vn.name)}${vn.city?"، "+esc(vn.city):""}`,f.league.round&&`🏆 ${esc(String(f.league.round).replace("Regular Season - ","الجولة "))}`,f.fixture.referee&&`🧑‍⚖️ ${esc(f.fixture.referee)}`,(f.tv||f.broadcast)&&`📺 ${esc(f.tv||f.broadcast)}`,!ns&&`⏰ ${time}`].filter(Boolean);
         const score=ns?time:`${arNum(f.goals.home??0)} - ${arNum(f.goals.away??0)}`;
         const st=(STATUS[s]||"")+(live&&f.fixture.status.elapsed?` ${arNum(f.fixture.status.elapsed)}'`:"");
-        h+=`<div class="mt"><div class="tm"><img src="${esc(f.teams.home.logo)}" onerror="this.style.visibility='hidden'">${esc(t(f.teams.home.name))}</div><div class="sc${live?" live":""}"><b>${score}</b><small>${st}</small></div><div class="tm"><img src="${esc(f.teams.away.logo)}" onerror="this.style.visibility='hidden'">${esc(t(f.teams.away.name))}</div></div>`})});
+        h+=`<div class="mt"><div class="tm"><img src="${esc(f.teams.home.logo)}" onerror="this.style.visibility='hidden'">${esc(t(f.teams.home.name))}</div><div class="sc${live?" live":""}"><b>${score}</b><small>${st}</small></div><div class="tm"><img src="${esc(f.teams.away.logo)}" onerror="this.style.visibility='hidden'">${esc(t(f.teams.away.name))}</div></div>${info.length?`<div class="mi2">${info.map(x=>`<span>${x}</span>`).join("")}</div>`:""}`})});
     box.innerHTML=h;
     box.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{mDay=+b.dataset.d;renderMatches(true)});
     const hasLive=c.list.some(f=>LIVE_S.includes(f.fixture.status.short));
@@ -284,7 +292,7 @@ async function renderNews(first){
     let j;try{j=await (await fetch(NU)).json()}catch(e){j=await (await fetch(`${WORKERS.s1}/proxy?url=${encodeURIComponent(NU)}`)).json()}
     const _x=0,arts=j.articles||[];if(section!=="news")return;
     const t=await tr(arts.flatMap(a=>[a.headline,a.description]));
-    let h=`<div class="upd">آخر تحديث: ${arNum(new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}))} — يتحدث كل دقيقتين</div>`;
+    let h=`<div class="upd">آخر تحديث: ${arNum(new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",hour12:true}))} — يتحدث كل دقيقتين</div>`;
     if(!arts.length)h+='<div class="msg">لا توجد أخبار</div>';
     arts.forEach((a,i)=>{const im=(a.images&&a.images[0]&&a.images[0].url)||"",link=(a.links&&a.links.web&&a.links.web.href)||"";
       h+=`<button class="nw f" data-i="${i}">${im?`<img loading="lazy" src="${esc(im)}" onerror="this.remove()">`:""}<div><h3>${esc(t(a.headline))}</h3><p>${esc(t(a.description||""))}</p><time>${a.published?new Date(a.published).toLocaleString("ar-EG",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):""}</time></div></button>`});
@@ -409,6 +417,7 @@ function recoverPlayback(){
   attemptPlay();
 }
 function play(url,title,live){
+  curName=title;$("#bList").classList.toggle("hid",!(live&&lastLive&&lastItems.length>1));if(!live)$("#chList").classList.remove("open");
   lastFocus=document.activeElement;clearTimeout(recoveryTimer);recoveryAttempts=0;nativeFallback=false;playbackFailed=false;externalPlayback=false;$("#failure").classList.add("hid");$("#time").textContent="00:00";$("#seek").value=0;
   P.classList.add("open");$("#ptitle").textContent=title;$("#seek").style.display=live?"none":"";
   $("#spin").classList.add("on");closeMenu();
@@ -449,14 +458,15 @@ function play(url,title,live){
   armRecovery();wake();setTimeout(()=>$("#bPlay").focus(),100);
 }
 v.addEventListener("loadedmetadata",()=>{if(!hls&&v.audioTracks&&v.audioTracks.length>1)$("#bA").classList.remove("hid")});
-function closePlayer(){if(ts){try{ts.destroy()}catch(e){}ts=null}clearTimeout(recoveryTimer);clearTimeout(idleT);clearTimeout(tapT);playbackFailed=true;if(hls){hls.destroy();hls=null}v.pause();v.removeAttribute("src");v.load();P.classList.remove("open");closeMenu();if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});lastFocus&&lastFocus.focus()}
+function closePlayer(){if(ts){try{ts.destroy()}catch(e){}ts=null}clearTimeout(recoveryTimer);clearTimeout(idleT);clearTimeout(tapT);playbackFailed=true;if(hls){hls.destroy();hls=null}v.pause();v.removeAttribute("src");v.load();P.classList.remove("open");$("#chList").classList.remove("open");closeMenu();if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});lastFocus&&lastFocus.focus()}
 const fmt=t=>isFinite(t)?new Date(t*1000).toISOString().substr(t>=3600?11:14,t>=3600?8:5):"مباشر";
 v.addEventListener("waiting",()=>{if(!playbackFailed&&!externalPlayback){$("#spin").classList.add("on");armRecovery()}});
 v.addEventListener("stalled",()=>{if(!recoveryTimer)armRecovery()});
 v.addEventListener("error",()=>{if(!hls&&!ts)recoverPlayback()});
 v.addEventListener("playing",()=>{clearTimeout(recoveryTimer);recoveryTimer=null;$("#spin").classList.remove("on")});
-v.addEventListener("play",()=>$("#bPlay").textContent="⏸");
-v.addEventListener("pause",()=>{$("#bPlay").textContent="▶";if(v.readyState>=3){clearTimeout(recoveryTimer);recoveryTimer=null}});
+const IC_PLAY='<svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>',IC_PAUSE='<svg viewBox="0 0 24 24" width="22" height="22"><rect x="7" y="5.5" width="3.2" height="13" rx="1.2" fill="currentColor"/><rect x="13.8" y="5.5" width="3.2" height="13" rx="1.2" fill="currentColor"/></svg>';
+v.addEventListener("play",()=>$("#bPlay").innerHTML=IC_PAUSE);
+v.addEventListener("pause",()=>{$("#bPlay").innerHTML=IC_PLAY;if(v.readyState>=3){clearTimeout(recoveryTimer);recoveryTimer=null}});
 
 /* Seek + skip (optimized) */
 let isSeeking=false;
@@ -502,12 +512,30 @@ $("#bFs").onclick=()=>isFs()?exitFull():goFull();
 const ARS=[["","الأصلي"],["ar-cover","ملء الشاشة"],["ar-fill","تمديد"],["ar-169","16:9"],["ar-43","4:3"]];let arI=0;
 $("#bAR").onclick=()=>{arI=(arI+1)%ARS.length;v.className=ARS[arI][0];$("#bAR").textContent="▭ "+ARS[arI][1];toast(ARS[arI][1])};
 $("#bExt").onclick=()=>{
-  let u=curUrl;const ua=navigator.userAgent;
-  if(server==="s2"){const m=u.match(/\/s2\/(live|movie|series)\/([^/?]+?)(?:\.\w+)?$/);if(m)u=`http://so.ta2al.us/${m[1]}/MH12ARBMH12/MH12ARBMH12/${m[2]}.${m[1]==="live"?"m3u8":"mp4"}`}
-  const opts=[{id:"vlc",label:"VLC"},{id:"mx",label:"MX Player"},{id:"any",label:"أي مشغل"},{id:"browser",label:"فتح في المتصفح"}];
+  extDirect().then(u=>openExt(u||curUrl));
+};
+const credCache={};
+async function getCreds(){
+  if(server==="s2")return{base:"http://so.ta2al.us",u:"MH12ARBMH12",p:"MH12ARBMH12"};
+  if(credCache[server])return credCache[server];
+  try{const j=await fetch(`${WORKER}/${server}/player_api.php`).then(r=>r.json());const ui=j.user_info||{},si=j.server_info||{};
+    if(ui.username&&ui.password&&si.url&&!String(si.url).includes("workers.dev")){const pr=si.server_protocol||"http",port=pr==="https"?(si.https_port||si.port):si.port;
+      return credCache[server]={base:`${pr}://${si.url}${port&&!["80","443"].includes(String(port))?":"+port:""}`,u:ui.username,p:ui.password}}}catch(e){}
+  return null;
+}
+async function extDirect(){
+  const m=curUrl.match(/\/s\d\/(live|movie|series)\/([^/?]+?)(\.\w+)?(\?|$)/);if(!m)return null;
+  const c=await getCreds();if(c){const ext=m[1]==="live"?"m3u8":(m[3]?m[3].slice(1):"mp4");return `${c.base}/${m[1]}/${c.u}/${c.p}/${m[2]}.${ext}`}
+  try{const r=await fetch(curUrl,{method:"HEAD",redirect:"follow"});if(r.url&&!r.url.includes("workers.dev"))return r.url}catch(e){}
+  return null;
+}
+function openExt(u){const ua=navigator.userAgent;
+  if(false){const m=u.match(/\/s2\/(live|movie|series)\/([^/?]+?)(?:\.\w+)?$/);if(m)u=`http://so.ta2al.us/${m[1]}/MH12ARBMH12/MH12ARBMH12/${m[2]}.${m[1]==="live"?"m3u8":"mp4"}`}
+  const opts=[{id:"vlc",label:"VLC"},{id:"mx",label:"MX Player"},{id:"any",label:"أي مشغل"},{id:"browser",label:"فتح في المتصفح"},{id:"copy",label:"نسخ الرابط"}];
   openMenu("مشغل خارجي",opts,null,id=>{
     const noProto=u.replace(/^https?:\/\//,"");
     externalPlayback=true;clearTimeout(recoveryTimer);$("#spin").classList.remove("on");v.pause();
+    if(id==="copy"){navigator.clipboard&&navigator.clipboard.writeText(u).then(()=>toast("تم النسخ"));return}
     if(id==="browser"){window.open(u,"_blank","noopener,noreferrer");return}
     if(/android/i.test(ua)){
       const pkg=id==="vlc"?";package=org.videolan.vlc":id==="mx"?";package=com.mxtech.videoplayer.ad":"";
@@ -516,9 +544,15 @@ $("#bExt").onclick=()=>{
     else if(id==="vlc"){location.href="vlc://"+u}
     else window.open(u,"_blank");
   });
-};
+}
+
+/* قائمة القنوات داخل المشغل */
+let curName="";
+function drawChList(){const box=$("#chItems");box.innerHTML="";lastItems.forEach(it=>{const b=document.createElement("button");b.className="chi f"+(it.name===curName?" on":"");b.innerHTML=`<img src="${esc(img(it.pic))}" onerror="this.style.visibility='hidden'"><span>${esc(it.name)}</span>`;b.onclick=e=>{e.stopPropagation();it.go();$("#chList").classList.add("open");drawChList()};box.appendChild(b)});const on=box.querySelector(".on");on&&on.scrollIntoView({block:"center"})}
+$("#bList").onclick=e=>{e.stopPropagation();const l=$("#chList");l.classList.toggle("open");if(l.classList.contains("open"))drawChList();wake()};
+$("#chList").addEventListener("click",e=>e.stopPropagation());
 $("#bX").onclick=closePlayer;
-function wake(){P.classList.remove("idle");clearTimeout(idleT);idleT=setTimeout(()=>{if(!playbackFailed&&!v.paused&&!$("#menu").classList.contains("open"))P.classList.add("idle")},4000)}
+function wake(){P.classList.remove("idle");clearTimeout(idleT);idleT=setTimeout(()=>{if(!playbackFailed&&!v.paused&&!$("#menu").classList.contains("open")&&!$("#chList").classList.contains("open"))P.classList.add("idle")},3000)}
 ["mousemove","touchstart","keydown"].forEach(ev=>P.addEventListener(ev,wake));
 let tapT=null;
 v.addEventListener("click",e=>{
@@ -526,6 +560,7 @@ v.addEventListener("click",e=>{
   tapT=setTimeout(()=>{
     tapT=null;
     // لمس الشاشة يظهر أو يخفي أزرار التحكم فقط بدون إيقاف أو تشغيل الفيديو
+    if($("#chList").classList.contains("open")){$("#chList").classList.remove("open");wake();return}
     if(P.classList.contains("idle")) wake();
     else P.classList.add("idle");
   },280);
