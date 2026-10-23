@@ -454,13 +454,11 @@ function startTs(url){
     enableWorker:true,
     lazyLoad:false,
     enableStashBuffer:true,
-    stashInitialSize:512*1024,
+    stashInitialSize:1024*1024,
     autoCleanupSourceBuffer:true,
-    autoCleanupMaxBackwardDuration:30,
-    autoCleanupMinBackwardDuration:15,
-    liveBufferLatencyChasing:true,
-    liveBufferLatencyMaxLatency:5,
-    liveBufferLatencyMinRemain:1.5
+    autoCleanupMaxBackwardDuration:60,
+    autoCleanupMinBackwardDuration:30,
+    liveBufferLatencyChasing:false
   });
   ts.attachMediaElement(v);
   ts.load();
