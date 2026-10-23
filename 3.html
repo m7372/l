@@ -1,246 +1,710 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AlameeereTv - منصة الترفيه</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { background: #000; color: #fff; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; overflow-x: hidden; }
-    header { position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.95); backdrop-filter: blur(12px); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1a1a1a; }
-    .logo { font-size: 20px; font-weight: 800; background: linear-gradient(90deg, #e50914, #ff5e62); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .filter-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 10px 16px; background: #000; scrollbar-width: none; }
-    .filter-tabs::-webkit-scrollbar { display: none; }
-    .tab-btn { background: #141414; color: #aaa; border: 1px solid #222; padding: 7px 15px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: 0.2s; }
-    .tab-btn.active, .tab-btn:hover { background: #e50914; color: #fff; border-color: #e50914; }
-    
-    .hero { position: relative; width: 100%; height: 50vh; min-height: 320px; max-height: 480px; overflow: hidden; background: #000; }
-    .hero-bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.75; transition: opacity 0.4s ease; }
-    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.65) 60%, #000 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 20px 16px; }
-    .hero-tag { display: inline-flex; align-items: center; gap: 6px; background: #e50914; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; margin-bottom: 8px; width: fit-content; }
-    .hero-title { font-size: 24px; font-weight: 800; line-height: 1.25; margin-bottom: 6px; }
-    .hero-meta { font-size: 13px; color: #bbb; display: flex; gap: 12px; margin-bottom: 14px; align-items: center; }
-    .hero-btn { background: #e50914; color: #fff; border: none; padding: 10px 22px; border-radius: 6px; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; width: fit-content; }
-    
-    .content-rows { padding: 8px 0 60px; background: #000; }
-    .row { margin-bottom: 26px; }
-    .row-header { display: flex; justify-content: space-between; align-items: center; padding: 0 16px 10px; }
-    .row-title { font-size: 17px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
-    .row-title::before { content: ""; display: inline-block; width: 4px; height: 16px; background: #e50914; border-radius: 2px; }
-    .items-track { display: flex; gap: 10px; overflow-x: auto; padding: 4px 16px; scrollbar-width: none; scroll-snap-type: x mandatory; }
-    .items-track::-webkit-scrollbar { display: none; }
-    
-    .card { flex: 0 0 120px; border-radius: 8px; overflow: hidden; background: #111; cursor: pointer; transition: transform 0.2s; position: relative; scroll-snap-align: start; }
-    .card:active { transform: scale(0.96); }
-    .card-img-wrap { width: 100%; aspect-ratio: 2/3; background: #181818; position: relative; overflow: hidden; }
-    .card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .card-badge { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.75); color: #ffb703; font-size: 10px; font-weight: 700; padding: 2px 5px; border-radius: 4px; }
-    .card-play-icon { position: absolute; bottom: 6px; left: 6px; background: rgba(229,9,20,0.85); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
-    .card-body { padding: 7px 6px 9px; }
-    .card-title { font-size: 12px; font-weight: 600; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-sub { font-size: 10px; color: #888; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    
-    .card.channel { flex: 0 0 105px; text-align: center; }
-    .card.channel .card-img-wrap { aspect-ratio: 1/1; border-radius: 50%; padding: 14px; background: #141414; border: 1px solid #222; }
-    .card.channel .card-img { object-fit: contain; }
-    
-    .modal { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.92); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 16px; }
-    .modal.active { display: flex; }
-    .modal-box { width: 100%; max-width: 680px; background: #111; border: 1px solid #222; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-    .modal-close { position: absolute; top: 10px; left: 10px; z-index: 10; background: #222; color: #fff; border: none; width: 34px; height: 34px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .modal-frame { width: 100%; aspect-ratio: 16/9; background: #000; border: none; display: none; }
-    .modal-info { padding: 16px; }
-    .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
-    .modal-desc { font-size: 13px; color: #999; line-height: 1.5; }
-    .modal-poster { width: 100px; aspect-ratio: 2/3; border-radius: 6px; object-fit: cover; margin-bottom: 12px; display: none; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>AlameeereTv</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
+<style>
+:root{--canvas:#000;--ink:#fff;--surface:#111;--line:#252525;--muted:#929292;--danger:#ef5350;--clock:#b6dcd6;--date:#ccc2e0;--shine:linear-gradient(90deg,transparent 35%,rgba(255,255,255,.18) 50%,transparent 65%);--control-shade:linear-gradient(transparent,rgba(0,0,0,.9));--failure-glow:0 0 28px rgba(239,83,80,.15)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#000;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;height:100%;height:100dvh;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.f:focus,.f.sel{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 24px rgba(255,255,255,.35)}
+.f{outline:none}
+/* Standby */
+#standby{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:50;overflow:hidden;transition:opacity .6s;cursor:pointer}
+#standby.hide{opacity:0;pointer-events:none}
+.logo{position:relative;font-size:clamp(40px,9vw,120px);font-weight:800;letter-spacing:0;color:#fff;direction:ltr}
+.logo span{position:absolute;inset:0;background:linear-gradient(90deg,transparent 40%,rgba(255,255,255,.95) 50%,transparent 60%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;mix-blend-mode:screen}
+.logo .a{animation:sweepR 3.2s ease-in-out infinite}
+.logo .b{animation:sweepL 3.2s ease-in-out infinite}
+@keyframes sweepR{0%{background-position:150% 0}100%{background-position:-50% 0}}
+@keyframes sweepL{0%{background-position:-50% 0}100%{background-position:150% 0}}
+.beam{position:absolute;top:50%;height:2px;width:45vw;transform:translateY(-50%);filter:blur(1px)}
+.beam.r{background:linear-gradient(90deg,transparent,#fff);animation:beamR 3.2s ease-in-out infinite}
+.beam.l{background:linear-gradient(270deg,transparent,#fff);animation:beamL 3.2s ease-in-out infinite}
+@keyframes beamR{0%{right:100%}100%{right:-45vw}}
+@keyframes beamL{0%{left:100%}100%{left:-45vw}}
+.glow{position:absolute;width:40vw;height:40vw;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.12),transparent 60%);animation:pulse 3.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
+.hint{position:absolute;bottom:8%;font-size:14px;color:#888;letter-spacing:0}
+/* Layout */
+body{display:flex;flex-direction:column}
+header{flex:none;padding:16px;border-bottom:1px solid var(--line);background:var(--canvas)}
+.masthead{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;direction:ltr;margin-bottom:16px}
+.brand{position:relative;font-weight:800;font-size:24px;direction:ltr;color:var(--ink);white-space:nowrap}
+.brand span{position:absolute;inset:0;background:var(--shine);background-size:250% 100%;background-clip:text;-webkit-background-clip:text;color:transparent;pointer-events:none}
+.brand .a{animation:sweepR 7s linear infinite}.brand .b{animation:sweepL 7s linear infinite}
+.calendar{justify-self:end;direction:rtl;text-align:center;color:var(--date);font-size:13px;line-height:1.5;padding:6px 14px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.01))}
+.calendar strong{display:block;font-size:15px;font-weight:700;color:var(--ink)}
+.clock{justify-self:start;text-align:center;color:var(--clock);direction:ltr;font-variant-numeric:tabular-nums;padding:6px 14px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.01));text-shadow:0 0 12px rgba(255,255,255,.35)}
+.clock time{font-size:24px;font-weight:600;letter-spacing:1px}.clock small{display:block;font-size:11px;color:var(--muted);direction:rtl}
+.calendar,.clock{display:flex!important;align-items:center;gap:6px;padding:8px 14px!important;border-radius:999px!important;font-size:15px!important;line-height:1.2!important;height:38px;white-space:nowrap;text-shadow:none}.calendar strong,.clock time{display:inline!important;font-size:15px!important;font-weight:600!important;letter-spacing:0!important}.clock small{display:inline!important;font-size:13px!important}
+#q{display:block;width:100%;max-width:520px;margin:12px auto 0;padding:9px 16px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink);font:inherit;font-size:15px;direction:rtl}#q:focus{outline:2px solid #fff}
+.navigation{display:flex;direction:rtl;justify-content:center;gap:8px}.navigation .tab{direction:rtl;white-space:nowrap}
+.server-picker{position:relative}#srvMenu{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px;min-width:140px;z-index:30}#srvMenu .mi{text-align:right}
+@media(prefers-reduced-motion:reduce){.brand span,.logo span,.beam,.glow{animation:none!important}}
+.tab{padding:8px 14px;border-radius:999px;background:#111;font-size:15px}
+.tab.on{background:#fff;color:#000}
+main{display:flex;flex:1;min-height:0;overflow:hidden}
+#cats{flex:none;width:240px;overflow-y:auto;border-inline-end:1px solid #1a1a1a;padding:8px}
+.cat{display:block;width:100%;text-align:start;padding:10px 12px;border-radius:8px;font-size:14px;color:#bbb}
+.cat.on{background:#1c1c1c;color:#fff}
+#grid{flex:1;min-height:0;min-width:0;overflow-y:auto;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,150px);grid-auto-rows:max-content;gap:12px;align-content:start;align-items:start}
+.card{display:block;width:100%;min-width:0;align-self:start;background:var(--surface);border-radius:8px;overflow:hidden;text-align:start}
+.ph{position:relative;display:block;width:100%;height:0;padding-top:150%;background:var(--surface);overflow:hidden}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.card.live .ph{padding-top:56.25%}
+.card.live .ph img{object-fit:contain;padding:12px}
+.card p{padding:8px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg{color:#777;padding:30px;grid-column:1/-1;text-align:center}
+@media(max-width:700px){main{flex-direction:column}#cats{width:100%;height:auto;max-height:none;display:flex;overflow-x:auto;border:0;border-bottom:1px solid #1a1a1a}.cat{white-space:nowrap;width:auto}#grid{grid-template-columns:repeat(3,minmax(0,1fr))}.masthead{gap:7px}.brand{font-size:20px}.calendar{font-size:10px}.calendar strong{font-size:11px}.clock time{font-size:13px!important}.calendar strong,.clock small{font-size:12px!important}.calendar,.clock{padding:7px 9px!important;height:34px}header{padding:12px}.navigation{gap:5px}.navigation .tab{padding:9px 10px;font-size:13px}#cats{max-height:60px}.cat{flex:none}}
+/* Player */
+#player{position:fixed;inset:0;background:#000;z-index:40;display:none}
+#player.open{display:block}
+video{width:100%;height:100%;background:#000;object-fit:contain}
+video.ar-cover{object-fit:cover}video.ar-fill{object-fit:fill}
+video.ar-169{aspect-ratio:16/9;height:auto;max-height:100%;object-fit:fill;position:absolute;top:50%;transform:translateY(-50%)}
+video.ar-43{width:auto;aspect-ratio:4/3;height:100%;object-fit:fill;display:block;margin:auto}
+.hid{display:none!important}
+#player.isLive .vodonly{display:none}
+#ctrl{padding-bottom:max(16px,env(safe-area-inset-bottom))!important}
+#toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.7);padding:12px 20px;border-radius:10px;font-size:18px;display:none;pointer-events:none}
+#ctrl{position:absolute;inset:auto 0 0 0;padding:16px;background:linear-gradient(transparent,rgba(0,0,0,.9));transition:opacity .3s;direction:ltr}
+#player.idle #ctrl,#player.idle #ptitle{opacity:0}
+#ptitle{position:absolute;top:0;inset-inline:0;padding:16px;background:linear-gradient(rgba(0,0,0,.85),transparent);font-size:18px;transition:opacity .3s;direction:rtl}
+#seek{width:100%;accent-color:#e50914;height:8px;cursor:pointer;margin-bottom:12px;touch-action:none}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cb{padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.1);font-size:14px;min-width:44px}
+#vol{width:90px;accent-color:#fff}
+#time{font-size:13px;color:#ccc;margin-inline-end:auto}
+.menu{position:absolute;z-index:3;bottom:calc(100% + 10px);right:16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px;min-width:180px;max-width:calc(100% - 32px);max-height:40vh;overflow:auto;display:none}
+.menu.open{display:block}
+.menu h4{font-size:12px;color:#888;padding:6px 10px}
+.mi{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:6px;font-size:14px}
+.mi.on{background:#fff;color:#000}
+#spin{position:absolute;inset:0;display:none;align-items:center;justify-content:center;pointer-events:none}
+#spin.on{display:flex}
+#spin div{width:48px;height:48px;border:3px solid #333;border-top-color:#fff;border-radius:50%;animation:rot 1s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+#failure{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none;color:var(--danger);text-align:center;padding:0 16px}
+#failure .sad{font-size:64px;line-height:1}#failure strong{font-size:32px;font-weight:800;direction:ltr;text-shadow:var(--failure-glow)}#failure p{font-size:17px;color:var(--muted);word-break:break-all}
+/* Header like reference */
+header{padding:14px 12px 12px!important}
+.masthead{margin-bottom:12px!important}
+.calendar,.clock{border:0!important;background:none!important;height:auto!important;padding:0!important;border-radius:0!important}
+.calendar{color:#d6d6d6!important;font-size:15px!important}.calendar strong{color:#d6d6d6!important;font-weight:500!important}
+.clock{color:#4ade80!important;direction:rtl!important;font-weight:600}.clock time,.clock small{color:#4ade80!important;font-size:15px!important}
+.brand{font-size:30px!important}
+.navigation{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px!important}
+.navigation .tab{padding:12px 4px!important;border-radius:999px;background:#111;border:1px solid #222;font-size:15px!important;text-align:center}
+.navigation .tab.on{background:#fff;color:#000;border-color:#fff;font-weight:700}
+.searchrow{display:flex;gap:8px;margin-top:10px;align-items:stretch}
+.searchrow #q{margin:0!important;max-width:none!important;flex:1;background:#111;border:1px solid #222;padding:12px 16px}
+#srv{height:100%;padding:12px 18px;border-radius:999px;background:#111;border:1px solid #222;color:#60a5fa;font-size:15px;white-space:nowrap}
+@media(max-width:700px){.brand{font-size:22px!important}.calendar,.clock time,.clock small,.calendar strong{font-size:11px!important}.navigation{gap:5px!important}.navigation .tab{font-size:12px!important;padding:11px 2px!important}}
+#extra{flex:1;overflow-y:auto;padding:12px;direction:rtl}
+.daybar{display:flex;gap:8px;justify-content:center;margin-bottom:10px}.daybar button{padding:8px 16px;border-radius:999px;background:#111;border:1px solid #222}.daybar button.on{background:#fff;color:#000}
+.upd{text-align:center;color:#777;font-size:12px;margin-bottom:10px}
+.lg{margin:14px 0 6px;font-weight:700;color:#e5e5e5;display:flex;align-items:center;gap:8px}.lg img{width:22px;height:22px;object-fit:contain}
+.mt{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;background:#111;border:1px solid #1f1f1f;border-radius:12px;padding:10px;margin-bottom:8px}
+.tm{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;font-size:13px}.tm img{width:34px;height:34px;object-fit:contain}
+.sc{text-align:center;min-width:86px}.sc b{display:block;font-size:20px;direction:ltr}.sc small{display:block;font-size:11px;color:#999;margin-top:2px}
+.sc.live b{color:#4ade80}.sc.live small{color:#4ade80}
+.nw{display:flex;gap:10px;background:#111;border:1px solid #1f1f1f;border-radius:12px;overflow:hidden;margin-bottom:10px;width:100%;text-align:right}
+.nw img{width:130px;min-width:130px;height:96px;object-fit:cover;background:#1a1a1a}
+.nw div{padding:8px 4px 8px 10px}.nw h3{font-size:14px;line-height:1.5;margin-bottom:4px}.nw p{font-size:12px;color:#999;line-height:1.5}.nw time{font-size:11px;color:#666}
+.cb.ic{display:inline-flex;align-items:center;justify-content:center;width:44px;height:40px;padding:0;background:rgba(255,255,255,.08);border-radius:50%;backdrop-filter:blur(6px);transition:background .2s,transform .15s}.cb.ic:active{transform:scale(.9)}.cb.ic svg{display:block}
+#chList{position:absolute;top:0;bottom:0;right:0;width:min(300px,75vw);background:rgba(10,10,10,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-left:1px solid rgba(255,255,255,.08);z-index:5;transform:translateX(100%);transition:transform .25s;overflow-y:auto;padding:max(12px,env(safe-area-inset-top)) 10px 12px;direction:rtl}
+#chList.open{transform:none}#chList h4{font-size:13px;color:#aaa;padding:4px 6px 10px}
+.chi{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border-radius:10px;text-align:right;font-size:14px;background:transparent}.chi.on{background:rgba(255,255,255,.18)}.chi img{width:40px;height:30px;object-fit:contain;flex:none}.chi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mi2{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;font-size:11px;color:#9a9a9a;margin-top:6px;padding-top:8px;border-top:1px solid #1f1f1f;direction:rtl;text-align:center}.mi2 span{background:#181818;border-radius:999px;padding:3px 9px;unicode-bidi:plaintext}
+</style>
 </head>
 <body>
+<div id="standby">
+  <div class="glow"></div>
+  <div class="beam r"></div><div class="beam l"></div>
+  <div class="logo">AlameeereTv<span class="a">AlameeereTv</span><span class="b">AlameeereTv</span></div>
+  <div class="hint">اضغط OK أو المس الشاشة للدخول</div>
+</div>
 
-  <header>
-    <div class="logo">AlameeereTv</div>
-    <div style="font-size:12px;color:#888;">منصة الترفيه</div>
-  </header>
-
-  <div class="filter-tabs">
-    <button class="tab-btn active" onclick="filterCategory('all', this)">الكل</button>
-    <button class="tab-btn" onclick="filterCategory('channels', this)">القنوات</button>
-    <button class="tab-btn" onclick="filterCategory('episodes', this)">المسلسلات والحلقات</button>
-    <button class="tab-btn" onclick="filterCategory('posters', this)">الأفلام</button>
+<header>
+  <div class="masthead">
+    <div class="clock"><time id="clockTime"></time><small id="clockPeriod"></small></div>
+    <div class="brand">AlameeereTv<span class="a" aria-hidden="true">AlameeereTv</span><span class="b" aria-hidden="true">AlameeereTv</span></div>
+    <div class="calendar"><strong id="dateDay"></strong><time id="dateValue"></time></div>
   </div>
+  <nav class="navigation">
+    <button class="tab f on" data-t="live">📺 قنوات</button>
+    <button class="tab f" data-t="vod">🎬 أفلام</button>
+    <button class="tab f" data-t="series">🍿 مسلسلات</button>
+    <button class="tab f" data-x="matches">⚽ مباريات</button>
+    <button class="tab f" data-x="news">📰 أخبار</button>
+  </nav>
+  <div class="searchrow">
+    <div class="server-picker"><button class="f" id="srv" aria-expanded="false">سيرفر 1</button>
+      <div id="srvMenu"><button class="mi f" data-s="s1">سيرفر 1</button><button class="mi f" data-s="s2">سيرفر 2</button><button class="mi f" data-s="s3">سيرفر 3</button><button class="mi f" data-s="s4">سيرفر 4</button><button class="mi f" data-s="s5">سيرفر 5</button><button class="mi f" data-s="s6">سيرفر 6</button><button class="mi f" data-s="s7">سيرفر 7</button></div>
+    </div>
+    <input id="q" class="f" type="search" placeholder="🔍 بحث عام..." autocomplete="off">
+  </div>
+</header>
+<main><nav id="cats"></nav><section id="grid"></section><section id="extra" class="hid"></section></main>
 
-  <div class="hero" id="hero">
-    <img class="hero-bg" id="hero-img" src="" alt="Hero">
-    <div class="hero-overlay">
-      <div class="hero-tag" id="hero-tag">مميز</div>
-      <h1 class="hero-title" id="hero-title">...</h1>
-      <div class="hero-meta" id="hero-meta"></div>
-      <button class="hero-btn" id="hero-btn" onclick="playHero()">▶ تشغيل الآن</button>
+<div id="player">
+  <video id="v" playsinline></video>
+  <div id="spin"><div></div></div>
+  <div id="ptitle"></div>
+  <div id="failure" class="hid" role="status"><div class="sad" aria-hidden="true">☹</div><strong>AlameeereTv</strong><p>جرب قناة اخرى</p></div>
+  <div id="toast" role="status"></div>
+  <div id="chList"><h4>القنوات</h4><div id="chItems"></div></div>
+  <div id="ctrl">
+    <div class="menu" id="menu"></div>
+    <input type="range" id="seek" class="f" min="0" max="1000" value="0">
+    <div class="row">
+      <button class="cb f ic" id="bPlay" aria-label="تشغيل/إيقاف"><svg viewBox="0 0 24 24" width="22" height="22"><rect x="7" y="5.5" width="3.2" height="13" rx="1.2" fill="currentColor"/><rect x="13.8" y="5.5" width="3.2" height="13" rx="1.2" fill="currentColor"/></svg></button>
+      <button class="cb f" id="bMute">🔊</button>
+      <input type="range" id="vol" class="f" min="0" max="1" step="0.05" value="1">
+      <button class="cb f vodonly ic" id="bRw" aria-label="تأخير 10"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/><text x="12" y="15.5" font-size="7.5" text-anchor="middle" fill="currentColor" stroke="none" font-family="system-ui" font-weight="600">10</text></svg></button>
+      <button class="cb f vodonly ic" id="bFf" aria-label="تقديم 10"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v4h-4"/><text x="12" y="15.5" font-size="7.5" text-anchor="middle" fill="currentColor" stroke="none" font-family="system-ui" font-weight="600">10</text></svg></button>
+      <span id="time">00:00</span>
+      <button class="cb f hid" id="bQ">⚙ الجودة</button>
+      <button class="cb f hid" id="bA">🎧 الصوت</button>
+      <button class="cb f" id="bS">الترجمة</button>
+      <button class="cb f" id="bAR">▭ المقاس</button>
+      <button class="cb f hid" id="bExt">↗ مشغل خارجي</button>
+      <button class="cb f ic hid" id="bList" aria-label="القنوات"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
+      <button class="cb f" id="bFs">⛶</button>
+      <button class="cb f" id="bX">✕</button>
     </div>
   </div>
+</div>
 
-  <div class="content-rows" id="content-rows"></div>
+<script>
+const WORKERS={s1:"https://i.m737217130.workers.dev",s2:"https://i.m737217130.workers.dev",s3:"https://3.m737217130.workers.dev",s4:"https://4.m737217130.workers.dev",s5:"https://4.m737217130.workers.dev",s6:"https://r.m737217130.workers.dev"};
+const S7={base:"https://x.gamerdz1517.com",user:"00:1A:79:c1:08:31",pass:"tl8q1bzd"};
+let WORKER=WORKERS.s1;let ts=null;
+let server="s1",type="live",cat=null,hls=null,stack=[];
+const $=s=>document.querySelector(s),grid=$("#grid"),cats=$("#cats"),v=$("#v"),P=$("#player");
+const api=a=>{
+  if(server==="s7"){
+    return fetch(`${S7.base}/player_api.php?username=${encodeURIComponent(S7.user)}&password=${encodeURIComponent(S7.pass)}&action=${a}`).then(r=>r.json());
+  }
+  return fetch(`${WORKER}/${server}/player_api.php?action=${a}`).then(r=>r.json());
+};
+const img=u=>u?(u.startsWith("https")?u:`${WORKER}/proxy?url=${encodeURIComponent(u)}`):"";
+const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-  <div class="modal" id="playerModal">
-    <div class="modal-box">
-      <button class="modal-close" onclick="closeModal()">✕</button>
-      <iframe class="modal-frame" id="modalFrame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-      <div class="modal-info">
-        <img class="modal-poster" id="modalPoster" src="" alt="">
-        <div class="modal-title" id="modalTitle"></div>
-        <div class="modal-desc" id="modalDesc"></div>
-      </div>
-    </div>
-  </div>
+function updateClock(){
+  const now=new Date();
+  $("#dateDay").textContent=new Intl.DateTimeFormat("ar",{weekday:"long"}).format(now)+"، ";
+  $("#dateValue").textContent=new Intl.DateTimeFormat("ar-EG",{day:"numeric",month:"long",year:"numeric"}).format(now);
+  const h=now.getHours()%12||12,p=n=>String(n).padStart(2,"0");
+  $("#clockTime").textContent=`${p(h)}:${p(now.getMinutes())}:${p(now.getSeconds())}`.replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
+  $("#clockPeriod").textContent=now.getHours()<12?"ص":"م";
+}
+updateClock();setInterval(updateClock,1000);
+/* Standby */
+const sb=$("#standby");
+function enter(){if(sb.classList.contains("hide"))return;sb.classList.add("hide");setTimeout(()=>$(".tab").focus(),300)}
+let sbT=0;
+function enterEv(e){e.preventDefault();e.stopPropagation();if(sb.classList.contains("hide"))return;sbT=Date.now();enter()}
+sb.addEventListener("click",enterEv);
+sb.addEventListener("touchend",enterEv,{passive:false});
+/* block the ghost tap that would open a channel right after leaving the welcome screen */
+document.addEventListener("click",e=>{if(Date.now()-sbT<700){e.preventDefault();e.stopPropagation()}},true);
 
-  <script>
-    const SECTIONS_DATA = [{"tp":"slider","tt":"أعمال مميزة","it":[{"t":"The Odyssey","p":"https://image.tmdb.org/t/p/w500/mH400wWkX4aUe72aI4q5cK3Q0G.jpg","v":6.9,"ep":"","sn":"","g":"إثارة","l":""},{"t":"السراب","p":"https://image.tmdb.org/t/p/w500/vGfA7g7bFj8rL49S6wG8fM7GfC.jpg","v":7.2,"ep":"","sn":"","g":"دراما","l":""},{"t":"House of the Dragon","p":"https://image.tmdb.org/t/p/w500/7QMsOTMUswlwxJP0rTTZfmz2tX2.jpg","v":8.4,"ep":"","sn":"","g":"خيال علمي وفانتازيا","l":""},{"t":"The Walking Dead: Daryl Dixon","p":"https://image.tmdb.org/t/p/w500/w20v3N8W1Z1C2r8x7e9L8sM4p3.jpg","v":8.1,"ep":"","sn":"","g":"خيال علمي وفانتازيا","l":""},{"t":"FROM","p":"https://image.tmdb.org/t/p/w500/uuxUcwzWbA38i8xVl8nN3dC9g.jpg","v":8.2,"ep":"","sn":"","g":"غموض","l":""},{"t":"Tulsa King","p":"https://image.tmdb.org/t/p/w500/fwHn2v9a7x8B6K1q8X2f9L5.jpg","v":8.5,"ep":"","sn":"","g":"جريمة","l":""},{"t":"Penguin","p":"https://image.tmdb.org/t/p/w500/vOW8m7C1Z4r4W5b9K1q8X2f9L.jpg","v":8.8,"ep":"","sn":"","g":"دراما","l":""}]},{"tp":"channels","tt":"قنوات البث المباشر","it":[{"t":"beIN Sports 1","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283626.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=63"},{"t":"beIN Sports 2","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283677.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=64"},{"t":"beIN Sports 3","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283731.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=65"},{"t":"beIN Sports 4","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283785.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=66"},{"t":"beIN Sports 5","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283833.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=67"},{"t":"beIN Sports 6","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283881.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=68"},{"t":"beIN Sports 7","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283928.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=69"},{"t":"beIN Sports 8","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711283976.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=70"},{"t":"beIN Sports 9","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284024.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=71"},{"t":"beIN Sports Extra 1","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284073.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=72"},{"t":"beIN Sports Extra 2","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284121.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=73"},{"t":"beIN Sports News","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284170.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=74"},{"t":"SSC 1 HD","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284218.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=75"},{"t":"SSC 2 HD","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284267.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=76"},{"t":"SSC 3 HD","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284315.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=77"},{"t":"SSC 4 HD","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284364.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=78"},{"t":"SSC 5 HD","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284412.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=79"},{"t":"SSC Extra 1","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284461.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=80"},{"t":"SSC Extra 2","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284509.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=81"},{"t":"SSC Extra 3","p":"https://admin.dramaramadan.net/uploads/images/channels/2024-03-24/1711284558.png","v":0,"ep":"","sn":"","g":"","l":"https://admin.dramaramadan.net/api/channels/show.php?id=82"}]},{"tp":"actors","tt":"أشهر الممثلين","it":[{"t":"Tom Cruise","p":"https://image.tmdb.org/t/p/w500/8qB9q59qM4aM0lS5bC1Z8X2f9L5.jpg","v":8.4,"ep":"","sn":"","g":"تمثيل","l":""},{"t":"Leonardo DiCaprio","p":"https://image.tmdb.org/t/p/w500/wo2hxAzv4vPUw10L3u87wMhW9b.jpg","v":8.9,"ep":"","sn":"","g":"تمثيل","l":""},{"t":"Cillian Murphy","p":"https://image.tmdb.org/t/p/w500/360R1v9X0k8bW3C1Z8X2f9L5.jpg","v":8.7,"ep":"","sn":"","g":"تمثيل","l":""},{"t":"Jason Statham","p":"https://image.tmdb.org/t/p/w500/whNlvx57zFaeW10L3u87wMhW9b.jpg","v":7.9,"ep":"","sn":"","g":"تمثيل","l":""},{"t":"Keanu Reeves","p":"https://image.tmdb.org/t/p/w500/4D0PpNI0kmP5bC1Z8X2f9L5.jpg","v":8.6,"ep":"","sn":"","g":"تمثيل","l":""},{"t":"Robert Downey Jr.","p":"https://image.tmdb.org/t/p/w500/im9SAqJPZKEW10L3u87wMhW9b.jpg","v":8.8,"ep":"","sn":"","g":"تمثيل","l":""}]},{"tp":"posters","tt":"آخر الأفلام المضافة","it":[{"t":"Deadpool & Wolverine","p":"https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg","v":7.7,"ep":"","sn":"","g":"أكشن","l":""},{"t":"Alien: Romulus","p":"https://image.tmdb.org/t/p/w500/b33nnKl1vOX6KGfbtlr0093Hk8x.jpg","v":7.3,"ep":"","sn":"","g":"رعب","l":""},{"t":"Inside Out 2","p":"https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg","v":7.6,"ep":"","sn":"","g":"رسوم متحركة","l":""},{"t":"Bad Boys: Ride or Die","p":"https://image.tmdb.org/t/p/w500/oGythE98MYleE6mZlGs5oBGkux1.jpg","v":7.5,"ep":"","sn":"","g":"أكشن","l":""},{"t":"Twisters","p":"https://image.tmdb.org/t/p/w500/pjnD08FlMAIXsfOLKQbvmO0f0MD.jpg","v":7,"ep":"","sn":"","g":"إثارة","l":""},{"t":"A Quiet Place: Day One","p":"https://image.tmdb.org/t/p/w500/yrpPYKijwd9Ja5G9vxep09DH1t5.jpg","v":6.8,"ep":"","sn":"","g":"رعب","l":""}]},{"tp":"posters","tt":"تريند","it":[{"t":"Rebel Ridge","p":"https://image.tmdb.org/t/p/w500/xEt2GSz9z5rLEKSeg749fsug2ST.jpg","v":7.1,"ep":"","sn":"","g":"إثارة","l":""},{"t":"Beetlejuice Beetlejuice","p":"https://image.tmdb.org/t/p/w500/kKgQzkUCUm0Fq047mN6qWqa2q00.jpg","v":7.2,"ep":"","sn":"","g":"كوميديا","l":""},{"t":"The Crow","p":"https://image.tmdb.org/t/p/w500/58Nsugk8m1B9t2F1R7X5b9L.jpg","v":5.8,"ep":"","sn":"","g":"فانتازيا","l":""},{"t":"Blink Twice","p":"https://image.tmdb.org/t/p/w500/lP53mgI0h3X7t2F1R7X5b9L.jpg","v":6.7,"ep":"","sn":"","g":"غموض","l":""},{"t":"It Ends with Us","p":"https://image.tmdb.org/t/p/w500/4TzwDWpLqaPt9DRHO2gFSxGrV2C.jpg","v":7.2,"ep":"","sn":"","g":"رومانسية","l":""},{"t":"Speak No Evil","p":"https://image.tmdb.org/t/p/w500/fDtp1P1eM5bC1Z8X2f9L5.jpg","v":7.3,"ep":"","sn":"","g":"رعب","l":""}]},{"tp":"posters","tt":"أفضل الأفلام العربية","it":[{"t":"ولاد رزق 3","p":"https://image.tmdb.org/t/p/w500/gK7Z3c5b8L9X2f9L5.jpg","v":7.8,"ep":"","sn":"","g":"أكشن وجريمة","l":""},{"t":"أهل الكهف","p":"https://image.tmdb.org/t/p/w500/hR8X2f9L5mB9t2F1R7.jpg","v":6.9,"ep":"","sn":"","g":"مغامرات وتاريخ","l":""},{"t":"اللعب مع العيال","p":"https://image.tmdb.org/t/p/w500/jL5mB9t2F1R7X5b9L.jpg","v":7.4,"ep":"","sn":"","g":"كوميديا","l":""},{"t":"عصابة الماكس","p":"https://image.tmdb.org/t/p/w500/kM9t2F1R7X5b9L5.jpg","v":6.5,"ep":"","sn":"","g":"كوميديا","l":""},{"t":"بيت الروبي","p":"https://image.tmdb.org/t/p/w500/lP9t2F1R7X5b9L5.jpg","v":7.6,"ep":"","sn":"","g":"كوميديا ودراما","l":""},{"t":"تاج","p":"https://image.tmdb.org/t/p/w500/mQ9t2F1R7X5b9L5.jpg","v":5.9,"ep":"","sn":"","g":"كوميديا وفانتازيا","l":""}]},{"tp":"posters","tt":"أفضل الأفلام الأجنبية","it":[{"t":"Oppenheimer","p":"https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg","v":8.1,"ep":"","sn":"","g":"دراما وتاريخ","l":""},{"t":"Dune: Part Two","p":"https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg","v":8.2,"ep":"","sn":"","g":"خيال علمي ومغامرة","l":""},{"t":"Interstellar","p":"https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg","v":8.4,"ep":"","sn":"","g":"خيال علمي ومغامرة","l":""},{"t":"The Dark Knight","p":"https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg","v":8.5,"ep":"","sn":"","g":"أكشن وجريمة","l":""},{"t":"Inception","p":"https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg","v":8.4,"ep":"","sn":"","g":"خيال علمي ومغامرة","l":""},{"t":"Gladiator","p":"https://image.tmdb.org/t/p/w500/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg","v":8.2,"ep":"","sn":"","g":"أكشن ودراما","l":""}]},{"tp":"collections","tt":"سلاسل الأفلام","it":[{"t":"John Wick Collection","p":"https://image.tmdb.org/t/p/w500/p2mD2q1B5C1Z8X2f9L5.jpg","v":8.2,"ep":"","sn":"","g":"أكشن","l":""},{"t":"Fast & Furious Collection","p":"https://image.tmdb.org/t/p/w500/q3mD2q1B5C1Z8X2f9L5.jpg","v":7.5,"ep":"","sn":"","g":"أكشن ومغامرات","l":""},{"t":"The Avengers Collection","p":"https://image.tmdb.org/t/p/w500/r4mD2q1B5C1Z8X2f9L5.jpg","v":8.3,"ep":"","sn":"","g":"خيال علمي وبطولات","l":""},{"t":"Harry Potter Collection","p":"https://image.tmdb.org/t/p/w500/s5mD2q1B5C1Z8X2f9L5.jpg","v":8.1,"ep":"","sn":"","g":"فانتازيا ومغامرات","l":""},{"t":"Mission: Impossible Collection","p":"https://image.tmdb.org/t/p/w500/t6mD2q1B5C1Z8X2f9L5.jpg","v":7.9,"ep":"","sn":"","g":"أكشن وتجسس","l":""},{"t":"The Lord of the Rings Collection","p":"https://image.tmdb.org/t/p/w500/u7mD2q1B5C1Z8X2f9L5.jpg","v":8.6,"ep":"","sn":"","g":"فانتازيا ومغامرات","l":""}]},{"tp":"posters","tt":"أفضل المسلسلات الأجنبية","it":[{"t":"Breaking Bad","p":"https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg","v":8.9,"ep":"","sn":"","g":"دراما وجريمة","l":""},{"t":"Game of Thrones","p":"https://image.tmdb.org/t/p/w500/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg","v":8.4,"ep":"","sn":"","g":"فانتازيا ودراما","l":""},{"t":"Chernobyl","p":"https://image.tmdb.org/t/p/w500/hlLXt2tOPT6RRnjiUmoxyG9LTFi.jpg","v":8.7,"ep":"","sn":"","g":"تاريخ ودراما","l":""},{"t":"Stranger Things","p":"https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg","v":8.6,"ep":"","sn":"","g":"خيال ورعب","l":""},{"t":"The Boys","p":"https://image.tmdb.org/t/p/w500/2ZmAVwwAlmbtqzyNeewfnW0Xjth.jpg","v":8.5,"ep":"","sn":"","g":"أكشن وخيال علمي","l":""},{"t":"Peaky Blinders","p":"https://image.tmdb.org/t/p/w500/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg","v":8.5,"ep":"","sn":"","g":"دراما وجريمة","l":""}]},{"tp":"episodes","tt":"أحدث الحلقات الأجنبية","it":[{"t":"9-1-1","p":"https://image.tmdb.org/t/p/w500/3Urtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"الحلقة 2","sn":"الموسم 8","g":"دراما وحركة","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"FROM","p":"https://image.tmdb.org/t/p/w500/4Vrtj58K3o2P1v2a3b4c5.jpg","v":8.2,"ep":"الحلقة 3","sn":"الموسم 3","g":"غموض ورعب","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"Penguin","p":"https://image.tmdb.org/t/p/w500/5Wrtj58K3o2P1v2a3b4c5.jpg","v":8.8,"ep":"الحلقة 4","sn":"الموسم 1","g":"جريمة ودراما","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"Tulsa King","p":"https://image.tmdb.org/t/p/w500/6Xrtj58K3o2P1v2a3b4c5.jpg","v":8.5,"ep":"الحلقة 5","sn":"الموسم 2","g":"جريمة وكوميديا","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"Slow Horses","p":"https://image.tmdb.org/t/p/w500/7Yrtj58K3o2P1v2a3b4c5.jpg","v":8.3,"ep":"الحلقة 6","sn":"الموسم 4","g":"تجسس وإثارة","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"Agatha All Along","p":"https://image.tmdb.org/t/p/w500/8Zrtj58K3o2P1v2a3b4c5.jpg","v":7.4,"ep":"الحلقة 5","sn":"الموسم 1","g":"فانتازيا وكوميديا","l":"https://stmruby.com/embed-8kqg781rflj7.html"}]},{"tp":"episodes","tt":"أحدث الحلقات العربية","it":[{"t":"حب ع ورق","p":"https://admin.dramaramadan.net/uploads/images/episodes/2024-03-24/1711285000.jpg","v":7.3,"ep":"الحلقة 15","sn":"الموسم 1","g":"دراما ورومانسية","l":"https://admin.dramaramadan.net/api/episodes/show.php?id=43634"},{"t":"عمر أفندي","p":"https://image.tmdb.org/t/p/w500/9Artj58K3o2P1v2a3b4c5.jpg","v":8,"ep":"الحلقة 12","sn":"الموسم 1","g":"كوميديا وفانتازيا","l":"https://admin.dramaramadan.net/api/episodes/show.php?id=43634"},{"t":"مفترق طرق","p":"https://image.tmdb.org/t/p/w500/0Brtj58K3o2P1v2a3b4c5.jpg","v":7.6,"ep":"الحلقة 30","sn":"الموسم 1","g":"دراما وقانون","l":"https://admin.dramaramadan.net/api/episodes/show.php?id=43634"},{"t":"البيت بيتي","p":"https://image.tmdb.org/t/p/w500/1Crtj58K3o2P1v2a3b4c5.jpg","v":8.2,"ep":"الحلقة 10","sn":"الموسم 2","g":"رعب وكوميديا","l":"https://admin.dramaramadan.net/api/episodes/show.php?id=43634"},{"t":"سفاح الجيزة","p":"https://image.tmdb.org/t/p/w500/2Drtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"الحلقة 8","sn":"الموسم 1","g":"جريمة وغموض","l":"https://admin.dramaramadan.net/api/episodes/show.php?id=43634"},{"t":"موضوع عائلي","p":"https://image.tmdb.org/t/p/w500/3Ertj58K3o2P1v2a3b4c5.jpg","v":8.4,"ep":"الحلقة 10","sn":"الموسم 2","g":"كوميديا ودراما","l":"https://admin.dramaramadan.net/api/episodes/show.php?id=43634"}]},{"tp":"posters","tt":"أفضل المسلسلات العربية","it":[{"t":"الحشاشين","p":"https://image.tmdb.org/t/p/w500/4Frtj58K3o2P1v2a3b4c5.jpg","v":8.3,"ep":"","sn":"","g":"تاريخ وإثارة","l":""},{"t":"جعفر العمدة","p":"https://image.tmdb.org/t/p/w500/5Grtj58K3o2P1v2a3b4c5.jpg","v":7.9,"ep":"","sn":"","g":"دراما وتشويق","l":""},{"t":"الاختيار","p":"https://image.tmdb.org/t/p/w500/6Hrtj58K3o2P1v2a3b4c5.jpg","v":8.2,"ep":"","sn":"","g":"حرب وأكشن","l":""},{"t":"الكبير أوي","p":"https://image.tmdb.org/t/p/w500/7Irtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"","sn":"","g":"كوميديا","l":""},{"t":"رشيد","p":"https://image.tmdb.org/t/p/w500/8Jrtj58K3o2P1v2a3b4c5.jpg","v":7.5,"ep":"","sn":"","g":"إثارة وجريمة","l":""},{"t":"تحت الوصاية","p":"https://image.tmdb.org/t/p/w500/9Krtj58K3o2P1v2a3b4c5.jpg","v":8.4,"ep":"","sn":"","g":"دراما إنسانية","l":""}]},{"tp":"posters","tt":"أفضل المسلسلات التركية المترجمة","it":[{"t":"المؤسس عثمان","p":"https://image.tmdb.org/t/p/w500/0Lrtj58K3o2P1v2a3b4c5.jpg","v":8.3,"ep":"","sn":"","g":"تاريخ وحروب","l":""},{"t":"صلاح الدين الأيوبي","p":"https://image.tmdb.org/t/p/w500/1Mrtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"","sn":"","g":"تاريخ ومغامرات","l":""},{"t":"الطائر الرفراف","p":"https://image.tmdb.org/t/p/w500/2Nrtj58K3o2P1v2a3b4c5.jpg","v":7.8,"ep":"","sn":"","g":"دراما ورومانسية","l":""},{"t":"حب بلا حدود","p":"https://image.tmdb.org/t/p/w500/3Prtj58K3o2P1v2a3b4c5.jpg","v":7.7,"ep":"","sn":"","g":"أكشن وانتقام","l":""},{"t":"القضاء","p":"https://image.tmdb.org/t/p/w500/4Qrtj58K3o2P1v2a3b4c5.jpg","v":8.4,"ep":"","sn":"","g":"جريمة وغموض","l":""},{"t":"شراب التوت","p":"https://image.tmdb.org/t/p/w500/5Rrtj58K3o2P1v2a3b4c5.jpg","v":7.9,"ep":"","sn":"","g":"دراما عائلية","l":""}]},{"tp":"episodes","tt":"أحدث الحلقات التركية المترجمة","it":[{"t":"الخليفة","p":"https://image.tmdb.org/t/p/w500/6Srtj58K3o2P1v2a3b4c5.jpg","v":7.8,"ep":"الحلقة 2","sn":"الموسم 1","g":"تاريخ ودراما","l":"https://anafast.cyou/1fnzoj1y95b8.html"},{"t":"حجر الأمنيات","p":"https://image.tmdb.org/t/p/w500/7Trtj58K3o2P1v2a3b4c5.jpg","v":7.6,"ep":"الحلقة 14","sn":"الموسم 1","g":"دراما وحزن","l":"https://anafast.cyou/1fnzoj1y95b8.html"},{"t":"السلة المتسخة","p":"https://image.tmdb.org/t/p/w500/8Urtj58K3o2P1v2a3b4c5.jpg","v":7.5,"ep":"الحلقة 35","sn":"الموسم 2","g":"دراما وكوميديا","l":"https://anafast.cyou/1fnzoj1y95b8.html"},{"t":"البراعم الحمراء","p":"https://image.tmdb.org/t/p/w500/9Vrtj58K3o2P1v2a3b4c5.jpg","v":8.2,"ep":"الحلقة 20","sn":"الموسم 2","g":"دراما وفكر","l":"https://anafast.cyou/1fnzoj1y95b8.html"},{"t":"حكاية ليلة","p":"https://image.tmdb.org/t/p/w500/0Wrtj58K3o2P1v2a3b4c5.jpg","v":7.7,"ep":"الحلقة 6","sn":"الموسم 1","g":"رومانسية وأكشن","l":"https://anafast.cyou/1fnzoj1y95b8.html"},{"t":"العبقري","p":"https://image.tmdb.org/t/p/w500/1Xrtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"الحلقة 4","sn":"الموسم 1","g":"غموض ورياضيات","l":"https://anafast.cyou/1fnzoj1y95b8.html"}]},{"tp":"posters","tt":"أفضل المسلسلات التركية المدبلجة","it":[{"t":"فريد","p":"https://image.tmdb.org/t/p/w500/2Yrtj58K3o2P1v2a3b4c5.jpg","v":7.8,"ep":"","sn":"","g":"دراما ورومانسية","l":""},{"t":"الثمن","p":"https://image.tmdb.org/t/p/w500/3Zrtj58K3o2P1v2a3b4c5.jpg","v":7.6,"ep":"","sn":"","g":"دراما عاطفية","l":""},{"t":"كريستال","p":"https://image.tmdb.org/t/p/w500/4Artj58K3o2P1v2a3b4c5.jpg","v":7.7,"ep":"","sn":"","g":"صراع وموضة","l":""},{"t":"ستيلتو","p":"https://image.tmdb.org/t/p/w500/5Brtj58K3o2P1v2a3b4c5.jpg","v":7.9,"ep":"","sn":"","g":"جريمة وغموض","l":""},{"t":"عروس بيروت","p":"https://image.tmdb.org/t/p/w500/6Crtj58K3o2P1v2a3b4c5.jpg","v":7.8,"ep":"","sn":"","g":"عائلي ورومانسي","l":""},{"t":"ابنة السفير","p":"https://image.tmdb.org/t/p/w500/7Drtj58K3o2P1v2a3b4c5.jpg","v":7.4,"ep":"","sn":"","g":"دراما وألم","l":""}]},{"tp":"episodes","tt":"أحدث الحلقات التركية المدبلجة","it":[{"t":"قدر مدبلج","p":"https://image.tmdb.org/t/p/w500/8Ertj58K3o2P1v2a3b4c5.jpg","v":7.5,"ep":"الحلقة 45","sn":"الموسم 1","g":"دراما ورومانسية","l":"https://miravd.com/embed-trw1vj9t227w.html"},{"t":"أمانة مدبلج","p":"https://image.tmdb.org/t/p/w500/9Frtj58K3o2P1v2a3b4c5.jpg","v":7.3,"ep":"الحلقة 112","sn":"الموسم 3","g":"دراما وانتقام","l":"https://miravd.com/embed-trw1vj9t227w.html"},{"t":"زهور الدم مدبلج","p":"https://image.tmdb.org/t/p/w500/0Grtj58K3o2P1v2a3b4c5.jpg","v":7.6,"ep":"الحلقة 88","sn":"الموسم 2","g":"عائلي وثأر","l":"https://miravd.com/embed-trw1vj9t227w.html"},{"t":"رياح الحب مدبلج","p":"https://image.tmdb.org/t/p/w500/1Hrtj58K3o2P1v2a3b4c5.jpg","v":7.4,"ep":"الحلقة 25","sn":"الموسم 1","g":"رومانسية وشباب","l":"https://miravd.com/embed-trw1vj9t227w.html"},{"t":"تل الرياح مدبلج","p":"https://image.tmdb.org/t/p/w500/2Irtj58K3o2P1v2a3b4c5.jpg","v":7.5,"ep":"الحلقة 60","sn":"الموسم 1","g":"دراما وصراع","l":"https://miravd.com/embed-trw1vj9t227w.html"},{"t":"الأرض الطيبة مدبلج","p":"https://image.tmdb.org/t/p/w500/3Jrtj58K3o2P1v2a3b4c5.jpg","v":7.2,"ep":"الحلقة 15","sn":"الموسم 4","g":"أكشن وقرية","l":"https://miravd.com/embed-trw1vj9t227w.html"}]},{"tp":"posters","tt":"أفضل الإنمي المترجم","it":[{"t":"Attack on Titan","p":"https://image.tmdb.org/t/p/w500/8Crtj58K3o2P1v2a3b4c5.jpg","v":8.9,"ep":"","sn":"","g":"أنمي وأكشن","l":""},{"t":"Demon Slayer","p":"https://image.tmdb.org/t/p/w500/9Drtj58K3o2P1v2a3b4c5.jpg","v":8.7,"ep":"","sn":"","g":"أنمي وفانتازيا","l":""},{"t":"Jujutsu Kaisen","p":"https://image.tmdb.org/t/p/w500/0Ertj58K3o2P1v2a3b4c5.jpg","v":8.6,"ep":"","sn":"","g":"أنمي وسحر","l":""},{"t":"Solo Leveling","p":"https://image.tmdb.org/t/p/w500/1Frtj58K3o2P1v2a3b4c5.jpg","v":8.5,"ep":"","sn":"","g":"أنمي وقوة خارقة","l":""},{"t":"One Piece","p":"https://image.tmdb.org/t/p/w500/2Grtj58K3o2P1v2a3b4c5.jpg","v":8.8,"ep":"","sn":"","g":"أنمي وقراصنة","l":""},{"t":"Bleach: Thousand-Year Blood War","p":"https://image.tmdb.org/t/p/w500/3Hrtj58K3o2P1v2a3b4c5.jpg","v":8.8,"ep":"","sn":"","g":"أنمي وسيوف","l":""}]},{"tp":"episodes","tt":"أحدث حلقات الإنمي المترجم","it":[{"t":"Magical★Explorer","p":"https://image.tmdb.org/t/p/w500/4Irtj58K3o2P1v2a3b4c5.jpg","v":7.6,"ep":"الحلقة 3","sn":"الموسم 1","g":"أنمي وفانتازيا","l":"https://test-stream.developer-pro.workers.dev/video?url=17097110129279"},{"t":"شياطين عالم الظلال","p":"https://image.tmdb.org/t/p/w500/5Jrtj58K3o2P1v2a3b4c5.jpg","v":7.8,"ep":"الحلقة 5","sn":"الموسم 1","g":"أنمي وأكشن","l":"https://test-stream.developer-pro.workers.dev/video?url=17101047532159"},{"t":"برج الإله","p":"https://image.tmdb.org/t/p/w500/6Krtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"الحلقة 14","sn":"الموسم 2","g":"أنمي وتحديات","l":"https://test-stream.developer-pro.workers.dev/video?url=17097110129279"},{"t":"حكاية الجني الخالد","p":"https://image.tmdb.org/t/p/w500/7Lrtj58K3o2P1v2a3b4c5.jpg","v":7.9,"ep":"الحلقة 8","sn":"الموسم 1","g":"أنمي أسطوري","l":"https://test-stream.developer-pro.workers.dev/video?url=17101047532159"},{"t":"فجر السحرة","p":"https://image.tmdb.org/t/p/w500/8Mrtj58K3o2P1v2a3b4c5.jpg","v":7.5,"ep":"الحلقة 11","sn":"الموسم 1","g":"أنمي وخيال","l":"https://test-stream.developer-pro.workers.dev/video?url=17097110129279"},{"t":"طارد الأرواح الأزرق","p":"https://image.tmdb.org/t/p/w500/9Nrtj58K3o2P1v2a3b4c5.jpg","v":8,"ep":"الحلقة 2","sn":"الموسم 4","g":"أنمي وشياطين","l":"https://test-stream.developer-pro.workers.dev/video?url=17101047532159"}]},{"tp":"episodes","tt":"أحدث حلقات الإنمي المدبلج","it":[{"t":"المحقق كونان مدبلج","p":"https://image.tmdb.org/t/p/w500/0Prtj58K3o2P1v2a3b4c5.jpg","v":8.4,"ep":"الحلقة 450","sn":"الجزء 9","g":"غموض وذكاء","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"سبيس باور مدبلج","p":"https://image.tmdb.org/t/p/w500/1Qrtj58K3o2P1v2a3b4c5.jpg","v":8.1,"ep":"الحلقة 22","sn":"الموسم 1","g":"مغامرات كلاسيكية","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"دراغون بول سوبر مدبلج","p":"https://image.tmdb.org/t/p/w500/2Rrtj58K3o2P1v2a3b4c5.jpg","v":8.3,"ep":"الحلقة 85","sn":"الموسم 1","g":"قتال وقوى","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"بي بليد المعركة الحديدية","p":"https://image.tmdb.org/t/p/w500/3Srtj58K3o2P1v2a3b4c5.jpg","v":7.9,"ep":"الحلقة 40","sn":"الجزء 2","g":"تحديات وبلابل","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"أبطال الديجيتال مدبلج","p":"https://image.tmdb.org/t/p/w500/4Trtj58K3o2P1v2a3b4c5.jpg","v":8.5,"ep":"الحلقة 30","sn":"الجزء 1","g":"عوالم رقمية","l":"https://stmruby.com/embed-8kqg781rflj7.html"},{"t":"القناص مدبلج","p":"https://image.tmdb.org/t/p/w500/5Urtj58K3o2P1v2a3b4c5.jpg","v":8.9,"ep":"الحلقة 62","sn":"الجزء 1","g":"صيد ومغامرات","l":"https://stmruby.com/embed-8kqg781rflj7.html"}]}];
+/* Tabs */
+let section="media";
+function setOn(b){document.querySelectorAll(".navigation .tab").forEach(x=>x.classList.toggle("on",x===b))}
+function showMedia(on){$("#extra").classList.toggle("hid",on);cats.classList.toggle("hid",!on);grid.classList.toggle("hid",!on);$(".searchrow").classList.toggle("hid",!on)}
+document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{type=b.dataset.t;section="media";setOn(b);showMedia(true);stack=[];loadCats()});
+document.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{section=b.dataset.x;setOn(b);showMedia(false);section==="matches"?renderMatches(true):renderNews(true)});
+const srvMenu=$("#srvMenu");
+function syncTabs(){}
+$("#srv").onclick=e=>{e.stopPropagation();const o=srvMenu.style.display==="block";srvMenu.style.display=o?"none":"block";$("#srv").setAttribute("aria-expanded",String(!o));if(!o){srvMenu.querySelectorAll(".mi").forEach(b=>b.classList.toggle("on",b.dataset.s===server));srvMenu.querySelector(".mi.on").focus()}};
+srvMenu.querySelectorAll(".mi").forEach(b=>b.onclick=()=>{srvMenu.style.display="none";$("#srv").setAttribute("aria-expanded","false");$("#srv").textContent=b.textContent;$("#srv").focus();if(server===b.dataset.s)return;server=b.dataset.s;WORKER=WORKERS[server]||WORKERS.s1;stack=[];syncTabs();loadCats()});
 
-    let currentHeroIndex = 0;
-    let heroItems = [];
+/* Arabic translation (cached) */
+const trCache=(()=>{try{return JSON.parse(localStorage.getItem("trAr")||"{}")}catch(e){return{}}})();
+const TEAM_AR={"Real Madrid":"ريال مدريد","Barcelona":"برشلونة","Atletico Madrid":"أتلتيكو مدريد","Manchester City":"مانشستر سيتي","Manchester United":"مانشستر يونايتد","Liverpool":"ليفربول","Arsenal":"آرسنال","Chelsea":"تشيلسي","Tottenham":"توتنهام","Bayern München":"بايرن ميونخ","Borussia Dortmund":"بوروسيا دورتموند","Paris Saint Germain":"باريس سان جيرمان","Juventus":"يوفنتوس","Inter":"إنتر ميلان","AC Milan":"ميلان","Napoli":"نابولي","AS Roma":"روما","Al-Hilal Saudi FC":"الهلال","Al-Nassr":"النصر","Al-Ittihad FC":"الاتحاد","Al-Ahli Jeddah":"الأهلي","Al Shabab":"الشباب","Al Ahly":"الأهلي المصري","Zamalek SC":"الزمالك","Pyramids FC":"بيراميدز"};
+async function trOne(s){
+  const r=await fetch("https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=ar&dt=t&q="+encodeURIComponent(s));
+  const j=await r.json();return j[0].map(x=>x[0]).join("");
+}
+async function tr(list){
+  const need=[...new Set(list.filter(s=>s&&!TEAM_AR[s]&&!trCache[s]))];
+  const q=[...need];
+  await Promise.all([1,2,3,4,5,6].map(async()=>{while(q.length){const s=q.shift();try{trCache[s]=await trOne(s)}catch(e){}}}));
+  if(need.length)try{localStorage.setItem("trAr",JSON.stringify(trCache))}catch(e){}
+  return s=>TEAM_AR[s]||trCache[s]||s;
+}
+const arNum=s=>String(s).replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 
-    function init() {
-      const sliderSec = SECTIONS_DATA.find(s => s.tp === 'slider');
-      if (sliderSec && sliderSec.it.length > 0) {
-        heroItems = sliderSec.it;
-        renderHero(0);
-        setInterval(() => {
-          currentHeroIndex = (currentHeroIndex + 1) % heroItems.length;
-          renderHero(currentHeroIndex);
-        }, 6000);
+/* Matches (API-Football) */
+const FB_KEY="31cb6151025a32e4a5833842169908a0";
+const LEAGUES={2:"دوري أبطال أوروبا",3:"الدوري الأوروبي",4:"دوري المؤتمر الأوروبي",39:"الدوري الإنجليزي الممتاز",140:"الدوري الإسباني (لا ليغا)",135:"الدوري الإيطالي (سيري آ)",78:"الدوري الألماني (بوندسليغا)",61:"الدوري الفرنسي",307:"دوري روشن السعودي",233:"الدوري المصري الممتاز",12:"دوري أبطال أفريقيا",17:"دوري أبطال آسيا",531:"كأس السوبر الإسباني",528:"كأس الاتحاد الإنجليزي",529:"كأس الرابطة الإنجليزية",143:"كأس ملك إسبانيا",137:"كأس إيطاليا",81:"كأس ألمانيا",66:"كأس فرنسا",548:"كأس خادم الحرمين الشريفين",1:"كأس العالم"};
+const LORDER=[2,3,4,39,140,135,78,61,307,233,12,17,531,528,529,143,137,81,66,548,1];
+const STATUS={TBD:"لم يحدد الموعد",NS:"لم تبدأ","1H":"الشوط الأول",HT:"استراحة","2H":"الشوط الثاني",ET:"وقت إضافي",BT:"استراحة",P:"ركلات الترجيح",SUSP:"معلقة",INT:"متوقفة",FT:"انتهت",AET:"انتهت بعد الإضافي",PEN:"انتهت بالترجيح",PST:"مؤجلة",CANC:"ملغاة",ABD:"ألغيت",AWD:"فوز إداري",WO:"انسحاب",LIVE:"مباشر"};
+const LIVE_S=["1H","HT","2H","ET","BT","P","LIVE","INT","SUSP"];
+let mDay=0,mTimer=null;
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+function quota(){const k="fbq"+ymd(new Date());return{n:+(localStorage.getItem(k)||0),inc(){localStorage.setItem(k,String(this.n+1))}}}
+async function getFixtures(day,force){
+  const d=new Date();d.setDate(d.getDate()+day);const date=ymd(d),key="fb_"+date;
+  let c=null;try{c=JSON.parse(localStorage.getItem(key)||"null")}catch(e){}
+  const hasLive=c&&c.list.some(f=>LIVE_S.includes(f.fixture.status.short));
+  const ttl=day!==0?30*60e3:hasLive?2*60e3:10*60e3;
+  if(c&&Date.now()-c.t<ttl&&!force)return c;
+  const q=quota();if(q.n>=95&&c)return c;
+  const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||"Asia/Riyadh";
+  const r=await fetch(`https://v3.football.api-sports.io/fixtures?date=${date}&timezone=${encodeURIComponent(tz)}`,{headers:{"x-apisports-key":FB_KEY}});
+  const j=await r.json();q.inc();
+  if(j.errors&&Object.keys(j.errors).length&&!(j.response||[]).length){if(c)return c;throw 0}
+  c={t:Date.now(),list:(j.response||[]).filter(f=>LEAGUES[f.league.id])};
+  try{localStorage.setItem(key,JSON.stringify(c))}catch(e){}
+  return c;
+}
+async function renderMatches(first){
+  clearTimeout(mTimer);if(section!=="matches")return;
+  const box=$("#extra");
+  if(first)box.innerHTML='<div class="msg">جاري تحميل المباريات...</div>';
+  try{
+    const c=await getFixtures(mDay);if(section!=="matches")return;
+    const t=await tr(c.list.flatMap(f=>[f.teams.home.name,f.teams.away.name,f.fixture.venue&&f.fixture.venue.name,f.fixture.venue&&f.fixture.venue.city,f.fixture.referee]));
+    let h=`<div class="daybar">${[["أمس",-1],["اليوم",0],["غداً",1]].map(([l,d])=>`<button class="f${d===mDay?" on":""}" data-d="${d}">${l}</button>`).join("")}</div>`;
+    h+=`<div class="upd">آخر تحديث: ${arNum(new Date(c.t).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",hour12:true}))} — يتحدث تلقائياً</div>`;
+    if(!c.list.length)h+='<div class="msg">لا توجد مباريات للبطولات المختارة في هذا اليوم</div>';
+    LORDER.forEach(id=>{const fs=c.list.filter(f=>f.league.id===id).sort((a,b)=>a.fixture.timestamp-b.fixture.timestamp);if(!fs.length)return;
+      h+=`<div class="lg"><img src="${esc(fs[0].league.logo)}" onerror="this.remove()">${LEAGUES[id]}</div>`;
+      fs.forEach(f=>{const s=f.fixture.status.short,live=LIVE_S.includes(s),ns=s==="NS"||s==="TBD";
+        const _d=new Date(f.fixture.date),time=arNum(`${_d.getHours()%12||12}:${String(_d.getMinutes()).padStart(2,"0")}`)+(_d.getHours()<12?" ص":" م");
+        const vn=f.fixture.venue||{},info=[vn.name&&`🏟 الملعب: ${esc(t(vn.name))}${vn.city?"، "+esc(t(vn.city)):""}`,f.league.round&&`🏆 ${esc(arRound(f.league.round))}`,f.fixture.referee&&`🧑‍⚖️ الحكم: ${esc(t(f.fixture.referee))}`,(f.tv||f.broadcast)&&`📺 القناة: ${esc(f.tv||f.broadcast)}`,!ns&&`⏰ ${time}`].filter(Boolean);
+        const score=ns?time:`${arNum(f.goals.home??0)} - ${arNum(f.goals.away??0)}`;
+        const st=(STATUS[s]||"")+(live&&f.fixture.status.elapsed?` ${arNum(f.fixture.status.elapsed)}'`:"");
+        h+=`<div class="mt"><div class="tm"><img src="${esc(f.teams.home.logo)}" onerror="this.style.visibility='hidden'">${esc(t(f.teams.home.name))}</div><div class="sc${live?" live":""}"><b>${score}</b><small>${st}</small></div><div class="tm"><img src="${esc(f.teams.away.logo)}" onerror="this.style.visibility='hidden'">${esc(t(f.teams.away.name))}</div>${info.length?`<div class="mi2">${info.map(x=>`<span>${x}</span>`).join("")}</div>`:""}</div>`})});
+    box.innerHTML=h;
+    box.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{mDay=+b.dataset.d;renderMatches(true)});
+    const hasLive=c.list.some(f=>LIVE_S.includes(f.fixture.status.short));
+    mTimer=setTimeout(()=>renderMatches(false),mDay===0&&hasLive?120e3:600e3);
+  }catch(e){if(first)box.innerHTML='<div class="msg">تعذر تحميل المباريات، سيعاد المحاولة تلقائياً</div>';mTimer=setTimeout(()=>renderMatches(false),60e3)}
+}
+
+function arRound(x){x=String(x);const m={"Regular Season":"الجولة","Group Stage":"دور المجموعات","League Stage":"مرحلة الدوري","Round of 16":"دور الـ16","Quarter-finals":"ربع النهائي","Semi-finals":"نصف النهائي","Final":"النهائي","Play-offs":"الملحق","Knockout Round Play-offs":"ملحق خروج المغلوب"};let o=x;for(const k in m)if(x.startsWith(k)){o=x.replace(k,m[k]);break}return arNum(o.replace(/\s*-\s*/," "))}
+/* News (ESPN) */
+let nTimer=null;
+async function renderNews(first){
+  clearTimeout(nTimer);if(section!=="news")return;
+  const box=$("#extra");if(first)box.innerHTML='<div class="msg">جاري تحميل الأخبار...</div>';
+  try{
+    const NU="https://site.api.espn.com/apis/site/v2/sports/soccer/all/news?limit=20";
+    let j;try{j=await (await fetch(NU)).json()}catch(e){j=await (await fetch(`${WORKERS.s1}/proxy?url=${encodeURIComponent(NU)}`)).json()}
+    const _x=0,arts=j.articles||[];if(section!=="news")return;
+    const t=await tr(arts.flatMap(a=>[a.headline,a.description]));
+    let h=`<div class="upd">آخر تحديث: ${arNum(new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",hour12:true}))} — يتحدث كل دقيقتين</div>`;
+    if(!arts.length)h+='<div class="msg">لا توجد أخبار</div>';
+    arts.forEach((a,i)=>{const im=(a.images&&a.images[0]&&a.images[0].url)||"",link=(a.links&&a.links.web&&a.links.web.href)||"";
+      h+=`<button class="nw f" data-i="${i}">${im?`<img loading="lazy" src="${esc(im)}" onerror="this.remove()">`:""}<div><h3>${esc(t(a.headline))}</h3><p>${esc(t(a.description||""))}</p><time>${a.published?new Date(a.published).toLocaleString("ar-EG",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):""}</time></div></button>`});
+    box.innerHTML=h;
+    box.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{const a=arts[+b.dataset.i],l=a.links&&a.links.web&&a.links.web.href;if(l)window.open(l,"_blank","noopener")});
+  }catch(e){if(first)box.innerHTML='<div class="msg">تعذر تحميل الأخبار، سيعاد المحاولة تلقائياً</div>'}
+  nTimer=setTimeout(()=>renderNews(false),120e3);
+}
+document.addEventListener("click",()=>{srvMenu.style.display="none";$("#srv").setAttribute("aria-expanded","false")});
+
+async function loadCats(){
+  catList=[];$("#q").value="";searchRun++;cats.innerHTML="";grid.innerHTML='<div class="msg">جاري التحميل...</div>';
+  const a={live:"get_live_categories",vod:"get_vod_categories",series:"get_series_categories"}[type];
+  try{
+    const list=await api(a);
+    if(!Array.isArray(list)||!list.length)throw 0;catList=list;
+    list.forEach((c,i)=>{const b=document.createElement("button");b.className="cat f";b.textContent=c.category_name;b.onclick=()=>{document.querySelectorAll(".cat").forEach(x=>x.classList.remove("on"));b.classList.add("on");loadItems(c.category_id)};cats.appendChild(b);if(!i)b.click()});
+  }catch(e){grid.innerHTML='<div class="msg">تعذر تحميل المحتوى من هذا السيرفر</div>'}
+}
+async function loadItems(id){
+  cat=id;stack=[];$("#q").value="";searchRun++;grid.innerHTML='<div class="msg">جاري التحميل...</div>';
+  const a={live:"get_live_streams",vod:"get_vod_streams",series:"get_series"}[type];
+  try{
+    const list=await api(`${a}&category_id=${id}`);
+    if(cat!==id)return;
+    if(!list.length){grid.innerHTML='<div class="msg">لا يوجد محتوى</div>';return}
+    itemCache[server+type+id]=list;
+    renderCards(list.map(toItem),type==="live");
+  }catch(e){grid.innerHTML='<div class="msg">خطأ في التحميل</div>'}
+}
+let lastItems=[],lastLive=false;
+const norm=t=>String(t||"").toLowerCase().replace(/[\u064B-\u0652\u0640]/g,"").replace(/[أإآا]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/\s+/g," ").trim();
+
+// تحويل صوتي ذكي للمطابقة بين العربية والإنجليزية (مثل: ديكستير -> dkstr و dexter -> dkstr)
+const _phCache=new Map();
+function toPhonetic(s){
+  const key=String(s||"");
+  if(_phCache.has(key))return _phCache.get(key);
+  let t=key.toLowerCase().replace(/[\u064B-\u0652\u0640]/g,"").replace(/[أإآاويىةهءؤئ]/g,"");
+  const m={"ب":"b","ت":"t","ث":"t","ج":"g","ح":"h","خ":"k","د":"d","ذ":"z","ر":"r","ز":"z","س":"s","ش":"s","ص":"s","ض":"d","ط":"t","ظ":"z","ع":"","غ":"g","ف":"f","ق":"k","ك":"k","ل":"l","م":"m","ن":"n","پ":"b","ڤ":"f","گ":"g"};
+  t=[...t].map(c=>m[c]||c).join("");
+  t=t.replace(/ph/g,"f").replace(/sh/g,"s").replace(/th/g,"t").replace(/ch/g,"s").replace(/ck/g,"k").replace(/[cq]/g,"k").replace(/x/g,"ks").replace(/p/g,"b").replace(/v/g,"f").replace(/j/g,"g").replace(/z/g,"s");
+  const out=t.replace(/[aeiouywh\s\-_.:,]+/g,"");
+  _phCache.set(key,out);
+  return out;
+}
+function matchSearch(name, query){
+  const n1=norm(name), q1=norm(query);
+  if(n1.includes(q1)) return true;
+  const pName=toPhonetic(name), pQuery=toPhonetic(query);
+  return (pQuery.length>=2 && pName.includes(pQuery));
+}
+
+let catList=[],itemCache={},searchRun=0,searchT;
+const toItem=x=>({name:x.name,pic:x.stream_icon||x.cover,go:()=>{
+  if(server==="s7"){
+    if(type==="live")play(`${S7.base}/live/${S7.user}/${S7.pass}/${x.stream_id}.ts`,x.name,true);
+    else if(type==="vod")play(`${S7.base}/movie/${S7.user}/${S7.pass}/${x.stream_id}.${x.container_extension||"mp4"}`,x.name,false);
+    else openSeries(x);
+    return;
+  }
+  if(type==="live")play(["s3","s4","s5"].includes(server)?`${WORKER}/${server}/live/${x.stream_id}`:`${WORKER}/${server}/live/${x.stream_id}.m3u8`,x.name,true);
+  else if(type==="vod")play(`${WORKER}/${server}/movie/${x.stream_id}.${server==="s2"?"m3u8":(x.container_extension||"mp4")}`,x.name,false);
+  else openSeries(x);
+}});
+let searchMode=false;
+async function globalSearch(){
+  const q=norm($("#q").value),rawQ=$("#q").value,run=++searchRun;
+  if(!q){searchMode=false;if(cat!=null)loadItems(cat);return}
+  searchMode=true;const a={live:"get_live_streams",vod:"get_vod_streams",series:"get_series"}[type];
+  const keyBase=server+type,found=[],seen=new Set();let done=0;
+  const show=()=>{if(run!==searchRun)return;grid.innerHTML="";
+    if(!found.length){grid.innerHTML=`<div class="msg">${done<catList.length?"جاري البحث في كل المجموعات... "+done+"/"+catList.length:"لا توجد نتائج"}</div>`;return}
+    found.forEach(it=>{const b=document.createElement("button");b.className="card f"+(type==="live"?" live":"");b.innerHTML=`<div class="ph"><img loading="lazy" src="${esc(img(it.pic))}" onerror="this.style.visibility='hidden'"></div><p>${esc(it.name)}</p>`;b.onclick=it.go;grid.appendChild(b)});
+    if(done<catList.length)grid.insertAdjacentHTML("beforeend",`<div class="msg">جاري البحث... ${done}/${catList.length}</div>`)};
+  const add=list=>{(list||[]).forEach(x=>{const k=x.stream_id||x.series_id||x.name;if(!seen.has(k)&&matchSearch(x.name,rawQ)){seen.add(k);found.push(toItem(x))}})};
+  show();const queue=[...catList];
+  const worker=async()=>{while(queue.length&&run===searchRun){const c=queue.shift(),k=keyBase+c.category_id;
+    if(!itemCache[k]){try{const l=await api(`${a}&category_id=${c.category_id}`);itemCache[k]=Array.isArray(l)?l:[]}catch(e){itemCache[k]=[]}}
+    if(run!==searchRun)return;add(itemCache[k]);done++;show()}};
+  await Promise.all([1,2,3,4,5,6].map(worker));
+}
+$("#q").addEventListener("input",()=>{clearTimeout(searchT);searchT=setTimeout(globalSearch,300)});
+let plItems=[],curIdx=-1,plType="live";
+function renderCards(items,live){items.forEach((it,i)=>{const g=it.go;it.go=()=>{plItems=items;curIdx=i;plType=live?"live":/^الموسم/.test(it.name)?"ep":"vod";g()}});lastItems=items;lastLive=live;drawCards()}
+function drawCards(){
+  const live=lastLive,items=lastItems;
+  grid.innerHTML="";if(!items.length){grid.innerHTML='<div class="msg">لا توجد نتائج</div>';return}
+  items.forEach(it=>{const b=document.createElement("button");b.className="card f"+(live?" live":"");b.innerHTML=`<div class="ph"><img loading="lazy" src="${esc(img(it.pic))}" onerror="this.style.visibility='hidden'"></div><p>${esc(it.name)}</p>`;b.onclick=it.go;grid.appendChild(b)});
+}
+async function openSeries(s){
+  grid.innerHTML='<div class="msg">جاري التحميل...</div>';
+  const info=await api(`get_series_info&series_id=${s.series_id}`);
+  stack.push(()=>loadItems(cat));
+  const seasons=Object.keys(info.episodes||{});
+  const showSeason=k=>{
+    renderCards(info.episodes[k].map(e=>({name:`الموسم ${k} - ${e.title}`,pic:(e.info&&e.info.movie_image)||s.cover,go:()=>play(server==="s7"?`${S7.base}/series/${S7.user}/${S7.pass}/${e.id}.${e.container_extension||"mp4"}`:`${WORKER}/${server}/series/${e.id}.${server==="s2"?"m3u8":(e.container_extension||"mp4")}`,`${s.name} - ${e.title}`,false)})),false);
+    grid.firstChild&&grid.firstChild.focus();
+  };
+  if(seasons.length===1)return showSeason(seasons[0]);
+  renderCards(seasons.map(k=>({name:`الموسم ${k}`,pic:s.cover,go:()=>{stack.push(()=>openSeries(s));showSeason(k)}})),false);
+  grid.firstChild&&grid.firstChild.focus();
+}
+
+/* Player */
+let lastFocus=null,idleT,recoveryTimer,recoveryAttempts=0,nativeFallback=false,playbackFailed=false,externalPlayback=false;
+let curUrl="";
+function armRecovery(){clearTimeout(recoveryTimer);if(P.classList.contains("open")&&!playbackFailed&&!externalPlayback)recoveryTimer=setTimeout(recoverPlayback,15000)}
+function failPlayback(){
+  if(playbackFailed||!P.classList.contains("open"))return;
+  playbackFailed=true;
+  $("#failure p").textContent="خطأ "+(v.error?v.error.code+" "+(v.error.message||""):"?")+" | "+curUrl;
+  clearTimeout(recoveryTimer);clearTimeout(idleT);
+  if(hls){hls.destroy();hls=null}if(ts){try{ts.destroy()}catch(e){}ts=null}v.pause();v.removeAttribute("src");v.load();
+  $("#spin").classList.remove("on");$("#failure").classList.remove("hid");P.classList.remove("idle");closeMenu();
+}
+function attemptPlay(){v.play().catch(e=>{if(e.name==="NotAllowedError"){clearTimeout(recoveryTimer);v.muted=true;$("#bMute").textContent="🔇";v.play().then(()=>toast("اضغط 🔇 لتشغيل الصوت")).catch(()=>{$("#spin").classList.remove("on");wake()})}else if(e.name!=="AbortError")recoverPlayback()})}
+function recoverPlayback(){
+  if(playbackFailed||externalPlayback||!P.classList.contains("open"))return;
+  clearTimeout(recoveryTimer);
+  if(P.classList.contains("isLive")&&recoveryAttempts>=3&&recoveryAttempts<12){
+    recoveryAttempts++;armRecovery();
+    if(ts){startTs(curUrl)}else if(hls){hls.stopLoad();hls.loadSource(curUrl);hls.startLoad(-1)}else{v.src=curUrl;v.load()}
+    attemptPlay();return;
+  }
+  if(recoveryAttempts>=(P.classList.contains("isLive")?12:3)){
+    if(hls&&curUrl.includes(".m3u8")&&window.mpegts&&mpegts.isSupported()&&!nativeFallback){
+      const rawUrl=curUrl.replace(/\.m3u8(\?|$)/,"$1");
+      if(rawUrl!==curUrl){
+        nativeFallback=true;recoveryAttempts=0;
+        if(hls){try{hls.destroy()}catch(e){}hls=null}
+        startTs(rawUrl);attemptPlay();armRecovery();return;
       }
-      renderRows(SECTIONS_DATA);
     }
-
-    function renderHero(idx) {
-      const item = heroItems[idx];
-      if (!item) return;
-      document.getElementById('hero-img').src = item.p;
-      document.getElementById('hero-title').textContent = item.t;
-      document.getElementById('hero-meta').innerHTML = `
-        <span>★ ${item.v || '8.5'}</span>
-        <span>${item.g || 'عمل سينمائي'}</span>
-        <span style="border:1px solid #444;padding:1px 5px;border-radius:3px;font-size:10px;">1080p</span>
-      `;
-      const btn = document.getElementById('hero-btn');
-      btn.textContent = item.l ? '▶ تشغيل الآن' : 'تفاصيل العمل';
-    }
-
-    function playHero() {
-      const item = heroItems[currentHeroIndex];
-      if (item) handleItemClick(item);
-    }
-
-    function renderRows(sections) {
-      const container = document.getElementById('content-rows');
-      container.innerHTML = '';
-
-      sections.forEach(sec => {
-        if (sec.tp === 'slider' || !sec.it || !sec.it.length) return;
-
-        const row = document.createElement('div');
-        row.className = 'row';
-        row.setAttribute('data-type', sec.tp);
-
-        let itemsHtml = '';
-        sec.it.forEach((item, idx) => {
-          const isChannel = sec.tp === 'channels';
-          const subText = item.ep ? (item.sn ? item.sn + ' - ' : '') + item.ep : (item.g || '');
-          const ratingBadge = item.v > 0 ? `<div class="card-badge">★ ${item.v}</div>` : '';
-          const playIcon = item.l ? `<div class="card-play-icon">▶</div>` : '';
-          
-          itemsHtml += `
-            <div class="card ${isChannel ? 'channel' : ''}" data-row="${sec.tt}" data-idx="${idx}">
-              <div class="card-img-wrap">
-                <img class="card-img" src="${item.p}" alt="${item.t}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/111/444?text=No+Image'">
-                ${ratingBadge}
-                ${playIcon}
-              </div>
-              <div class="card-body">
-                <div class="card-title">${item.t}</div>
-                ${subText ? `<div class="card-sub">${subText}</div>` : ''}
-              </div>
-            </div>
-          `;
-        });
-
-        row.innerHTML = `
-          <div class="row-header">
-            <div class="row-title">${sec.tt}</div>
-          </div>
-          <div class="items-track">${itemsHtml}</div>
-        `;
-        container.appendChild(row);
-      });
-
-      container.onclick = (e) => {
-        const card = e.target.closest('.card');
-        if (!card) return;
-        const rowTitle = card.getAttribute('data-row');
-        const idx = parseInt(card.getAttribute('data-idx'), 10);
-        const sec = SECTIONS_DATA.find(s => s.tt === rowTitle);
-        if (sec && sec.it[idx]) handleItemClick(sec.it[idx]);
-      };
-    }
-
-    function handleItemClick(item) {
-      const modal = document.getElementById('playerModal');
-      const frame = document.getElementById('modalFrame');
-      const poster = document.getElementById('modalPoster');
-      const title = document.getElementById('modalTitle');
-      const desc = document.getElementById('modalDesc');
-
-      title.textContent = item.t;
-
-      if (item.l) {
-        frame.style.display = 'block';
-        frame.src = item.l;
-        poster.style.display = 'none';
-        desc.textContent = (item.sn ? item.sn + ' - ' : '') + (item.ep || item.g || '');
-      } else {
-        frame.style.display = 'none';
-        frame.src = '';
-        poster.style.display = 'block';
-        poster.src = item.p;
-        desc.innerHTML = `
-          <div style="font-size:14px;color:#eee;margin-bottom:4px;"><b>التقييم:</b> ★ ${item.v || 'غير متوفر'}</div>
-          <div style="font-size:14px;color:#eee;margin-bottom:8px;"><b>التصنيف:</b> ${item.g || 'أفلام ومسلسلات'}</div>
-          <div style="color:#777;font-size:11px;">هذا العمل للعرض والكتالوج (لا يتوفر سيرفر تشغيل مباشر له حالياً).</div>
-        `;
+    if(hls&&!nativeFallback&&v.canPlayType("application/vnd.apple.mpegurl")){nativeFallback=true;hls.destroy();hls=null;v.src=curUrl;armRecovery();attemptPlay();return}
+    failPlayback();return;
+  }
+  recoveryAttempts++;armRecovery();
+  if(ts){try{ts.unload();ts.load()}catch(e){}}
+  else if(hls){hls.startLoad();hls.recoverMediaError()}
+  else{const position=v.currentTime;v.load();if(position>0)v.addEventListener("loadedmetadata",()=>{if(isFinite(v.duration))v.currentTime=Math.min(position,v.duration)},{once:true})}
+  attemptPlay();
+}
+let tsRe=null;
+function startTs(url){
+  if(ts){try{ts.destroy()}catch(e){}ts=null}
+  ts=mpegts.createPlayer({type:"mpegts",isLive:true,url},{
+    enableWorker:true,
+    lazyLoad:false,
+    enableStashBuffer:true,
+    stashInitialSize:512*1024,
+    autoCleanupSourceBuffer:true,
+    autoCleanupMaxBackwardDuration:30,
+    autoCleanupMinBackwardDuration:15,
+    liveBufferLatencyChasing:true,
+    liveBufferLatencyMaxLatency:5,
+    liveBufferLatencyMinRemain:1.5
+  });
+  ts.attachMediaElement(v);
+  ts.load();
+  ts.on(mpegts.Events.ERROR,(errType,errDetail)=>{
+    console.warn("mpegts error:",errType,errDetail);
+    clearTimeout(tsRe);
+    tsRe=setTimeout(()=>{
+      if(P.classList.contains("open")&&!playbackFailed&&!externalPlayback){
+        recoverPlayback();
       }
-
-      modal.classList.add('active');
-    }
-
-    function closeModal() {
-      const modal = document.getElementById('playerModal');
-      const frame = document.getElementById('modalFrame');
-      frame.src = '';
-      modal.classList.remove('active');
-    }
-
-    function filterCategory(cat, btn) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const rows = document.querySelectorAll('.row');
-      rows.forEach(r => {
-        const type = r.getAttribute('data-type');
-        if (cat === 'all') {
-          r.style.display = 'block';
-        } else if (cat === 'channels' && type === 'channels') {
-          r.style.display = 'block';
-        } else if (cat === 'episodes' && type === 'episodes') {
-          r.style.display = 'block';
-        } else if (cat === 'posters' && (type === 'posters' || type === 'collections' || type === 'actors')) {
-          r.style.display = 'block';
-        } else {
-          r.style.display = 'none';
+    },1200);
+  });
+}
+function play(url,title,live){
+  curName=title;$("#bList").classList.toggle("hid",!(plItems.length>1));$("#chList h4").textContent=plType==="live"?"القنوات":plType==="ep"?"الحلقات":"أفلام المجموعة";
+  lastFocus=document.activeElement;clearTimeout(recoveryTimer);recoveryAttempts=0;nativeFallback=false;playbackFailed=false;externalPlayback=false;$("#failure").classList.add("hid");$("#time").textContent="00:00";$("#seek").value=0;
+  P.classList.add("open");$("#ptitle").textContent=title;$("#seek").style.display=live?"none":"";
+  $("#spin").classList.add("on");closeMenu();
+  curUrl=url;P.classList.toggle("isLive",live);
+  const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  $("#bExt").classList.toggle("hid", !(isIOS || server === "s2"));
+  $("#bQ").classList.add("hid");$("#bA").classList.add("hid");
+  if(hls){hls.destroy();hls=null}
+  if(ts){try{ts.destroy()}catch(e){}ts=null}
+  if(location.protocol==="https:"&&url.startsWith("http://"))url="https://"+url.slice(7);
+  if(isIOS&&live&&/\.ts(\?|$)/.test(url))url=url.replace(/\.ts(\?|$)/,".m3u8$1");
+  if(isIOS&&live&&!/\.(m3u8|ts)(\?|$)/.test(url))url+=".m3u8";
+  curUrl=url;
+  if(!isIOS&&["s3","s4","s5","s7"].includes(server)&&live&&window.mpegts&&mpegts.isSupported()){
+    startTs(url);attemptPlay();armRecovery();wake();setTimeout(()=>$("#bPlay").focus(),100);return;
+  }
+  const isHls=url.includes(".m3u8");
+  if(isIOS&&v.canPlayType("application/vnd.apple.mpegurl")){v.setAttribute("webkit-playsinline","");v.muted=false;v.preload="auto";v.src=url;v.load();attemptPlay();armRecovery();wake();return}
+  if(isHls&&window.Hls&&Hls.isSupported()){
+    hls=new Hls({enableWorker:true,lowLatencyMode:false,startLevel:0,capLevelToPlayerSize:true,
+      maxBufferLength:30,maxMaxBufferLength:60,backBufferLength:30,maxBufferSize:60*1000*1000,
+      liveSyncDurationCount:3,liveMaxLatencyDurationCount:10,levelLoadingMaxRetry:8,startFragPrefetch:true,
+      manifestLoadingMaxRetry:8,fragLoadingMaxRetry:10,abrEwmaDefaultEstimate:300000});
+    hls.loadSource(url);hls.attachMedia(v);
+    hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+      $("#bQ").classList.toggle("hid",hls.levels.length<2);
+      if(hls.levels.length>1){
+        // اختيار أقل جودة وbitrate متوفرة فوراً لتفادي أي تقطيع
+        let minIdx=0,minB=Infinity;
+        hls.levels.forEach((l,i)=>{const b=l.bitrate||l.height||0;if(b<minB){minB=b;minIdx=i;}});
+        hls.currentLevel=minIdx;
+      }
+      attemptPlay()});
+    hls.on(Hls.Events.AUDIO_TRACKS_UPDATED,()=>$("#bA").classList.toggle("hid",hls.audioTracks.length<2));
+    hls.on(Hls.Events.ERROR,(e,d)=>{
+      if(d.fatal){
+        if(d.type===Hls.ErrorTypes.NETWORK_ERROR){
+          console.warn("HLS network error, retrying load...");
+          hls.startLoad();
+        }else if(d.type===Hls.ErrorTypes.MEDIA_ERROR){
+          console.warn("HLS media error, recovering media...");
+          hls.recoverMediaError();
+        }else{
+          recoverPlayback();
         }
-      });
-    }
+      }
+    });
+  }else{v.preload="auto";v.src=url;attemptPlay()}
+  armRecovery();wake();setTimeout(()=>$("#bPlay").focus(),100);
+}
+v.addEventListener("loadedmetadata",()=>{if(!hls&&v.audioTracks&&v.audioTracks.length>1)$("#bA").classList.remove("hid")});
+function closePlayer(){clearTimeout(tsRe);if(ts){try{ts.destroy()}catch(e){}ts=null}clearTimeout(recoveryTimer);clearTimeout(idleT);clearTimeout(tapT);playbackFailed=true;if(hls){hls.destroy();hls=null}v.pause();v.removeAttribute("src");v.load();P.classList.remove("open");$("#chList").classList.remove("open");closeMenu();if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});lastFocus&&lastFocus.focus()}
+const fmt=t=>isFinite(t)?new Date(t*1000).toISOString().substr(t>=3600?11:14,t>=3600?8:5):"مباشر";
+v.addEventListener("waiting",()=>{if(!playbackFailed&&!externalPlayback){$("#spin").classList.add("on");armRecovery()}});
+v.addEventListener("stalled",()=>{if(!recoveryTimer)armRecovery()});
+v.addEventListener("error",()=>{if(!hls&&!ts)recoverPlayback()});
+v.addEventListener("playing",()=>{clearTimeout(recoveryTimer);recoveryTimer=null;$("#spin").classList.remove("on")});
+const IC_PLAY='<svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>',IC_PAUSE='<svg viewBox="0 0 24 24" width="22" height="22"><rect x="7" y="5.5" width="3.2" height="13" rx="1.2" fill="currentColor"/><rect x="13.8" y="5.5" width="3.2" height="13" rx="1.2" fill="currentColor"/></svg>';
+v.addEventListener("play",()=>$("#bPlay").innerHTML=IC_PAUSE);
+v.addEventListener("pause",()=>{$("#bPlay").innerHTML=IC_PLAY;if(v.readyState>=3){clearTimeout(recoveryTimer);recoveryTimer=null}});
 
-    window.onload = init;
-  </script>
+/* Seek + skip (optimized) */
+let isSeeking=false;
+const seekEl=$("#seek");
+function applySeek(val){
+  if(!v.duration||!isFinite(v.duration))return;
+  const target=(val/1000)*v.duration;
+  if(typeof v.fastSeek==="function"){try{v.fastSeek(target)}catch(e){v.currentTime=target}}
+  else{v.currentTime=target}
+  $("#time").textContent=`${fmt(target)} / ${fmt(v.duration)}`;
+}
+seekEl.addEventListener("pointerdown",()=>{isSeeking=true});
+seekEl.addEventListener("touchstart",()=>{isSeeking=true},{passive:true});
+seekEl.addEventListener("input",e=>{applySeek(e.target.value)});
+seekEl.addEventListener("change",e=>{applySeek(e.target.value);setTimeout(()=>{isSeeking=false},100)});
+["pointerup","pointercancel","touchend"].forEach(ev=>{seekEl.addEventListener(ev,()=>{setTimeout(()=>{isSeeking=false},100)})});
+v.addEventListener("timeupdate",()=>{
+  $("#time").textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`;
+  if(!isSeeking&&v.duration&&isFinite(v.duration))seekEl.value=(v.currentTime/v.duration)*1000;
+});
+function skip(s){
+  if(!v.duration||!isFinite(v.duration))return;
+  const target=Math.max(0,Math.min(v.duration-1,v.currentTime+s));
+  if(typeof v.fastSeek==="function"){try{v.fastSeek(target)}catch(e){v.currentTime=target}}
+  else{v.currentTime=target}
+  toast(s>0?`⏩ +${s}`:`⏪ ${s}`);
+}
+
+$("#bPlay").onclick=()=>{if(playbackFailed)return;if(v.paused){externalPlayback=false;armRecovery();attemptPlay()}else v.pause()};
+$("#bMute").onclick=()=>{v.muted=!v.muted;$("#bMute").textContent=v.muted?"🔇":"🔊"};
+$("#vol").oninput=e=>{v.volume=e.target.value;v.muted=false;$("#bMute").textContent=v.volume==0?"🔇":"🔊"};
+function toast(t){const x=$("#toast");x.textContent=t;x.style.display="block";clearTimeout(x._t);x._t=setTimeout(()=>x.style.display="none",900)}
+$("#bRw").onclick=()=>skip(-10);$("#bFf").onclick=()=>skip(10);
+function goFull(){
+  const done=()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock("landscape").catch(()=>{})}catch(e){}};
+  if(P.requestFullscreen)P.requestFullscreen({navigationUI:"hide"}).then(done).catch(()=>{});
+  else if(P.webkitRequestFullscreen){P.webkitRequestFullscreen();done()}
+  else if(v.webkitEnterFullscreen)v.webkitEnterFullscreen();
+}
+function exitFull(){try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(e){}(document.exitFullscreen||document.webkitExitFullscreen).call(document)}
+const isFs=()=>document.fullscreenElement||document.webkitFullscreenElement;
+$("#bFs").onclick=()=>isFs()?exitFull():goFull();
+const ARS=[["","الأصلي"],["ar-cover","ملء الشاشة"],["ar-fill","تمديد"],["ar-169","16:9"],["ar-43","4:3"]];let arI=0;
+$("#bAR").onclick=()=>{arI=(arI+1)%ARS.length;v.className=ARS[arI][0];$("#bAR").textContent="▭ "+ARS[arI][1];toast(ARS[arI][1])};
+$("#bExt").onclick=()=>{
+  extDirect().then(u=>openExt(u||curUrl));
+};
+const credCache={};
+async function getCreds(){
+  if(server==="s2")return{base:"http://so.ta2al.us",u:"MH12ARBMH12",p:"MH12ARBMH12"};
+  if(credCache[server])return credCache[server];
+  try{const j=await fetch(`${WORKER}/${server}/player_api.php`).then(r=>r.json());const ui=j.user_info||{},si=j.server_info||{};
+    if(ui.username&&ui.password&&si.url&&!String(si.url).includes("workers.dev")){const pr=si.server_protocol||"http",port=pr==="https"?(si.https_port||si.port):si.port;
+      return credCache[server]={base:`${pr}://${si.url}${port&&!["80","443"].includes(String(port))?":"+port:""}`,u:ui.username,p:ui.password}}}catch(e){}
+  return null;
+}
+async function extDirect(){
+  const m=curUrl.match(/\/s\d\/(live|movie|series)\/([^/?]+?)(\.\w+)?(\?|$)/);if(!m)return null;
+  const c=await getCreds();if(c){const ext=m[1]==="live"?"m3u8":(m[3]?m[3].slice(1):"mp4");return `${c.base}/${m[1]}/${c.u}/${c.p}/${m[2]}.${ext}`}
+  try{const r=await fetch(curUrl,{method:"HEAD",redirect:"follow"});if(r.url&&!r.url.includes("workers.dev"))return r.url}catch(e){}
+  return null;
+}
+function openExt(u){const ua=navigator.userAgent;
+  if(false){const m=u.match(/\/s2\/(live|movie|series)\/([^/?]+?)(?:\.\w+)?$/);if(m)u=`http://so.ta2al.us/${m[1]}/MH12ARBMH12/MH12ARBMH12/${m[2]}.${m[1]==="live"?"m3u8":"mp4"}`}
+  const opts=[{id:"vlc",label:"VLC"},{id:"mx",label:"MX Player"},{id:"any",label:"أي مشغل"},{id:"browser",label:"فتح في المتصفح"}];
+  openMenu("مشغل خارجي",opts,null,id=>{
+    const noProto=u.replace(/^https?:\/\//,"");
+    externalPlayback=true;clearTimeout(recoveryTimer);$("#spin").classList.remove("on");v.pause();
+    if(id==="browser"){window.open(u,"_blank","noopener,noreferrer");return}
+    if(/android/i.test(ua)){
+      const pkg=id==="vlc"?";package=org.videolan.vlc":id==="mx"?";package=com.mxtech.videoplayer.ad":"";
+      location.href=`intent://${noProto}#Intent;scheme=https;type=video/*${pkg};end`;
+    }else if(/iphone|ipad|ipod|mac/i.test(ua)&&id==="vlc"){location.href="vlc-x-callback://x-callback-url/stream?url="+encodeURIComponent(u)}
+    else if(id==="vlc"){location.href="vlc://"+u}
+    else window.open(u,"_blank");
+  });
+}
+
+/* قائمة القنوات داخل المشغل */
+let curName="";
+function drawChList(){const box=$("#chItems");box.innerHTML="";plItems.forEach((it,i)=>{const b=document.createElement("button");b.className="chi f"+(i===curIdx?" on":"");b.innerHTML=`<img src="${esc(img(it.pic))}" onerror="this.style.visibility='hidden'"><span>${esc(it.name)}</span>`;b.onclick=e=>{e.stopPropagation();it.go();$("#chList").classList.add("open");drawChList()};box.appendChild(b)});const on=box.querySelector(".on");on&&on.scrollIntoView({block:"center"})}
+$("#bList").onclick=e=>{e.stopPropagation();const l=$("#chList");l.classList.toggle("open");if(l.classList.contains("open"))drawChList();wake()};
+$("#chList").addEventListener("click",e=>e.stopPropagation());
+$("#bX").onclick=closePlayer;
+function wake(){P.classList.remove("idle");clearTimeout(idleT);idleT=setTimeout(()=>{if(!playbackFailed&&!v.paused&&!$("#menu").classList.contains("open")&&!$("#chList").classList.contains("open"))P.classList.add("idle")},3000)}
+["mousemove","touchstart","keydown"].forEach(ev=>P.addEventListener(ev,wake));
+let tapT=null;
+v.addEventListener("click",e=>{
+  if(tapT){clearTimeout(tapT);tapT=null;isFs()?exitFull():goFull();return}
+  tapT=setTimeout(()=>{
+    tapT=null;
+    // لمس الشاشة يظهر أو يخفي أزرار التحكم فقط بدون إيقاف أو تشغيل الفيديو
+    if($("#chList").classList.contains("open")){$("#chList").classList.remove("open");wake();return}
+    if(P.classList.contains("idle")) wake();
+    else P.classList.add("idle");
+  },280);
+});
+
+/* Menus: quality / audio / subtitles */
+const menu=$("#menu");
+function closeMenu(){menu.classList.remove("open");menu.dataset.title="";document.querySelectorAll("#ctrl .cb[aria-expanded]").forEach(b=>b.setAttribute("aria-expanded","false"))}
+function openMenu(title,opts,cur,pick){
+  const trigger=document.activeElement;
+  if(menu.classList.contains("open")&&menu.dataset.title===title){closeMenu();return}
+  closeMenu();menu.dataset.title=title;
+  if(trigger&&trigger.classList.contains("cb"))trigger.setAttribute("aria-expanded","true");
+  menu.innerHTML=`<h4>${title}</h4>`;
+  if(!opts.length)menu.innerHTML+='<div class="mi">غير متوفر</div>';
+  opts.forEach(o=>{const b=document.createElement("button");b.className="mi f"+(o.id===cur?" on":"");b.textContent=o.label;b.onclick=()=>{pick(o.id);closeMenu();$("#bPlay").focus()};menu.appendChild(b)});
+  wake();menu.classList.add("open");(menu.querySelector(".mi.on")||menu.querySelector(".mi"))?.focus();
+}
+$("#bQ").onclick=()=>{
+  if(!hls)return openMenu("الجودة",[{id:-1,label:"تلقائي (الأصلية)"}],-1,()=>{});
+  openMenu("الجودة",[{id:-1,label:"تلقائي"},...hls.levels.map((l,i)=>({id:i,label:l.height?l.height+"p":Math.round(l.bitrate/1000)+"kbps"}))],hls.autoLevelEnabled?-1:hls.currentLevel,id=>hls.currentLevel=id);
+};
+$("#bA").onclick=()=>{
+  if(hls)return openMenu("لغة الصوت",hls.audioTracks.map((t,i)=>({id:i,label:t.name||t.lang||"مسار "+(i+1)})),hls.audioTrack,id=>hls.audioTrack=id);
+  const at=v.audioTracks;if(!at)return openMenu("لغة الصوت",[],0,()=>{});
+  const arr=[...Array(at.length)].map((_,i)=>({id:i,label:at[i].label||at[i].language||"مسار "+(i+1)}));
+  openMenu("لغة الصوت",arr,arr.findIndex((_,i)=>at[i].enabled),id=>{for(let i=0;i<at.length;i++)at[i].enabled=i===id});
+};
+$("#bS").onclick=()=>{
+  if(hls&&hls.subtitleTracks.length)return openMenu("الترجمة",[{id:-1,label:"إيقاف"},...hls.subtitleTracks.map((t,i)=>({id:i,label:t.name||t.lang}))],hls.subtitleTrack,id=>{hls.subtitleTrack=id;hls.subtitleDisplay=id>=0});
+  const tt=v.textTracks,arr=[{id:-1,label:"إيقاف"}];let cur=-1;
+  for(let i=0;i<tt.length;i++){arr.push({id:i,label:tt[i].label||tt[i].language||"ترجمة "+(i+1)});if(tt[i].mode==="showing")cur=i}
+  openMenu("الترجمة",arr,cur,id=>{for(let i=0;i<tt.length;i++)tt[i].mode=i===id?"showing":"disabled"});
+};
+
+/* Remote control / D-pad spatial navigation */
+function visibleFocusables(){
+  const root=P.classList.contains("open")?P:srvMenu.style.display==="block"?srvMenu:document;
+  return [...root.querySelectorAll(".f")].filter(e=>e.getClientRects().length>0);
+}
+function move(dir){
+  const cur=document.activeElement,els=visibleFocusables();
+  if(!els.includes(cur)){els[0]&&els[0].focus();return}
+  const r=cur.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  let best=null,bd=1e9;
+  els.forEach(e=>{if(e===cur)return;const q=e.getBoundingClientRect();if(!q.width)return;const x=q.left+q.width/2,y=q.top+q.height/2,dx=x-cx,dy=y-cy;
+    const ok={left:dx<-2,right:dx>2,up:dy<-2,down:dy>2}[dir];if(!ok)return;
+    const main=dir==="left"||dir==="right"?Math.abs(dx):Math.abs(dy),side=dir==="left"||dir==="right"?Math.abs(dy):Math.abs(dx);
+    const d=main+side*3;if(d<bd){bd=d;best=e}});
+  if(best){best.focus();best.scrollIntoView({block:"nearest",inline:"nearest"})}
+}
+function back(){
+  if(srvMenu.style.display==="block"){srvMenu.style.display="none";$("#srv").setAttribute("aria-expanded","false");$("#srv").focus();return true}
+  if(menu.classList.contains("open")){closeMenu();$("#bPlay").focus();return true}
+  if(P.classList.contains("open")){closePlayer();return true}
+  if(stack.length){stack.pop()();return true}
+  return false;
+}
+document.addEventListener("keydown",e=>{
+  const k=e.keyCode;
+  if(!sb.classList.contains("hide")){enter();e.preventDefault();return}
+  const map={37:"left",38:"up",39:"right",40:"down"};
+  const a=document.activeElement;
+  if(map[k]){
+    if(a&&a.type==="range"&&(k===37||k===39)){
+      if(a.id==="seek"&&v.duration){v.currentTime+=k===39?10:-10;e.preventDefault()}
+      return;
+    }
+    e.preventDefault();move(map[k]);return;
+  }
+  if(k===8||k===27||k===10009||k===461||k===166){if(back())e.preventDefault();return}
+  if(P.classList.contains("open")){
+    if(k===179||k===415||k===19||k===32&&a.tagName!=="BUTTON"){v.paused?v.play():v.pause();e.preventDefault()}
+  }
+});
+loadCats();
+</script>
 </body>
 </html>
