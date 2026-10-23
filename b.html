@@ -537,11 +537,10 @@ async function extDirect(){
 }
 function openExt(u){const ua=navigator.userAgent;
   if(false){const m=u.match(/\/s2\/(live|movie|series)\/([^/?]+?)(?:\.\w+)?$/);if(m)u=`http://so.ta2al.us/${m[1]}/MH12ARBMH12/MH12ARBMH12/${m[2]}.${m[1]==="live"?"m3u8":"mp4"}`}
-  const opts=[{id:"vlc",label:"VLC"},{id:"mx",label:"MX Player"},{id:"any",label:"أي مشغل"},{id:"browser",label:"فتح في المتصفح"},{id:"copy",label:"نسخ الرابط"}];
+  const opts=[{id:"vlc",label:"VLC"},{id:"mx",label:"MX Player"},{id:"any",label:"أي مشغل"},{id:"browser",label:"فتح في المتصفح"}];
   openMenu("مشغل خارجي",opts,null,id=>{
     const noProto=u.replace(/^https?:\/\//,"");
     externalPlayback=true;clearTimeout(recoveryTimer);$("#spin").classList.remove("on");v.pause();
-    if(id==="copy"){navigator.clipboard&&navigator.clipboard.writeText(u).then(()=>toast("تم النسخ"));return}
     if(id==="browser"){window.open(u,"_blank","noopener,noreferrer");return}
     if(/android/i.test(ua)){
       const pkg=id==="vlc"?";package=org.videolan.vlc":id==="mx"?";package=com.mxtech.videoplayer.ad":"";
