@@ -488,7 +488,7 @@ async function playDash(ch, id){
     buildQualityDash();
     
     try {
-      await v.play();
+      await v.play();loaderOff();
     } catch (err) {
       v.muted = true;
       setVolIcon();
@@ -650,7 +650,8 @@ let loaderAt=0;
 function loaderOn(){ if($('loader').classList.contains('off')) loaderAt=Date.now(); $('loader').classList.remove('off'); }
 function loaderOff(){ clearTimeout(loaderOff.t); $('loader').classList.add('off'); };
 v.addEventListener('waiting', () => { loaderOn(); $('buf').classList.add('on'); });
-v.addEventListener('canplay', () => $('buf').classList.remove('on'));
+v.addEventListener('canplay', () => { loaderOff(); $('buf').classList.remove('on'); });
+v.addEventListener('playing', () => { loaderOff(); $('buf').classList.remove('on'); });
 v.addEventListener('pause', () => { if (wake) { wake.release().catch(() => {}); wake = null; } });
 async function getWake(){ try { if (!wake && navigator.wakeLock && !document.hidden) { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => { wake = null; }); } } catch (e) {} }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && !v.paused) getWake(); });
