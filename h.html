@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>AlameeereTv</title>
+<title>AlameeereTv | بث مباشر للقنوات المجانية</title>
 <meta name="description" content="AlameeereTv: مشغل بث مباشر للقنوات الرسمية المجانية بتصميم سينمائي وتحكم يدوي كامل بالجودة.">
 <meta name="theme-color" content="#07080c">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -166,131 +166,115 @@ html,body{touch-action:manipulation}
   </div></div>
   <div class="search"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3A6.5 6.5 0 1 0 14 15.5l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg><input id="q" type="search" placeholder="ابحث عن قناة" autocomplete="off" enterkeyhint="search" aria-label="بحث عن قناة"></div>
   <div id="sections"></div>
-  <footer>AlameeereTv</footer>
+  <footer>AlameeereTv | قنوات رسمية مجانية فقط</footer>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.7.11/dist/shaka-player.compiled.js"></script>
 <script>
 const ta2alBase = "https://l.alameeeretv.workers.dev/?url=http://so.ta2al.us:80/live/MH12ARBMH12/MH12ARBMH12/";
 
-const CHANNELS = [
-  // قنوات Starzplay
+// مصفوفة القنوات مع دعم الصيغة المختصرة (n, u, t, clearkey) تلقائياً
+const RAW_CHANNELS = [
   {
-    name: "Starzplay 1",
-    url: "https://sps1.starzplayarabia.com/out/v1/eee188845e9543699fd24e5a9890c6e2/index.mpd",
-    type: "dash",
-    section: "منوعات",
-    drm: { clearKeys: { "b253c726c24c7c94a3ddf9b1907e2c76": "097963d6ad73c3d712a104981de0ed42" } }
+    n: "Starzplay 1",
+    u: "https://sps1.starzplayarabia.com/out/v1/eee188845e9543699fd24e5a9890c6e2/index.mpd",
+    t: "dash",
+    clearkey: { "b253c726c24c7c94a3ddf9b1907e2c76": "097963d6ad73c3d712a104981de0ed42" }
   },
   {
-    name: "Starzplay 2",
-    url: "https://sps2.starzplayarabia.com/out/v1/15e7d1ffb99746dda03f71dbbbc3c08b/index.mpd",
-    type: "dash",
-    section: "منوعات",
-    drm: { clearKeys: { "ee861edcd99093153a763a94b14c2c5a": "ab3991f6a7729ba1ea4bcdba0c1ae6c0" } }
+    n: "Starzplay 2",
+    u: "https://sps2.starzplayarabia.com/out/v1/15e7d1ffb99746dda03f71dbbbc3c08b/index.mpd",
+    t: "dash",
+    clearkey: { "ee861edcd99093153a763a94b14c2c5a": "ab3991f6a7729ba1ea4bcdba0c1ae6c0" }
   },
   {
-    name: "Starzplay 3",
-    url: "https://sps3.starzplayarabia.com/out/v1/95528122fa434bcd948c9ed2e7afabee/index.mpd",
-    type: "dash",
-    section: "منوعات",
-    drm: { clearKeys: { "117c29396ec6fd295880013241a466e1": "3dfb883251884e66d784111877c44b13" } }
-  },
-
-  // قنوات KSA Sport
-  {
-    name: "KSA Sport 1",
-    url: "https://ev-tcn-dxb-cdn.aws.playco.com/live/eds/KSA_Sports1_HD/DASH/KSA_Sports1_HD.mpd",
-    type: "dash",
-    section: "رياضة",
-    drm: { clearKeys: { "a0723ff5bf2bbbb31dc727e4346b1cc7": "29951a0a48586258ab168f26b3f58daa" } }
+    n: "Starzplay 3",
+    u: "https://sps3.starzplayarabia.com/out/v1/95528122fa434bcd948c9ed2e7afabee/index.mpd",
+    t: "dash",
+    clearkey: { "117c29396ec6fd295880013241a466e1": "3dfb883251884e66d784111877c44b13" }
   },
   {
-    name: "KSA Sport 2",
-    url: "https://ev-tcn-dxb-cdn.aws.playco.com/live/eds/KSA_Sports2_HD/DASH/KSA_Sports2_HD.mpd",
-    type: "dash",
-    section: "رياضة",
-    drm: { clearKeys: { "f7142ef5a9d7b8ef1044232e74605e91": "f36d37064c1109c107ffab95c0f7532d" } }
+    n: "KSA Sport 1",
+    u: "https://ev-tcn-dxb-cdn.aws.playco.com/live/eds/KSA_Sports1_HD/DASH/KSA_Sports1_HD.mpd",
+    t: "dash",
+    clearkey: { "a0723ff5bf2bbbb31dc727e4346b1cc7": "29951a0a48586258ab168f26b3f58daa" }
   },
   {
-    name: "KSA Sport 3",
-    url: "https://ev-fuj-dxb-cdn-edge2.aws.playco.com/live/eds/KSA_Sports3_HD/DASH/KSA_Sports3_HD.mpd",
-    type: "dash",
-    section: "رياضة",
-    drm: { clearKeys: { "637dc9620732d390ab2df32e070256f0": "0e47bb47e90258b5f392f8ecb54a8b22" } }
-  },
-
-  // قناة MBC Action
-  {
-    name: "MBC Action",
-    url: "https://ev-fast-mpd.starzplayarabia.com/live/eds/MBC_Action_HD/DASH/MBC_Action_HD.mpd",
-    type: "dash",
-    section: "أفلام ومسلسلات",
-    drm: { clearKeys: { "d889ec7cb5cd8acb44f702726a56ae21": "37be04cfb92f19ecd6074b976c1f3c54" } }
-  },
-
-  // قنوات ثمانية
-  {
-    name: "ثمانية 1",
-    url: "https://scccrwb-live.cdn.intigral-ott.net/bpk-tv/STCT1/wv-pr/manifest.mpd",
-    type: "dash",
-    section: "منوعات",
-    drm: { clearKeys: { "714c789c76686632652eefc19f18c3db": "962cee49ee9422b44a6c60a7999854ad" } }
+    n: "KSA Sport 2",
+    u: "https://ev-tcn-dxb-cdn.aws.playco.com/live/eds/KSA_Sports2_HD/DASH/KSA_Sports2_HD.mpd",
+    t: "dash",
+    clearkey: { "f7142ef5a9d7b8ef1044232e74605e91": "f36d37064c1109c107ffab95c0f7532d" }
   },
   {
-    name: "ثمانية 2",
-    url: "https://scccrwb-live.cdn.intigral-ott.net/bpk-tv/STCT2/wv-pr/manifest.mpd",
-    type: "dash",
-    section: "منوعات",
-    drm: { clearKeys: { "97e293d59ed72db87f12fe7075d8bb4c": "c633955e4477ed5acbae68a2b0f1d216" } }
+    n: "KSA Sport 3",
+    u: "https://ev-fuj-dxb-cdn-edge2.aws.playco.com/live/eds/KSA_Sports3_HD/DASH/KSA_Sports3_HD.mpd",
+    t: "dash",
+    clearkey: { "637dc9620732d390ab2df32e070256f0": "0e47bb47e90258b5f392f8ecb54a8b22" }
   },
   {
-    name: "ثمانية 3",
-    url: "https://scccrwb-live.cdn.intigral-ott.net/bpk-tv/STCT3/wv-pr/manifest.mpd",
-    type: "dash",
-    section: "منوعات",
-    drm: { clearKeys: { "4bc8e4e871589a45e7c0c7d245c243c6": "4c5e8108e0f3cea4b588f5727d3de482" } }
-  },
-
-  // قنوات beIN Sport En
-  {
-    name: "bein sport1 En",
-    url: "https://otte.live.fly.ww.aiv-cdn.net/syd-nitro/live/clients/dash/enc/ghwcl6hv68/out/v1/83536910d8034e9b9895a20fbe1c1687/cenc.mpd",
-    type: "dash",
-    section: "رياضة",
-    drm: { clearKeys: { "335DAD778109954503DCBB21DC92015F": "24bfd75d436cbf73168a2a2dccd40281" } }
+    n: "MBC Action",
+    u: "https://ev-fast-mpd.starzplayarabia.com/live/eds/MBC_Action_HD/DASH/MBC_Action_HD.mpd",
+    t: "dash",
+    clearkey: { "d889ec7cb5cd8acb44f702726a56ae21": "37be04cfb92f19ecd6074b976c1f3c54" }
   },
   {
-    name: "bein sport2 En",
-    url: "https://otte.live.fly.ww.aiv-cdn.net/syd-nitro/live/clients/dash/enc/8m8cd46i1t/out/v1/83985c68e4174e90a58a1f2c024be4c9/cenc.mpd",
-    type: "dash",
-    section: "رياضة",
-    drm: { clearKeys: { "0b42be2664d7e811d04f3e504e0924c5": "ae24090123b8c72ac5404dc152847cb8" } }
+    n: "ثمانية 1",
+    u: "https://scccrwb-live.cdn.intigral-ott.net/bpk-tv/STCT1/wv-pr/manifest.mpd",
+    t: "dash",
+    clearkey: { "714c789c76686632652eefc19f18c3db": "962cee49ee9422b44a6c60a7999854ad" }
   },
   {
-    name: "bein sport3 En",
-    url: "https://a151aivottlinear-a.akamaihd.net/OTTB/sin-nitro/live/dash/enc/q4u5nwaogz/out/v1/18de6d3e65934f3a8de4358e69eab86c/cenc.mpd",
-    type: "dash",
-    section: "رياضة",
-    drm: { clearKeys: { "3d04975236a44f62857d181597705ee6": "362133e9cb13189ad4fe095ced216f60" } }
+    n: "ثمانية 2",
+    u: "https://scccrwb-live.cdn.intigral-ott.net/bpk-tv/STCT2/wv-pr/manifest.mpd",
+    t: "dash",
+    clearkey: { "97e293d59ed72db87f12fe7075d8bb4c": "c633955e4477ed5acbae68a2b0f1d216" }
   },
-
-  // قنوات beIN HLS (عبر الووكر)
-  { name: "bein 1", url: `${ta2alBase}194432.m3u8`, section: "رياضة" },
-  { name: "bein 2", url: `${ta2alBase}618157.m3u8`, section: "رياضة" },
-  { name: "bein 3", url: `${ta2alBase}117974.m3u8`, section: "رياضة" },
-  { name: "bein 4", url: `${ta2alBase}332578.m3u8`, section: "رياضة" },
-  { name: "bein 5", url: `${ta2alBase}332578.m3u8`, section: "رياضة" },
-
-  // القنوات الأساسية
-  { name: "الجزيرة", url: "https://live-hls-web-aja2-gcp.thehlive.com/AJA2/index.m3u8", section: "أخبار" },
-  { name: "الجزيرة مباشر", url: "https://live-hls-web-ajm-ll-bp.thehlive.com/AJM/index.m3u8", section: "أخبار" },
-  { name: "العربية", url: "https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8", section: "أخبار" },
-  { name: "الحدث", url: "https://live.alarabiya.net/alarabiapublish/alhadath.smil/playlist.m3u8", section: "أخبار" },
-  { name: "سكاي نيوز عربية", url: "https://stream.skynewsarabia.com/hls/sna.m3u8", section: "أخبار" },
-  { name: "القرآن الكريم", url: "https://cdn-globecast.akamaized.net/live/eds/saudi_quran/hls_roku/index.m3u8", section: "قرآن وسنة" },
-  { name: "السنة النبوية", url: "https://cdn-globecast.akamaized.net/live/eds/saudi_sunnah/hls_roku/index.m3u8", section: "قرآن وسنة" }
+  {
+    n: "ثمانية 3",
+    u: "https://scccrwb-live.cdn.intigral-ott.net/bpk-tv/STCT3/wv-pr/manifest.mpd",
+    t: "dash",
+    clearkey: { "4bc8e4e871589a45e7c0c7d245c243c6": "4c5e8108e0f3cea4b588f5727d3de482" }
+  },
+  {
+    n: "bein sport1 En",
+    u: "https://otte.live.fly.ww.aiv-cdn.net/syd-nitro/live/clients/dash/enc/ghwcl6hv68/out/v1/83536910d8034e9b9895a20fbe1c1687/cenc.mpd",
+    t: "dash",
+    clearkey: { "335DAD778109954503DCBB21DC92015F": "24bfd75d436cbf73168a2a2dccd40281" }
+  },
+  {
+    n: "bein sport2 En",
+    u: "https://otte.live.fly.ww.aiv-cdn.net/syd-nitro/live/clients/dash/enc/8m8cd46i1t/out/v1/83985c68e4174e90a58a1f2c024be4c9/cenc.mpd",
+    t: "dash",
+    clearkey: { "0b42be2664d7e811d04f3e504e0924c5": "ae24090123b8c72ac5404dc152847cb8" }
+  },
+  {
+    n: "bein sport3 En",
+    u: "https://a151aivottlinear-a.akamaihd.net/OTTB/sin-nitro/live/dash/enc/q4u5nwaogz/out/v1/18de6d3e65934f3a8de4358e69eab86c/cenc.mpd",
+    t: "dash",
+    clearkey: { "3d04975236a44f62857d181597705ee6": "362133e9cb13189ad4fe095ced216f60" }
+  },
+  { n: "bein 1", u: `${ta2alBase}194432.m3u8`, t: "hls" },
+  { n: "bein 2", u: `${ta2alBase}618157.m3u8`, t: "hls" },
+  { n: "bein 3", u: `${ta2alBase}117974.m3u8`, t: "hls" },
+  { n: "bein 4", u: `${ta2alBase}332578.m3u8`, t: "hls" },
+  { n: "bein 5", u: `${ta2alBase}332578.m3u8`, t: "hls" },
+  { n: "الجزيرة", u: "https://live-hls-web-aja2-gcp.thehlive.com/AJA2/index.m3u8", t: "hls" },
+  { n: "الجزيرة مباشر", u: "https://live-hls-web-ajm-ll-bp.thehlive.com/AJM/index.m3u8", t: "hls" },
+  { n: "العربية", u: "https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8", t: "hls" },
+  { n: "الحدث", u: "https://live.alarabiya.net/alarabiapublish/alhadath.smil/playlist.m3u8", t: "hls" },
+  { n: "سكاي نيوز عربية", u: "https://stream.skynewsarabia.com/hls/sna.m3u8", t: "hls" },
+  { n: "القرآن الكريم", u: "https://cdn-globecast.akamaized.net/live/eds/saudi_quran/hls_roku/index.m3u8", t: "hls" },
+  { n: "السنة النبوية", u: "https://cdn-globecast.akamaized.net/live/eds/saudi_sunnah/hls_roku/index.m3u8", t: "hls" }
 ];
+
+// دمج وتوحيد الصيغ تلقائياً لتعمل بسلاسة
+const CHANNELS = RAW_CHANNELS.map(c => ({
+  name: c.name || c.n || "قناة",
+  url: c.url || c.u || "",
+  type: c.type || c.t || (/\.mpd(\?|$)/i.test(c.url || c.u || "") ? "dash" : "hls"),
+  section: c.section || (c.n && c.n.toLowerCase().includes('bein') ? "رياضة" : c.n && c.n.toLowerCase().includes('ksa') ? "رياضة" : "منوعات"),
+  clearkey: c.clearkey || c.drm?.clearKeys || null
+}));
 
 const HIDE_MS = 3000;
 const $ = id => document.getElementById(id);
@@ -438,26 +422,7 @@ async function playDash(ch, id){
   sk = p;
   
   const cfg = { abr: { enabled: false }, streaming: { bufferingGoal: 20 } };
-  if (ch.drm) {
-    cfg.drm = {};
-    if (ch.drm.server) {
-      cfg.drm.servers = {
-        'com.widevine.alpha': ch.drm.server,
-        'com.microsoft.playready': ch.drm.server,
-        ...(ch.drm.servers || {})
-      };
-    } else if (ch.drm.servers) {
-      cfg.drm.servers = ch.drm.servers;
-    }
-    if (ch.drm.clearKeys) {
-      cfg.drm.clearKeys = ch.drm.clearKeys;
-    } else if (ch.clearkey) {
-      cfg.drm.clearKeys = ch.clearkey;
-    }
-    if (ch.drm.advanced) {
-      cfg.drm.advanced = ch.drm.advanced;
-    }
-  } else if (ch.clearkey) {
+  if (ch.clearkey) {
     cfg.drm = { clearKeys: ch.clearkey };
   }
 
