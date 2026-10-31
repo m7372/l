@@ -337,7 +337,7 @@ function play(i, keep){
     hls.on(Hls.Events.MANIFEST_PARSED, (e, d) => {
       if (id !== loadId) return;
       let best = 0;
-      d.levels.forEach((l, k) => { if (l.bitrate > d.levels[best].bitrate) best = k; });
+      d.levels.forEach((l, k) => { if (l.bitrate < d.levels[best].bitrate) best = k; });
       lowIdx = best;
       hls.currentLevel = best;
       buildQuality();
@@ -389,10 +389,18 @@ window.addEventListener('offline', () => { toast('انقطع الاتصال با
 window.addEventListener('online', () => { toast('عاد الاتصال. نكمل التشغيل'); retries = 0; if (cur >= 0) play(cur, true); });
 let lastT = -1, stall = 0;
 setInterval(() => {
-  if (cur < 0 || v.paused || !navigator.onLine || !$('reload').hidden) { stall = 0; return; }
-  if (Math.abs(v.currentTime - lastT) < 0.01) stall++; else stall = 0;
+  // لا نعد توقفاً إذا كان الفيديو غير محدد، أو متوقفاً يدوياً، أو لا يزال في مرحلة التخزين المبدئي (readyState < 3)
+  if (cur < 0 || v.paused || !navigator.onLine || !$('reload').hidden || v.readyState < 3) {
+    stall = 0;
+    return;
+  }
+  if (Math.abs(v.currentTime - lastT) < 0.01) {
+    stall++;
+  } else {
+    stall = 0;
+  }
   lastT = v.currentTime;
-  if (stall >= 3) { stall = 0; retry(loadId); }
+  if (stall >= 4) { stall = 0; retry(loadId); }
 }, 4000);
 
 async function playDash(ch, id){
@@ -403,16 +411,24 @@ async function playDash(ch, id){
     const p = new window.shaka.Player(v);
     sk = p;
     
+    // إعدادات التشغيل بأقل جودة لأعلى سرعة وأقل استهلاك بيانات
     const cfg = { 
-      abr: { enabled: true, defaultBandwidthEstimate: 5000000 }, 
+      abr: { 
+        enabled: false // إيقاف الترقية التلقائية لتثبيت أقل جودة
+      }, 
       streaming: { 
-        bufferingGoal: 30, 
-        rebufferingGoal: 2,
-        jumpLargeGaps: true
+        bufferingGoal: 2,
+        rebufferingGoal: 0.8,
+        bufferBehind: 10,
+        jumpLargeGaps: true,
+        safeSeekOffset: 0,
+        stallEnabled: true,
+        stallThreshold: 2
       },
       manifest: {
         dash: {
-          ignoreMinBufferTime: true
+          ignoreMinBufferTime: true,
+          autoCorrectDrift: true
         }
       }
     };
@@ -444,26 +460,33 @@ async function playDash(ch, id){
     await p.load(ch.url);
     if (id !== loadId) { p.destroy(); return; }
     
+    // اختيار أقل جودة متوفرة عمداً (Lowest Bandwidth / Resolution)
     const tracks = p.getVariantTracks();
-    let bestTrack = null;
+    let lowestTrack = null;
     tracks.forEach(t => {
-      if (!bestTrack || t.bandwidth > bestTrack.bandwidth) {
-        bestTrack = t;
+      if (!lowestTrack || t.bandwidth < lowestTrack.bandwidth) {
+        lowestTrack = t;
       }
     });
-    if (bestTrack) {
-      p.selectVariantTrack(bestTrack, true);
+    if (lowestTrack) {
+      p.selectVariantTrack(lowestTrack, true);
     }
 
     buildQualityDash();
-    v.play().catch(err => console.warn('Auto-play blocked:', err));
+    
+    try {
+      await v.play();
+    } catch (err) {
+      v.muted = true;
+      setVolIcon();
+      await v.play().catch(() => {});
+    }
   } catch (e) {
-    console.error('PlayDash load failed:', e);
-    const isDrm = e && (e.category === 6 || e.code === 6001 || e.code === 6002);
+    console.error('Dash load failed:', e);
+    const isDrm = (e && (e.category === 6 || e.code === 6001 || e.code === 6002 || e.code === 6007));
     dashFail(id, isDrm, e);
   }
 }
-
 function shaka_ok(){ 
   try { 
     return window.shaka && shaka.Player.isBrowserSupported(); 
@@ -615,8 +638,7 @@ v.addEventListener('play', setPlayIcon); v.addEventListener('pause', setPlayIcon
 v.addEventListener('volumechange', setVolIcon);
 let loaderAt=0;
 function loaderOn(){ if($('loader').classList.contains('off')) loaderAt=Date.now(); $('loader').classList.remove('off'); }
-function loaderOff(){ const w=Math.max(0,2600-(Date.now()-loaderAt)); clearTimeout(loaderOff.t); loaderOff.t=setTimeout(()=>{ if(!v.paused||v.readyState>2) $('loader').classList.add('off'); },w); }
-v.addEventListener('playing', () => { loaderOff(); retries = 0; $('buf').classList.remove('on'); getWake(); });
+function loaderOff(){ clearTimeout(loaderOff.t); $('loader').classList.add('off'); };
 v.addEventListener('waiting', () => { loaderOn(); $('buf').classList.add('on'); });
 v.addEventListener('canplay', () => $('buf').classList.remove('on'));
 v.addEventListener('pause', () => { if (wake) { wake.release().catch(() => {}); wake = null; } });
