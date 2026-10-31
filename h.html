@@ -171,6 +171,7 @@ html,body{touch-action:manipulation}
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.7.11/dist/shaka-player.compiled.js"></script>
 <script>
+try { if (window.shaka && shaka.polyfill) shaka.polyfill.installAll(); } catch (e) {}
 const ta2alBase = "https://l.alameeeretv.workers.dev/?url=http://so.ta2al.us:80/live/MH12ARBMH12/MH12ARBMH12/";
 
 const RAW_CHANNELS = [
@@ -205,13 +206,24 @@ const SECTION_NAMES = {
   "mbc_ksa": "MBC Action و KSA Sport"
 };
 
-const CHANNELS = RAW_CHANNELS.map(c => ({
+const function normalizeClearKeys(ck) {
+  if (!ck || typeof ck !== 'object') return null;
+  const res = {};
+  for (const [k, v] of Object.entries(ck)) {
+    if (k && v) {
+      res[k.trim().toLowerCase()] = ('' + v).trim().toLowerCase();
+    }
+  }
+  return res;
+}
+
+CHANNELS = RAW_CHANNELS.map(c => ({
   name: c.name || c.n || "قناة",
   url: c.url || c.u || "",
   type: c.type || c.t || (/\.mpd(\?|$)/i.test(c.url || c.u || "") ? "dash" : "hls"),
   sectionKey: c.s || "star_8",
   section: SECTION_NAMES[c.s] || "قنوات عامة",
-  clearkey: c.clearkey || c.drm?.clearKeys || null
+  clearkey: normalizeClearKeys(c.clearkey || c.drm?.clearKeys || null)
 }));
 
 const HIDE_MS = 3000;
@@ -302,8 +314,9 @@ function play(i, keep){
   document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', +c.dataset.i === i));
   loaderAt=0; $('loader').classList.add('off'); loaderOn();
   closeMenus(); stopSpeed();
-  if (hls) { hls.destroy(); hls = null; }
+  if (hls) { try { hls.destroy(); } catch (e) {} hls = null; }
   if (sk) { try { sk.destroy(); } catch (e) {} sk = null; }
+  try { v.removeAttribute('src'); v.load(); } catch (e) {}
   isDash = false;
   $('qMenu').innerHTML = '';
   if (ch.type === 'dash' || /\.mpd(\?|$)/i.test(ch.url)) {
@@ -335,11 +348,22 @@ function play(i, keep){
   poke();
 }
 
-function dashFail(id, protectedStream){
+function dashFail(id, protectedStream, errDetail){
   if (id !== loadId) return;
-  if (!protectedStream) { retry(id); return; }
-  toast('هذه القناة محمية ويتطلب ضبط مفاتيح فك التشفير بشكل صحيح');
-  clearTimeout(loaderOff.t); $('loader').classList.add('off');
+  clearTimeout(loaderOff.t);
+  $('loader').classList.add('off');
+  
+  if (protectedStream) {
+    toast('هذه القناة مشفرة (DRM) أو مفاتيح ClearKey منتهية/غير مطابقة');
+    return;
+  }
+  
+  if (errDetail && (errDetail.category === 1 || errDetail.code === 1001 || errDetail.code === 1002)) {
+    toast('خطأ في الاتصال بسيرفر القناة أو حظر CORS');
+    return;
+  }
+  
+  retry(id);
 }
 function retry(id){
   if (id !== loadId) return;
@@ -361,29 +385,54 @@ setInterval(() => {
 }, 4000);
 
 async function playDash(ch, id){
-  if (!window.shaka || !shaka_ok()) { toast('هذا المتصفح لا يدعم بث DASH'); $('loader').classList.add('off'); return; }
-  const p = new window.shaka.Player();
-  sk = p;
+  if (!window.shaka) { toast('مكتبة Shaka غير محملة'); $('loader').classList.add('off'); return; }
+  if (!shaka_ok()) { toast('هذا المتصفح لا يدعم بث DASH/DRM'); $('loader').classList.add('off'); return; }
   
-  const cfg = { 
-    abr: { enabled: true, defaultBandwidthEstimate: 5000000 }, 
-    streaming: { bufferingGoal: 30, rebufferingGoal: 2 } 
-  };
-  
-  if (ch.clearkey) {
-    cfg.drm = { clearKeys: ch.clearkey };
-  }
-
-  p.configure(cfg);
-  p.addEventListener('error', e => { const d = e.detail || {}; dashFail(id, d.category === 6 || d.severity === 3); });
-  p.addEventListener('variantchanged', buildQualityDash);
-  p.addEventListener('trackschanged', buildQualityDash);
   try {
-    await p.attach(v);
+    const p = new window.shaka.Player(v);
+    sk = p;
+    
+    const cfg = { 
+      abr: { enabled: true, defaultBandwidthEstimate: 5000000 }, 
+      streaming: { 
+        bufferingGoal: 30, 
+        rebufferingGoal: 2,
+        jumpLargeGaps: true
+      },
+      manifest: {
+        dash: {
+          ignoreMinBufferTime: true
+        }
+      }
+    };
+    
+    if (ch.clearkey) {
+      cfg.drm = { 
+        clearKeys: ch.clearkey,
+        advanced: {
+          'org.w3.clearkey': {
+            videoRobustness: '',
+            audioRobustness: ''
+          }
+        }
+      };
+    }
+
+    p.configure(cfg);
+    
+    p.addEventListener('error', e => {
+      const d = e.detail || {};
+      console.error('Shaka player error:', d);
+      const isDrm = (d.category === 6 || d.code === 6001 || d.code === 6002 || d.code === 6007);
+      dashFail(id, isDrm, d);
+    });
+    
+    p.addEventListener('variantchanged', buildQualityDash);
+    p.addEventListener('trackschanged', buildQualityDash);
+    
     await p.load(ch.url);
     if (id !== loadId) { p.destroy(); return; }
     
-    // اختيار أعلى جودة متاحة تلقائياً لأقصى سرعة وأفضل عرض
     const tracks = p.getVariantTracks();
     let bestTrack = null;
     tracks.forEach(t => {
@@ -396,11 +445,21 @@ async function playDash(ch, id){
     }
 
     buildQualityDash();
-    v.play().catch(() => {});
-  } catch (e) { dashFail(id, true); }
+    v.play().catch(err => console.warn('Auto-play blocked:', err));
+  } catch (e) {
+    console.error('PlayDash load failed:', e);
+    const isDrm = e && (e.category === 6 || e.code === 6001 || e.code === 6002);
+    dashFail(id, isDrm, e);
+  }
 }
 
-function shaka_ok(){ try { shaka.polyfill.installAll(); return shaka.Player.isBrowserSupported(); } catch (e) { return false; } }
+function shaka_ok(){ 
+  try { 
+    return window.shaka && shaka.Player.isBrowserSupported(); 
+  } catch (e) { 
+    return false; 
+  } 
+}
 function buildQualityDash(){
   if (!sk || !isDash) return;
   const m = $('qMenu'); m.innerHTML = '<h4>الجودة</h4>';
