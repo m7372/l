@@ -88,7 +88,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
 header{justify-content:center!important;position:relative}
 header .live{position:absolute;inset-inline-start:16px}
 .logo{font-size:26px}
-#intro{position:fixed;inset:0;z-index:100;background:radial-gradient(700px 400px at 50% 50%,rgba(232,194,122,.14),transparent 65%),#000;display:grid;place-items:center;transition:opacity 1s;cursor:pointer}
+#intro{position:fixed;inset:0;z-index:9999;background:radial-gradient(700px 400px at 50% 50%,rgba(232,194,122,.14),transparent 65%),#000;display:grid;place-items:center;transition:opacity .6s ease;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #intro.out{opacity:0;pointer-events:none}
 #intro .glow{font-size:clamp(40px,12vw,120px);filter:drop-shadow(0 0 22px rgba(255,255,255,.5))}
 @media(prefers-reduced-motion:reduce){.glow{animation:none!important;background:none;-webkit-text-fill-color:#fff;color:#fff;text-shadow:0 0 18px rgba(255,255,255,.6)}}
@@ -126,7 +126,18 @@ html,body{touch-action:manipulation}
 </style>
 </head>
 <body>
-<div id="intro" role="presentation"><div class="glow">AlameeereTv</div></div>
+<div id="intro" role="button" tabindex="0" onclick="dismissIntro()" ontouchstart="dismissIntro()"><div class="glow">AlameeereTv</div></div>
+<script>
+function dismissIntro(){
+  const el = document.getElementById('intro');
+  if (el && !el.classList.contains('out')) {
+    el.classList.add('out');
+    setTimeout(() => { try { el.remove(); } catch(e){} }, 1000);
+  }
+}
+// إخفاء تلقائي بعد 3 ثوانٍ دون انتظار
+setTimeout(dismissIntro, 3200);
+</script>
 <header>
   <div class="logo"><i><svg viewBox="0 0 24 24"><path d="M4 5h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-6v2h3v2H7v-2h3v-2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg></i><b class="glow">AlameeereTv</b></div>
   <div class="live">بث مباشر</div>
@@ -668,7 +679,7 @@ document.addEventListener('keydown', e => {
   poke();
 });
 
-const intro=$('intro');const endIntro=()=>intro.classList.add('out');intro.onclick=endIntro;setTimeout(endIntro,5200);setTimeout(()=>intro.remove(),6500);
+if (typeof dismissIntro === 'function') { const intro = $('intro'); if (intro) { intro.addEventListener('pointerdown', dismissIntro, {passive:true}); } }
 $('bPrev').innerHTML = ICON.prev; $('bNext').innerHTML = ICON.next; $('bTools').innerHTML = ICON.more;
 try {
   const sv0 = localStorage.getItem('atv_vol'); if (sv0 !== null && !isNaN(+sv0)) v.volume = Math.min(1, Math.max(0, +sv0));
