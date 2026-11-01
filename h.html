@@ -313,6 +313,12 @@ function cardEl(i){
   w.append(b, st); return w;
 }
 function renderSections(){
+  const savedScrolls = new Map();
+  host.querySelectorAll('section').forEach(sec => {
+    const title = sec.querySelector('h2')?.textContent || '';
+    const row = sec.querySelector('.row');
+    if (row) savedScrolls.set(title, row.scrollLeft);
+  });
   host.innerHTML = '';
   const ok = i => true;
   let real = 0;
@@ -327,13 +333,18 @@ function renderSections(){
   add('المفضلة', favs.map(idxOf).filter(i => i >= 0), false);
   
   // ترتيب الصفوف حسب المطلوب
-  const sectionKeys = ["bein", "star_8", "mbc_ksa", "shahid"];
+  const sectionKeys = ["bein", "alwan", "star_8", "mbc_ksa", "shahid"];
   sectionKeys.forEach(skKey => {
     const indices = CHANNELS.map((c, i) => i).filter(i => CHANNELS[i].sectionKey === skKey);
     add(SECTION_NAMES[skKey], indices, true);
   });
 
   if (!real) { const d = document.createElement('div'); d.className = 'empty'; d.textContent = 'لا توجد قناة بهذا الاسم'; host.appendChild(d); }
+  host.querySelectorAll('section').forEach(sec => {
+    const title = sec.querySelector('h2')?.textContent || '';
+    const row = sec.querySelector('.row');
+    if (row && savedScrolls.has(title)) row.scrollLeft = savedScrolls.get(title);
+  });
 }
 
 
@@ -349,7 +360,7 @@ function play(i, keep){
     retries = 0;
     sv('atv_last', ch.url);
     recent = [ch.url, ...recent.filter(u => u !== ch.url)].slice(0, 5); sv('atv_recent', recent);
-    renderSections();
+    // Keep the existing row DOM and horizontal scroll position while switching channels.
   }
   $('title').textContent = ch.name;
   document.querySelectorAll('.card').forEach(c => c.classList.toggle('sel', +c.dataset.i === i));
