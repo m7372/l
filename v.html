@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>مشغّل الفيديو الشامل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e1a2b;--panel:#162640;--line:#2a3f60;--txt:#f1f4f9;--mut:#9fb0c9;--ac:#3fd0bd}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:'Cairo',system-ui,sans-serif}
+body{padding:max(12px,env(safe-area-inset-top)) 12px max(16px,env(safe-area-inset-bottom))}
+main{max-width:1000px;margin:auto}
+h1{font-size:20px;margin:6px 4px 12px}
+#stage{background:#000;border-radius:14px;overflow:hidden;border:1px solid var(--line);direction:ltr}
+#stage.drag{outline:2px dashed var(--ac);outline-offset:-6px}
+video{display:block;width:100%;max-height:70vh;background:#000}
+.src{display:flex;gap:8px;margin-top:12px}
+.src input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--txt);font:inherit;padding:11px 12px;direction:ltr}
+.src input:focus{outline:2px solid var(--ac);border-color:transparent}
+button,select,label.b{font:inherit;color:var(--txt);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;cursor:pointer;min-height:44px}
+button:hover,select:hover,label.b:hover{border-color:var(--ac)}
+button:focus-visible,select:focus-visible,label.b:focus-within{outline:2px solid var(--ac)}
+button.go{background:var(--ac);color:#06201c;border-color:var(--ac);font-weight:700}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tools input[type=file]{position:absolute;opacity:0;width:0;height:0}
+#info{margin-top:12px;font-size:14px;color:var(--mut);min-height:22px}
+#info.err{color:#ff9aa5}
+.fmt{margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:14px;font-size:14px;color:var(--mut);line-height:1.9}
+.fmt b{color:var(--txt)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<h1>مشغّل الفيديو الشامل</h1>
+<div id="stage"><video id="v" controls playsinline crossorigin="anonymous"></video></div>
+
+<div class="src">
+  <input id="url" type="url" placeholder="الصق رابط الفيديو أو البث (mp4 / m3u8 / mpd / ts / flv ...)" aria-label="رابط الفيديو">
+  <button class="go" id="go">تشغيل</button>
+</div>
+
+<div class="tools">
+  <label class="b">فتح ملف<input id="file" type="file" accept="video/*,audio/*,.mkv,.avi,.wmv,.flv,.ts,.m2ts,.mts,.3gp,.mov,.m3u8,.mpd"></label>
+  <label class="b">ترجمة<input id="sub" type="file" accept=".srt,.vtt"></label>
+  <select id="speed" aria-label="السرعة">
+    <option value="0.5">0.5x</option><option value="0.75">0.75x</option><option value="1" selected>1x</option>
+    <option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="2">2x</option>
+  </select>
+  <select id="qual" aria-label="الجودة" hidden></select>
+  <button id="pip">صورة داخل صورة</button>
+</div>
+
+<div id="info" role="status">اسحب ملفاً هنا، أو افتح ملفاً، أو الصق رابطاً.</div>
+
+<div class="fmt">
+  <b>الصيغ المدعومة:</b> MP4 · WebM · MOV · OGG · MP3 · AAC · WAV · M4A (مباشرة)، HLS (m3u8)، DASH (mpd)، MPEG-TS وFLV وM2TS.<br>
+  <b>ملاحظة:</b> ملفات MKV وAVI وWMV تعمل فقط إذا كان ترميزها (H.264 / VP9 / AAC...) مدعوماً في متصفحك. المتصفح لا يفك كل الترميزات، ولا يمكن لأي مشغّل ويب فعل ذلك.
+</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.compiled.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const v = $('v'), info = $('info'), qual = $('qual');
+let eng = null, blobUrl = null, subUrl = null, tried = [];
+
+function say(t, err){ info.textContent = t; info.className = err ? 'err' : ''; }
+
+function kind(name, mime){
+  const n = (name || '').split('?')[0].split('#')[0].toLowerCase();
+  const m = n.match(/\.([a-z0-9]+)$/); const e = m ? m[1] : '';
+  if (e === 'm3u8' || /mpegurl/.test(mime||'')) return 'hls';
+  if (e === 'mpd' || /dash\+xml/.test(mime||'')) return 'dash';
+  if (['ts','m2ts','mts','flv'].includes(e)) return e === 'flv' ? 'flv' : 'mpegts';
+  return 'native';
+}
+
+function destroy(){
+  try { eng && eng.destroy && eng.destroy(); } catch(e){}
+  try { eng && eng.unload && eng.unload(); } catch(e){}
+  eng = null; qual.hidden = true; qual.innerHTML = '';
+  v.removeAttribute('src'); v.load();
+}
+
+async function load(src, name, mime, order){
+  destroy();
+  tried = order || [kind(name || src, mime)];
+  if (!tried.includes('native')) tried.push('native');
+  say('جارٍ التحميل...');
+  start(src, name, mime);
+}
+
+async function start(src, name, mime){
+  const k = tried.shift();
+  if (!k){ say('تعذّر تشغيل هذا المصدر. قد يكون الترميز غير مدعوم أو الرابط يمنع التشغيل من موقع آخر (CORS).', true); return; }
+  try{
+    if (k === 'hls'){
+      if (window.Hls && Hls.isSupported()){
+        const h = new Hls({enableWorker:true,lowLatencyMode:true});
+        eng = h; h.loadSource(src); h.attachMedia(v);
+        h.on(Hls.Events.MANIFEST_PARSED, (_, d) => {
+          if (d.levels.length > 1){
+            qual.innerHTML = '<option value="-1">جودة: تلقائي</option>' + d.levels.map((l,i)=>`<option value="${i}">${l.height ? l.height + 'p' : Math.round(l.bitrate/1000) + 'k'}</option>`).join('');
+            qual.hidden = false; qual.onchange = () => { h.currentLevel = +qual.value; };
+          }
+          v.play().catch(()=>{}); say('HLS');
+        });
+        h.on(Hls.Events.ERROR, (_, d) => { if (d.fatal){ destroy(); start(src, name, mime); } });
+      } else { v.src = src; say('HLS (أصلي)'); v.play().catch(()=>{}); }
+    } else if (k === 'dash'){
+      const p = new shaka.Player(); eng = p; await p.attach(v);
+      p.addEventListener('error', () => { destroy(); start(src, name, mime); });
+      await p.load(src); v.play().catch(()=>{}); say('DASH');
+      const tr = p.getVariantTracks().filter(t=>t.height);
+      const hs = [...new Set(tr.map(t=>t.height))].sort((a,b)=>b-a);
+      if (hs.length > 1){
+        qual.innerHTML = '<option value="0">جودة: تلقائي</option>' + hs.map(h=>`<option value="${h}">${h}p</option>`).join('');
+        qual.hidden = false;
+        qual.onchange = () => {
+          if (+qual.value === 0){ p.configure({abr:{enabled:true}}); return; }
+          p.configure({abr:{enabled:false}});
+          const t = tr.find(x => x.height === +qual.value); if (t) p.selectVariantTrack(t, true);
+        };
+      }
+    } else if (k === 'mpegts' || k === 'flv'){
+      if (!(window.mpegts && mpegts.getFeatureList().mseLivePlayback)) throw 0;
+      const p = mpegts.createPlayer({type: k === 'flv' ? 'flv' : 'mpegts', url: src, isLive: !blobUrl});
+      eng = p; p.attachMediaElement(v); p.load();
+      p.on(mpegts.Events.ERROR, () => { destroy(); start(src, name, mime); });
+      v.play().catch(()=>{}); say(k === 'flv' ? 'FLV' : 'MPEG-TS');
+    } else {
+      v.src = src;
+      v.onerror = () => { v.onerror = null; destroy(); start(src, name, mime); };
+      v.onloadedmetadata = () => say('تشغيل مباشر من المتصفح');
+      v.play().catch(()=>{});
+    }
+  } catch(e){ destroy(); start(src, name, mime); }
+}
+
+$('go').onclick = () => { const u = $('url').value.trim(); if (u){ blobUrl = null; load(u); } };
+$('url').onkeydown = e => { if (e.key === 'Enter') $('go').click(); };
+
+function openFile(f){
+  if (!f) return;
+  if (blobUrl) URL.revokeObjectURL(blobUrl);
+  blobUrl = URL.createObjectURL(f);
+  load(blobUrl, f.name, f.type, [kind(f.name, f.type)]);
+  say(f.name);
+}
+$('file').onchange = e => openFile(e.target.files[0]);
+
+const stage = $('stage');
+['dragenter','dragover'].forEach(t => stage.addEventListener(t, e => { e.preventDefault(); stage.classList.add('drag'); }));
+['dragleave','drop'].forEach(t => stage.addEventListener(t, e => { e.preventDefault(); stage.classList.remove('drag'); }));
+stage.addEventListener('drop', e => openFile(e.dataTransfer.files[0]));
+
+$('sub').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  let t = await f.text();
+  if (/\.srt$/i.test(f.name)) t = 'WEBVTT\n\n' + t.replace(/\r/g,'').replace(/(\d+:\d+:\d+),(\d+)/g,'$1.$2');
+  if (subUrl) URL.revokeObjectURL(subUrl);
+  subUrl = URL.createObjectURL(new Blob([t], {type:'text/vtt'}));
+  v.querySelectorAll('track').forEach(x => x.remove());
+  const tr = document.createElement('track');
+  tr.kind = 'subtitles'; tr.label = 'ترجمة'; tr.default = true; tr.src = subUrl;
+  v.appendChild(tr); tr.track.mode = 'showing'; say('تم تحميل الترجمة');
+};
+
+$('speed').onchange = e => { v.playbackRate = +e.target.value; };
+$('pip').onclick = async () => {
+  try { document.pictureInPictureElement ? await document.exitPictureInPicture() : await v.requestPictureInPicture(); }
+  catch(e){ say('صورة داخل صورة غير مدعومة هنا', true); }
+};
+
+document.addEventListener('keydown', e => {
+  if (/INPUT|SELECT/.test(e.target.tagName)) return;
+  if (e.key === ' '){ e.preventDefault(); v.paused ? v.play() : v.pause(); }
+  else if (e.key === 'ArrowRight') v.currentTime += 5;
+  else if (e.key === 'ArrowLeft') v.currentTime -= 5;
+  else if (e.key === 'ArrowUp'){ e.preventDefault(); v.volume = Math.min(1, v.volume + .1); }
+  else if (e.key === 'ArrowDown'){ e.preventDefault(); v.volume = Math.max(0, v.volume - .1); }
+  else if (e.key === 'f') document.fullscreenElement ? document.exitFullscreen() : stage.requestFullscreen();
+  else if (e.key === 'm') v.muted = !v.muted;
+});
+</script>
+</body>
+</html>
