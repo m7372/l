@@ -253,10 +253,12 @@ function normalizeClearKeys(ck) {
   const res = {};
   for (const [k, v] of Object.entries(ck)) {
     if (k && v) {
-      res[k.trim().toLowerCase()] = ('' + v).trim().toLowerCase();
+      const cleanK = ('' + k).replace(/[^0-9a-fA-F]/g, '').toLowerCase();
+      const cleanV = ('' + v).replace(/[^0-9a-fA-F]/g, '').toLowerCase();
+      if (cleanK && cleanV) res[cleanK] = cleanV;
     }
   }
-  return res;
+  return Object.keys(res).length ? res : null;
 }
 
 CHANNELS = RAW_CHANNELS.map(c => ({
@@ -492,19 +494,28 @@ async function playDash(ch, id){
   if (!shaka_ok()) { toast('هذا المتصفح لا يدعم بث DASH/DRM'); $('loader').classList.add('off'); return; }
   
   try {
-    const p = new window.shaka.Player(v);
-    sk = p;
-    
-    // نفس إعدادات المشغل الشغال: تجاهل سيرفر الرخص الخارجي والاعتماد على ClearKey
+    if (!sk) {
+      sk = new window.shaka.Player(v);
+      sk.addEventListener('error', e => {
+        const d = e.detail || {};
+        console.error('Shaka player error:', d);
+        const isDrm = (d.category === 6 || d.code === 6001 || d.code === 6002 || d.code === 6007 || d.code === 6012);
+        dashFail(loadId, isDrm, d);
+      });
+      sk.addEventListener('variantchanged', buildQualityDash);
+      sk.addEventListener('trackschanged', buildQualityDash);
+    } else {
+      await sk.unload().catch(() => {});
+    }
+
+    if (id !== loadId) return;
+
     const cfg = {
       abr: { enabled: true, defaultBandwidthEstimate: 500000 },
-      manifest: {
-        dash: { ignoreDrmInfo: true, ignoreMinBufferTime: true }
-      },
       streaming: {
-        bufferingGoal: 8,
-        rebufferingGoal: 1.5,
-        bufferBehind: 15,
+        bufferingGoal: 6,
+        rebufferingGoal: 2,
+        bufferBehind: 10,
         jumpLargeGaps: true
       }
     };
@@ -512,33 +523,11 @@ async function playDash(ch, id){
       cfg.drm = { clearKeys: ch.clearkey };
     }
 
-    p.configure(cfg);
+    sk.configure(cfg);
     
-    p.addEventListener('error', e => {
-      const d = e.detail || {};
-      console.error('Shaka player error:', d);
-      const isDrm = (d.category === 6 || d.code === 6001 || d.code === 6002 || d.code === 6007);
-      dashFail(id, isDrm, d);
-    });
-    
-    p.addEventListener('variantchanged', buildQualityDash);
-    p.addEventListener('trackschanged', buildQualityDash);
-    
-    await p.load(ch.url);
-    if (id !== loadId) { p.destroy(); return; }
+    await sk.load(ch.url);
+    if (id !== loadId) return;
     loaderOff();
-    
-    // اختيار أقل جودة متوفرة عمداً (Lowest Bandwidth / Resolution)
-    const tracks = p.getVariantTracks();
-    let lowestTrack = null;
-    tracks.forEach(t => {
-      if (!lowestTrack || t.bandwidth < lowestTrack.bandwidth) {
-        lowestTrack = t;
-      }
-    });
-    if (lowestTrack) {
-      p.selectVariantTrack(lowestTrack, true);
-    }
 
     buildQualityDash();
     
@@ -551,7 +540,7 @@ async function playDash(ch, id){
     }
   } catch (e) {
     console.error('Dash load failed:', e);
-    const isDrm = (e && (e.category === 6 || e.code === 6001 || e.code === 6002 || e.code === 6007));
+    const isDrm = (e && (e.category === 6 || e.code === 6001 || e.code === 6002 || e.code === 6007 || e.code === 6012));
     dashFail(id, isDrm, e);
   }
 }
