@@ -1,412 +1,363 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Alameeere Movies</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; outline: none; }
-        body { background-color: #0a0a0a; color: #fff; overflow-x: hidden; min-height: 100vh; }
-        
-        /* Splash Screen */
-        .splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; cursor: pointer; transition: opacity 0.5s; }
-        .splash-title { text-align: center; }
-        .splash-title h1 { font-size: 3.5rem; font-weight: 900; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
-        .splash-title h2 { font-size: 1.5rem; font-weight: 400; letter-spacing: 5px; color: #aaa; margin-top: -10px; }
-        .splash-hint { position: absolute; bottom: 10%; font-size: 1.2rem; color: #888; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>سينما أونلاين</title>
+  <!-- مكتبة تشغيل فيديو m3u8 -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1015;
+      color: #fff;
+      min-height: 100vh;
+      padding-bottom: 50px;
+    }
 
-        /* Main App */
-        .hidden { display: none !important; }
-        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: #111; position: sticky; top: 0; z-index: 100; }
-        .logo h1 { font-size: 1.8rem; font-weight: 900; }
-        .logo h2 { font-size: 0.8rem; color: #888; letter-spacing: 2px; }
-        .search-container input { padding: 10px 15px; border-radius: 8px; border: 1px solid #333; background: #222; color: #fff; width: 200px; }
-        .search-container button { padding: 10px 20px; border: none; border-radius: 8px; background: #e50914; color: #fff; font-weight: bold; cursor: pointer; }
+    header {
+      background: #181920;
+      padding: 15px 25px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
 
-        /* Categories */
-        .categories-bar { display: flex; gap: 10px; overflow-x: auto; padding: 15px 5%; background: #0a0a0a; border-bottom: 1px solid #222; }
-        .categories-bar::-webkit-scrollbar { display: none; }
-        .category-btn { background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 8px 15px; border-radius: 20px; font-size: 1rem; cursor: pointer; white-space: nowrap; }
-        .category-btn.active { background: #e50914; border-color: #e50914; }
+    .logo { font-size: 22px; font-weight: bold; color: #e50914; }
 
-        /* Grid */
-        .content-area { padding: 20px 5%; }
-        .section-title { margin-bottom: 15px; font-size: 1.5rem; }
-        .movies-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
-        .movie-card { background: #1a1a1a; border-radius: 10px; overflow: hidden; cursor: pointer; position: relative; }
-        .movie-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
-        .movie-card .card-title { padding: 8px; font-size: 0.9rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        /* Focus (Remote) */
-        [tabindex="0"]:focus, .movie-card:focus { outline: 3px solid #e50914; outline-offset: 2px; transform: scale(1.05); box-shadow: 0 0 15px rgba(229,9,20,0.5); z-index: 10; }
+    .search-box {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+      max-width: 400px;
+    }
 
-        /* Watch Page */
-        .watch-page { height: 100vh; display: flex; flex-direction: column; background: #000; }
-        .player-header { display: flex; align-items: center; padding: 15px; background: #111; gap: 20px; }
-        .back-btn { background: #333; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
-        .video-wrapper { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; }
-        video { width: 100%; height: 100%; max-height: 100vh; object-fit: contain; }
-        
-        .controls { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 20px; opacity: 0; transition: opacity 0.3s; display: flex; flex-direction: column; gap: 10px; }
-        .video-wrapper:hover .controls, .controls.active { opacity: 1; }
-        input[type="range"] { width: 100%; accent-color: #e50914; cursor: pointer; }
-        .controls-row { display: flex; align-items: center; gap: 15px; }
-        .controls-row button, .controls-row select { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
-        .controls-row select { font-size: 1rem; background: #222; padding: 5px; border-radius: 5px; }
-        #volume-bar { width: 80px; }
-        .player-loader { position: absolute; background: rgba(0,0,0,0.8); padding: 20px 40px; border-radius: 10px; z-index: 10; }
+    .search-box input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background: #232530;
+      color: #fff;
+      outline: none;
+    }
 
-        @media (min-width: 1920px) {
-            .splash-title h1 { font-size: 6rem; }
-            .movies-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-        }
-    </style>
+    .search-box button {
+      padding: 10px 18px;
+      background: #e50914;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .categories {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 15px 25px;
+      background: #13141a;
+      scrollbar-width: none;
+    }
+    .categories::-webkit-scrollbar { display: none; }
+
+    .cat-btn {
+      background: #232530;
+      color: #ddd;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: 0.2s;
+    }
+    .cat-btn.active, .cat-btn:hover {
+      background: #e50914;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #181920;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+    }
+
+    .poster-wrap {
+      position: relative;
+      width: 100%;
+      padding-top: 145%;
+      background: #232530;
+    }
+    .poster-wrap img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    .card h3 {
+      font-size: 13px;
+      line-height: 1.4;
+      padding: 12px;
+      color: #eee;
+      flex: 1;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 35px;
+    }
+    .pagination button {
+      padding: 10px 20px;
+      background: #232530;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Modal Player */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal.show { display: flex; }
+    .modal-content {
+      background: #181920;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 800px;
+      overflow: hidden;
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #e50914;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 10;
+    }
+    video { width: 100%; max-height: 480px; background: #000; display: block; }
+    .video-title { padding: 15px; font-size: 16px; }
+  </style>
 </head>
 <body>
 
-    <!-- Splash Screen -->
-    <div id="splash-screen" class="splash-screen">
-        <div class="splash-title">
-            <h1>AlameeereTv</h1>
-            <h2>Movies</h2>
-        </div>
-        <div class="splash-hint">اضغط OK أو المس الشاشة للدخول</div>
+  <header>
+    <div class="logo">سينما</div>
+    <form class="search-box" onsubmit="handleSearch(event)">
+      <input type="text" id="searchInput" placeholder="ابحث عن فيلم أو مسلسل..." />
+      <button type="submit">بحث</button>
+    </form>
+  </header>
+
+  <nav class="categories" id="catList">
+    <button class="cat-btn active" onclick="loadCategory('', this)">الكل</button>
+  </nav>
+
+  <main class="container">
+    <div id="movieGrid" class="grid">جاري تحميل الأفلام...</div>
+    <div class="pagination">
+      <button id="prevBtn" onclick="changePage(-1)" disabled>السابق</button>
+      <span id="pageNumber" style="align-self:center;">صفحة 1</span>
+      <button id="nextBtn" onclick="changePage(1)">التالي</button>
     </div>
+  </main>
 
-    <!-- Main App (Home) -->
-    <div id="main-app" class="hidden">
-        <header class="main-header">
-            <div class="logo">
-                <h1>Alameeere</h1>
-                <h2>Movies</h2>
-            </div>
-            <div class="search-container">
-                <input type="text" id="search-input" placeholder="ابحث هنا..." tabindex="0">
-                <button id="search-btn" tabindex="0">بحث</button>
-            </div>
-        </header>
-
-        <!-- التصنيفات (المجموعات) -->
-        <div class="categories-bar" id="categories-bar">
-            <button class="category-btn active" tabindex="0" onclick="filterCategory('all', this)">الكل</button>
-            <button class="category-btn" tabindex="0" onclick="filterCategory('مسلسل', this)">مسلسلات</button>
-            <button class="category-btn" tabindex="0" onclick="filterCategory('فيلم', this)">أفلام</button>
-            <button class="category-btn" tabindex="0" onclick="filterCategory('انمي', this)">أنمي</button>
-        </div>
-
-        <main class="content-area">
-            <h3 class="section-title" id="section-title">أحدث الإضافات</h3>
-            <div id="movies-grid" class="movies-grid"></div>
-            <div id="loading" style="text-align:center; padding:20px; display:none;">جاري التحميل...</div>
-        </main>
+  <!-- نافذة المشغل المنبثقة -->
+  <div class="modal" id="playerModal" onclick="closePlayer(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="close-btn" onclick="closePlayer()">✕</button>
+      <video id="videoPlayer" controls autoplay></video>
+      <div class="video-title" id="playerTitle"></div>
     </div>
+  </div>
 
-    <!-- Watch App (Player) -->
-    <div id="watch-app" class="watch-page hidden">
-        <div class="player-header">
-            <button class="back-btn" tabindex="0" onclick="closePlayer()">🔙 رجوع</button>
-            <h2 id="video-title">جاري التحميل...</h2>
-        </div>
-        <div class="video-wrapper" id="video-wrapper" tabindex="0">
-            <video id="main-video" playsinline></video>
-            <div id="player-loader" class="player-loader">جاري التحميل...</div>
-            <div class="controls" id="controls">
-                <input type="range" id="progress-bar" min="0" max="100" value="0" step="0.1">
-                <div class="controls-row">
-                    <button id="play-pause-btn" tabindex="0">⏸️</button>
-                    <span id="time-display">0:00 / 0:00</span>
-                    <div style="flex:1"></div>
-                    <button id="mute-btn" tabindex="0">🔊</button>
-                    <input type="range" id="volume-bar" min="0" max="1" step="0.1" value="1">
-                    <select id="speed-select" tabindex="0">
-                        <option value="0.5">0.5x</option>
-                        <option value="1" selected>1x</option>
-                        <option value="1.5">1.5x</option>
-                        <option value="2">2x</option>
-                    </select>
-                    <button id="fullscreen-btn" tabindex="0">⛶</button>
-                </div>
+  <script>
+    const API = 'https://mo.m737217130.workers.dev/';
+    let currentPage = 1;
+    let currentCategory = '';
+    let currentSearch = '';
+    let hls = null;
+
+    // جلب التصنيفات
+    async function fetchCategories() {
+      try {
+        const res = await fetch(`${API}?action=categories`);
+        const cats = await res.json();
+        const container = document.getElementById('catList');
+        cats.forEach(cat => {
+          const btn = document.createElement('button');
+          btn.className = 'cat-btn';
+          btn.innerText = cat.name;
+          btn.onclick = () => loadCategory(cat.slug, btn);
+          container.appendChild(btn);
+        });
+      } catch (e) {
+        console.error('خطأ في جلب التصنيفات:', e);
+      }
+    }
+
+    // جلب الأفلام
+    async function fetchMovies() {
+      const grid = document.getElementById('movieGrid');
+      grid.innerHTML = '<p>جاري التحميل...</p>';
+
+      let url = `${API}?action=posts&page=${currentPage}`;
+      if (currentSearch) {
+        url = `${API}?action=search&search=${encodeURIComponent(currentSearch)}&page=${currentPage}`;
+      } else if (currentCategory) {
+        url = `${API}?action=posts&category=${currentCategory}&page=${currentPage}`;
+      }
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        grid.innerHTML = '';
+
+        if (!data.posts || data.posts.length === 0) {
+          grid.innerHTML = '<p>لا توجد نتائج لعرضها.</p>';
+          return;
+        }
+
+        data.posts.forEach(post => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.onclick = () => playMovie(post.realid, post.title);
+          card.innerHTML = `
+            <div class="poster-wrap">
+              <img src="${post.thumbnail}" alt="${post.title}" loading="lazy" />
             </div>
-        </div>
-    </div>
-
-    <script>
-        // --- 1. إعدادات الـ API ---
-        const WORKER_URL = "https://mo.m737217130.workers.dev/";
-        const MAIN_API = "https://wecima.bar/api.php";
-        const API_HEADERS = {
-            "X-App-Key": "sv_x9k2m7p4q8n3r6t1w5y0z",
-            "Accept": "application/json, text/plain, */*",
-            "X-Device-ID": "3b29c9ef4e872d8a",
-            "User-Agent": "okhttp/4.12.0",
-            "X-App-Chk": "cebe2159",
-            "X-App-Sig": "0de08ec6cd0526dcc699041ed8e6dfb3"
-        };
-
-        let allFetchedMovies = []; // لتخزين الأفلام لتصفيتها محلياً
-        let hls = null;
-        let hideControlsTimeout;
-
-        // --- 2. دوال جلب البيانات ---
-        async function fetchData(action, params = {}) {
-            try {
-                let url = `${WORKER_URL}?action=${action}`;
-                for (let key in params) url += `&${key}=${encodeURIComponent(params[key])}`;
-                let res = await fetch(url);
-                if (res.ok) {
-                    let data = await res.json();
-                    if (data && !data.error) return data;
-                }
-            } catch (e) { console.warn("Worker failed, trying API..."); }
-
-            try {
-                let url = `${MAIN_API}?action=${action}`;
-                for (let key in params) url += `&${key}=${encodeURIComponent(params[key])}`;
-                let res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`, { headers: API_HEADERS });
-                if (res.ok) return await res.json();
-            } catch (e) { console.error("API failed too"); }
-            return null;
-        }
-
-        // --- 3. منطق صفحة البداية ---
-        document.getElementById('splash-screen').addEventListener('click', enterSite);
-        document.addEventListener('keydown', (e) => {
-            const splash = document.getElementById('splash-screen');
-            if (!splash.classList.contains('hidden') && (e.key === 'Enter' || e.key === ' ')) {
-                enterSite();
-            }
+            <h3>${post.title}</h3>
+          `;
+          grid.appendChild(card);
         });
 
-        function enterSite() {
-            document.getElementById('splash-screen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('splash-screen').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                loadLatestMovies();
-            }, 500);
+        document.getElementById('pageNumber').innerText = `صفحة ${currentPage}`;
+        document.getElementById('prevBtn').disabled = currentPage <= 1;
+      } catch (e) {
+        grid.innerHTML = '<p>حدث خطأ أثناء تحميل البيانات.</p>';
+      }
+    }
+
+    // تشغيل الفيديو عند الضغط على البطاقة
+    async function playMovie(realid, title) {
+      const modal = document.getElementById('playerModal');
+      const video = document.getElementById('videoPlayer');
+      const titleEl = document.getElementById('playerTitle');
+
+      titleEl.innerText = 'جاري تحضير سيرفر المشاهدة...';
+      modal.classList.add('show');
+
+      try {
+        const res = await fetch(`${API}?action=stream&realid=${realid}`);
+        const streamData = await res.json();
+
+        if (!streamData.url) {
+          alert('تعذر استخراج رابط المشاهدة لهذا المحتوى.');
+          closePlayer();
+          return;
         }
 
-        async function loadLatestMovies() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('movies-grid').innerHTML = '';
-            
-            const data = await fetchData("posts", { page: 1 });
-            if (data && data.posts) {
-                allFetchedMovies = data.posts; // حفظها للتصفية
-                renderMovies(allFetchedMovies);
-            } else {
-                document.getElementById('movies-grid').innerHTML = "<p>حدث خطأ في جلب البيانات.</p>";
-            }
-            document.getElementById('loading').style.display = 'none';
+        titleEl.innerText = title;
+
+        if (Hls.isSupported()) {
+          if (hls) hls.destroy();
+          hls = new Hls();
+          hls.loadSource(streamData.url);
+          hls.attachMedia(video);
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = streamData.url;
         }
+      } catch (e) {
+        alert('حدث خطأ أثناء جلب الفيديو.');
+        closePlayer();
+      }
+    }
 
-        function filterCategory(keyword, btnElement) {
-            // تغيير شكل الأزرار
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-            btnElement.classList.add('active');
+    function closePlayer() {
+      const modal = document.getElementById('playerModal');
+      const video = document.getElementById('videoPlayer');
+      modal.classList.remove('show');
+      video.pause();
+      if (hls) {
+        hls.destroy();
+        hls = null;
+      }
+    }
 
-            document.getElementById('section-title').textContent = keyword === 'all' ? 'أحدث الإضافات' : `تصنيف: ${keyword}`;
-            
-            if (keyword === 'all') {
-                renderMovies(allFetchedMovies);
-            } else {
-                // تصفية محلية بناءً على الكلمة المفتاحية في العنوان
-                const filtered = allFetchedMovies.filter(m => m.title.includes(keyword));
-                if (filtered.length > 0) {
-                    renderMovies(filtered);
-                } else {
-                    document.getElementById('movies-grid').innerHTML = `<p>لا توجد نتائج مطابقة لـ "${keyword}" في هذه الصفحة.</p>`;
-                }
-            }
-        }
+    function loadCategory(slug, btn) {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCategory = slug;
+      currentSearch = '';
+      currentPage = 1;
+      fetchMovies();
+    }
 
-        document.getElementById('search-btn').addEventListener('click', performSearch);
-        document.getElementById('search-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') performSearch();
-        });
+    function handleSearch(e) {
+      e.preventDefault();
+      const val = document.getElementById('searchInput').value.trim();
+      if (!val) return;
+      currentSearch = val;
+      currentPage = 1;
+      fetchMovies();
+    }
 
-        async function performSearch() {
-            const query = document.getElementById('search-input').value.trim();
-            if (!query) return filterCategory('all', document.querySelector('.category-btn'));
+    function changePage(direction) {
+      currentPage += direction;
+      if (currentPage < 1) currentPage = 1;
+      fetchMovies();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('movies-grid').innerHTML = '';
-            document.getElementById('section-title').textContent = `نتائج البحث عن: ${query}`;
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-
-            const data = await fetchData("search", { search: query });
-            if (data && (data.posts || data.results)) {
-                renderMovies(data.posts || data.results);
-            } else {
-                document.getElementById('movies-grid').innerHTML = "<p>لا توجد نتائج مطابقة.</p>";
-            }
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        function renderMovies(posts) {
-            const grid = document.getElementById('movies-grid');
-            grid.innerHTML = '';
-            posts.forEach(post => {
-                const card = document.createElement('div');
-                card.className = "movie-card";
-                card.tabIndex = 0;
-                card.innerHTML = `
-                    <img src="${post.thumbnail || 'https://via.placeholder.com/300x450?text=No+Image'}" alt="${post.title}" loading="lazy">
-                    <div class="card-title">${post.title}</div>
-                `;
-                const openVideo = () => openPlayer(post.realid, post.title);
-                card.addEventListener('click', openVideo);
-                card.addEventListener('keydown', (e) => { if (e.key === 'Enter') openVideo(); });
-                grid.appendChild(card);
-            });
-        }
-
-        // --- 4. منطق المشغل (Watch Page) ---
-        async function openPlayer(id, title) {
-            document.getElementById('main-app').classList.add('hidden');
-            document.getElementById('watch-app').classList.remove('hidden');
-            document.getElementById('video-title').textContent = decodeURIComponent(title);
-            
-            const video = document.getElementById('main-video');
-            video.pause();
-            video.src = "";
-            
-            document.getElementById('player-loader').style.display = 'block';
-            const data = await fetchData("stream", { realid: id });
-            
-            let url = null;
-            if (data) {
-                if (typeof data === 'string') url = data;
-                else url = data.url || data.stream || data.m3u8 || (data.data && data.data.url);
-            }
-
-            if (url) {
-                document.getElementById('player-loader').style.display = 'none';
-                if (Hls.isSupported() && url.includes('.m3u8')) {
-                    if (hls) hls.destroy();
-                    hls = new Hls();
-                    hls.loadSource(url);
-                    hls.attachMedia(video);
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(e=>console.log(e)));
-                } else {
-                    video.src = url;
-                    video.play().catch(e=>console.log(e));
-                }
-            } else {
-                document.getElementById('player-loader').textContent = "الرابط غير متوفر.";
-            }
-        }
-
-        function closePlayer() {
-            const video = document.getElementById('main-video');
-            video.pause();
-            if (hls) { hls.destroy(); hls = null; }
-            document.getElementById('watch-app').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-        }
-
-        // تحكم المشغل
-        const video = document.getElementById('main-video');
-        document.getElementById('play-pause-btn').addEventListener('click', () => { video.paused ? video.play() : video.pause(); });
-        video.addEventListener('play', () => document.getElementById('play-pause-btn').textContent = '⏸️');
-        video.addEventListener('pause', () => document.getElementById('play-pause-btn').textContent = '▶️');
-        
-        video.addEventListener('timeupdate', () => {
-            if (!video.duration) return;
-            document.getElementById('progress-bar').value = (video.currentTime / video.duration) * 100;
-            document.getElementById('time-display').textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
-        });
-
-        document.getElementById('progress-bar').addEventListener('input', (e) => {
-            video.currentTime = (e.target.value / 100) * video.duration;
-        });
-
-        document.getElementById('mute-btn').addEventListener('click', () => {
-            video.muted = !video.muted;
-            document.getElementById('mute-btn').textContent = video.muted ? '🔇' : '🔊';
-        });
-        document.getElementById('volume-bar').addEventListener('input', (e) => {
-            video.volume = e.target.value;
-            video.muted = video.volume === 0;
-        });
-        document.getElementById('speed-select').addEventListener('change', (e) => {
-            video.playbackRate = parseFloat(e.target.value);
-        });
-        document.getElementById('fullscreen-btn').addEventListener('click', () => {
-            const wrap = document.getElementById('video-wrapper');
-            if (!document.fullscreenElement) wrap.requestFullscreen();
-            else document.exitFullscreen();
-        });
-
-        function formatTime(sec) {
-            if (isNaN(sec)) return "0:00";
-            const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
-            return `${m}:${s.toString().padStart(2, '0')}`;
-        }
-
-        // إخفاء عناصر التحكم
-        function showControls() {
-            const c = document.getElementById('controls');
-            c.classList.add('active');
-            clearTimeout(hideControlsTimeout);
-            hideControlsTimeout = setTimeout(() => { if (!video.paused) c.classList.remove('active'); }, 3000);
-        }
-        document.getElementById('video-wrapper').addEventListener('mousemove', showControls);
-        document.getElementById('video-wrapper').addEventListener('touchstart', showControls);
-
-        // --- 5. التنقل بالريموت (Spatial Navigation) ---
-        document.addEventListener("keydown", (e) => {
-            // اختصارات المشغل
-            if (!document.getElementById('watch-app').classList.contains('hidden')) {
-                showControls();
-                if (e.key === "ArrowRight") { video.currentTime += 10; e.preventDefault(); return; }
-                if (e.key === "ArrowLeft") { video.currentTime -= 10; e.preventDefault(); return; }
-                if (e.key === "ArrowUp") { video.volume = Math.min(video.volume + 0.1, 1); e.preventDefault(); return; }
-                if (e.key === "ArrowDown") { video.volume = Math.max(video.volume - 0.1, 0); e.preventDefault(); return; }
-                if (e.key === "Escape" || e.key === "Backspace") { closePlayer(); e.preventDefault(); return; }
-                if (e.key === " " || e.key === "Enter") { 
-                    if (document.activeElement.tagName !== 'BUTTON' && document.activeElement.tagName !== 'SELECT') {
-                        video.paused ? video.play() : video.pause(); e.preventDefault(); return; 
-                    }
-                }
-            }
-
-            // التنقل بالأسهم بين العناصر
-            const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-            if (!keys.includes(e.key)) return;
-            if (document.activeElement.tagName === "INPUT") return;
-
-            const focusable = Array.from(document.querySelectorAll('button, input, select, [tabindex="0"]'))
-                .filter(el => el.offsetWidth > 0 && el.offsetHeight > 0 && !el.closest('.hidden'));
-            
-            if (focusable.length === 0) return;
-            const current = document.activeElement;
-            if (!current || !focusable.includes(current)) { focusable[0].focus(); e.preventDefault(); return; }
-
-            e.preventDefault();
-            const curRect = current.getBoundingClientRect();
-            let best = null, minDist = Infinity;
-
-            focusable.forEach(el => {
-                if (el === current) return;
-                const rect = el.getBoundingClientRect();
-                const dx = (rect.left + rect.width/2) - (curRect.left + curRect.width/2);
-                const dy = (rect.top + rect.height/2) - (curRect.top + curRect.height/2);
-                let inDir = false, dist = Infinity;
-
-                if (e.key === "ArrowRight" && dx > 10) { inDir = true; dist = Math.abs(dx) + Math.abs(dy)*2; }
-                if (e.key === "ArrowLeft" && dx < -10) { inDir = true; dist = Math.abs(dx) + Math.abs(dy)*2; }
-                if (e.key === "ArrowDown" && dy > 10) { inDir = true; dist = Math.abs(dy) + Math.abs(dx)*2; }
-                if (e.key === "ArrowUp" && dy < -10) { inDir = true; dist = Math.abs(dy) + Math.abs(dx)*2; }
-
-                if (inDir && dist < minDist) { minDist = dist; best = el; }
-            });
-
-            if (best) { best.focus(); best.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-        });
-    </script>
+    // بدء التشغيل
+    fetchCategories();
+    fetchMovies();
+  </script>
 </body>
 </html>
