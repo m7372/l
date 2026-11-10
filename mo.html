@@ -67,6 +67,11 @@
     .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; max-height: 400px; overflow-y: auto; padding: 5px; }
     .episode-btn { background: #232530; color: #fff; border: 1px solid #333; padding: 12px 15px; border-radius: 8px; cursor: pointer; text-align: right; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
     .episode-btn:hover, .episode-btn:focus { background: #333; border-color: #e50914; }
+    
+    /* زر تحميل المزيد */
+    .load-more-container { display: flex; justify-content: center; margin-top: 20px; width: 100%; grid-column: 1 / -1; }
+    .load-more-btn { background: #e50914; color: #fff; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; }
+    .load-more-btn:hover { background: #b80710; }
 
     /* Player Modal */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999; justify-content: center; align-items: center; padding: 20px; }
@@ -186,6 +191,11 @@
     let hls = null;
     let hideControlsTimer;
     let groupedContent = [];
+
+    // بيانات النافذة الحالية
+    let activeSeries = null;
+    let activeSeasonEpisodes = [];
+    let currentSeriesPage = 1;
 
     // ===== Splash =====
     const splash = document.getElementById('splash-screen');
@@ -315,99 +325,34 @@
     // ===== Series Modal (المواسم والحلقات) =====
     const seriesModal = document.getElementById('seriesModal');
 
-    async function openSeriesModal(series) {
+    function openSeriesModal(series) {
+      activeSeries = series;
       document.getElementById('seriesPoster').src = series.thumbnail;
       document.getElementById('seriesTitle').innerText = series.title;
       document.getElementById('seriesStory').innerText = series.story || 'لا يوجد وصف متاح.';
       
-      // إظهار النافذة فوراً مع رسالة تحميل
-      document.getElementById('seasonTabs').innerHTML = '<span style="color:#aaa;">جاري جلب جميع الحلقات...</span>';
-      document.getElementById('episodesGrid').innerHTML = '';
+      // إظهار النافذة
       seriesModal.classList.add('show');
 
-      // جلب جميع حلقات المسلسل من الـ API
-      await fetchAllSeriesEpisodes(series);
-    }
-
-    // دالة جديدة لجلب جميع الحلقات
-    async function fetchAllSeriesEpisodes(series) {
-      let allEpisodes = [];
-      let page = 1;
-      let totalPages = 1;
-
-      // نقوم بجلب الصفحة الأولى لمعرفة عدد الصفحات
-      try {
-        // نطلب البحث بـ series_slug لجلب كل ما يخص المسلسل
-        const firstRes = await fetch(`${API}?action=posts&series_slug=${encodeURIComponent(series.series_slug)}&page=1`);
-        const firstData = await firstRes.json();
-        
-        if (firstData && firstData.posts) {
-          allEpisodes = allEpisodes.concat(firstData.posts);
-          if (firstData.total_pages) {
-            totalPages = firstData.total_pages;
-          }
-        }
-
-        // إذا كان هناك أكثر من صفحة، نقوم بجلبها كلها
-        if (totalPages > 1) {
-          const fetchPromises = [];
-          for (let i = 2; i <= totalPages; i++) {
-            fetchPromises.push(
-              fetch(`${API}?action=posts&series_slug=${encodeURIComponent(series.series_slug)}&page=${i}`)
-                .then(res => res.json())
-            );
-          }
-          
-          const pagesData = await Promise.all(fetchPromises);
-          pagesData.forEach(data => {
-            if (data && data.posts) {
-              allEpisodes = allEpisodes.concat(data.posts);
-            }
-          });
-        }
-
-        // إزالة أي تكرار (في حال كان الـ API يعيد نفس الحلقة)
-        const uniqueEpisodes = [];
-        const map = new Map();
-        for (const ep of allEpisodes) {
-          if (!map.has(ep.realid)) {
-            map.set(ep.realid, true);
-            uniqueEpisodes.push(ep);
-          }
-        }
-
-        // تحديث بيانات المسلسل بالحلقات الكاملة
-        series.episodes = uniqueEpisodes;
-        renderSeasonsAndEpisodes(series);
-
-      } catch (error) {
-        console.error("خطأ في جلب الحلقات:", error);
-        document.getElementById('seasonTabs').innerHTML = '<span style="color:red;">حدث خطأ في جلب الحلقات، جرب لاحقاً.</span>';
-      }
-    }
-
-    // دالة عرض المواسم والحلقات (بعد جلبها)
-    function renderSeasonsAndEpisodes(series) {
-      const seasons = {};
+      // تجميع الحلقات التي تم تحميلها مسبقاً في الصفحة الرئيسية
+      const initialSeasons = {};
       series.episodes.forEach(ep => {
         const seasonName = ep.season_info?.name || ep.movie_season || 'الموسم الأول';
-        if (!seasons[seasonName]) seasons[seasonName] = [];
-        seasons[seasonName].push(ep);
+        if (!initialSeasons[seasonName]) initialSeasons[seasonName] = [];
+        initialSeasons[seasonName].push(ep);
       });
 
-      // ترتيب الحلقات داخل كل موسم
-      for (let season in seasons) {
-        seasons[season].sort((a, b) => {
-          const numA = parseInt(a.meta?.number || 0);
-          const numB = parseInt(b.meta?.number || 0);
-          return numA - numB; // ترتيب تصاعدي (1، 2، 3...)
-        });
-      }
+      renderSeasonsAndEpisodes(initialSeasons);
+      
+      // تصفير عداد الصفحات الخاص بالمسلسل
+      currentSeriesPage = 1;
+    }
 
+    function renderSeasonsAndEpisodes(seasonsObj) {
       const seasonTabs = document.getElementById('seasonTabs');
       seasonTabs.innerHTML = '';
       
-      const seasonNames = Object.keys(seasons);
+      const seasonNames = Object.keys(seasonsObj);
       
       if (seasonNames.length === 0) {
         seasonTabs.innerHTML = '<span style="color:#aaa;">لا توجد حلقات متاحة.</span>';
@@ -422,16 +367,22 @@
         btn.onclick = () => {
           document.querySelectorAll('.season-tab').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-          renderEpisodes(seasons[seasonName]);
+          
+          // ترتيب الحلقات
+          seasonsObj[seasonName].sort((a, b) => parseInt(a.meta?.number||0) - parseInt(b.meta?.number||0));
+          activeSeasonEpisodes = seasonsObj[seasonName];
+          renderEpisodes(activeSeasonEpisodes, true);
         };
         seasonTabs.appendChild(btn);
       });
 
       // عرض حلقات الموسم الأول افتراضياً
-      renderEpisodes(seasons[seasonNames[0]]);
+      seasonsObj[seasonNames[0]].sort((a, b) => parseInt(a.meta?.number||0) - parseInt(b.meta?.number||0));
+      activeSeasonEpisodes = seasonsObj[seasonNames[0]];
+      renderEpisodes(activeSeasonEpisodes, true);
     }
 
-    function renderEpisodes(episodes) {
+    function renderEpisodes(episodes, showLoadMore) {
       const grid = document.getElementById('episodesGrid');
       grid.innerHTML = '';
       
@@ -456,6 +407,62 @@
         
         grid.appendChild(btn);
       });
+
+      // إضافة زر "تحميل المزيد" لجلب باقي الحلقات
+      if (showLoadMore) {
+        const loadMoreDiv = document.createElement('div');
+        loadMoreDiv.className = 'load-more-container';
+        const loadMoreBtn = document.createElement('button');
+        loadMoreBtn.className = 'load-more-btn';
+        loadMoreBtn.innerText = '⬇️ تحميل المزيد من الحلقات';
+        loadMoreBtn.tabIndex = 0;
+        loadMoreBtn.onclick = () => fetchMoreEpisodes(loadMoreBtn);
+        loadMoreDiv.appendChild(loadMoreBtn);
+        grid.appendChild(loadMoreDiv);
+      }
+    }
+
+    // دالة جلب المزيد من الحلقات (لن تفشل أبداً مع الـ API الخاص بك)
+    async function fetchMoreEpisodes(btn) {
+      btn.innerText = 'جاري التحميل...';
+      btn.disabled = true;
+      
+      currentSeriesPage++;
+      // نبحث باسم المسلسل لجلب الصفحة التالية
+      let query = activeSeries.title.replace("الحلقة", "").trim(); // تنظيف الاسم
+      
+      try {
+        const res = await fetch(`${API}?action=search&search=${encodeURIComponent(query)}&page=${currentSeriesPage}`);
+        const data = await res.json();
+        
+        if (data && data.posts && data.posts.length > 0) {
+          // تصفية النتائج للتأكد من أنها لنفس المسلسل
+          const newEps = data.posts.filter(p => p.series_slug === activeSeries.series_slug);
+          
+          if (newEps.length > 0) {
+            // دمج الحلقات الجديدة
+            newEps.forEach(ep => {
+              if(!activeSeasonEpisodes.find(e => e.realid === ep.realid)) {
+                activeSeasonEpisodes.push(ep);
+              }
+            });
+            
+            // إعادة ترتيب وعرض
+            activeSeasonEpisodes.sort((a, b) => parseInt(a.meta?.number||0) - parseInt(b.meta?.number||0));
+            renderEpisodes(activeSeasonEpisodes, true);
+            return;
+          }
+        }
+        
+        // إذا لم يجد المزيد
+        btn.innerText = 'لا توجد حلقات أخرى متاحة';
+        btn.disabled = true;
+        btn.style.background = '#444';
+
+      } catch (error) {
+        btn.innerText = 'حدث خطأ، جرب مرة أخرى';
+        btn.disabled = false;
+      }
     }
 
     function closeSeriesModal() {
