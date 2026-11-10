@@ -25,6 +25,19 @@
       padding-bottom: 60px;
     }
 
+    /* ------------------- إطار التركيز لشاشات التلفزيون والريموت ------------------- */
+    :focus {
+      outline: none;
+    }
+    .focusable:focus, .card:focus, .cat-btn:focus, .ctrl-btn:focus, input:focus, .pagination button:focus {
+      outline: 4px solid var(--primary) !important;
+      outline-offset: 3px;
+      transform: scale(1.06);
+      box-shadow: 0 0 25px rgba(229, 9, 20, 0.85);
+      z-index: 100;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
     /* ------------------- شاشة البداية Splash Screen ------------------- */
     #splashScreen {
       position: fixed;
@@ -47,7 +60,6 @@
     .splash-logo {
       font-size: clamp(38px, 8vw, 64px);
       font-weight: 900;
-      letter-spacing: 1px;
       background: linear-gradient(135deg, #ffffff 20%, #e50914 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -55,12 +67,12 @@
       animation: floatLogo 3s ease-in-out infinite;
     }
     .splash-prompt {
-      font-size: 17px;
+      font-size: 18px;
       color: #b0b4c8;
-      border: 1px solid rgba(255,255,255,0.15);
-      padding: 12px 28px;
+      border: 2px solid rgba(255,255,255,0.2);
+      padding: 12px 32px;
       border-radius: 30px;
-      background: rgba(255,255,255,0.03);
+      background: rgba(255,255,255,0.04);
       backdrop-filter: blur(8px);
       animation: pulseText 2s infinite ease-in-out;
     }
@@ -69,8 +81,8 @@
       50% { transform: translateY(-8px); }
     }
     @keyframes pulseText {
-      0%, 100% { opacity: 0.6; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.03); border-color: var(--primary); }
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.04); border-color: var(--primary); }
     }
 
     /* ------------------- الشريط العلوي Header ------------------- */
@@ -93,7 +105,7 @@
       gap: 15px;
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 90;
       box-shadow: 0 4px 20px rgba(0,0,0,0.6);
     }
     .main-logo {
@@ -110,7 +122,7 @@
     .search-box {
       display: flex;
       flex: 1;
-      max-width: 420px;
+      max-width: 440px;
       background: #1d1f2b;
       border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.1);
@@ -126,7 +138,7 @@
       font-size: 14px;
     }
     .search-box button {
-      padding: 10px 18px;
+      padding: 10px 20px;
       background: var(--primary);
       border: none;
       color: #fff;
@@ -139,7 +151,7 @@
       display: flex;
       gap: 10px;
       overflow-x: auto;
-      padding: 12px 20px;
+      padding: 14px 20px;
       background: #111218;
       border-bottom: 1px solid rgba(255,255,255,0.05);
       scrollbar-width: none;
@@ -162,7 +174,7 @@
       border-color: var(--primary);
     }
 
-    /* ------------------- الشبكة Cards Grid ------------------- */
+    /* ------------------- شبكة البطاقات Grid ------------------- */
     .container {
       max-width: 1400px;
       margin: 20px auto;
@@ -178,8 +190,8 @@
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 18px;
     }
     @media (max-width: 600px) {
       .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -191,14 +203,10 @@
       overflow: hidden;
       cursor: pointer;
       position: relative;
-      transition: transform 0.2s, box-shadow 0.2s;
       display: flex;
       flex-direction: column;
       border: 1px solid rgba(255,255,255,0.04);
-    }
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+      transition: transform 0.2s, box-shadow 0.2s;
     }
     .poster-wrap {
       position: relative;
@@ -216,11 +224,11 @@
       position: absolute;
       top: 8px;
       right: 8px;
-      background: rgba(0,0,0,0.65);
+      background: rgba(0,0,0,0.7);
       border: none;
       color: #fff;
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
       font-size: 16px;
       cursor: pointer;
@@ -228,10 +236,9 @@
       align-items: center;
       justify-content: center;
       backdrop-filter: blur(4px);
-      transition: transform 0.2s;
       z-index: 2;
     }
-    .fav-btn.active { color: var(--primary); transform: scale(1.1); }
+    .fav-btn.active { color: var(--primary); }
     .card h3 {
       font-size: 13px;
       line-height: 1.4;
@@ -262,7 +269,7 @@
     }
     .pagination button:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    /* ------------------- المشغل الاحترافي Pro Player Modal ------------------- */
+    /* ------------------- المشغل الاحترافي Pro Player ------------------- */
     .player-modal {
       display: none;
       position: fixed;
@@ -291,48 +298,43 @@
       transition: filter 0.1s ease;
     }
 
-    /* شاشات اللمس الحركية للتحكم بالصوت والإضاءة */
+    /* اللمس للصوت والإضاءة */
     .touch-overlay {
       position: absolute;
       inset: 0;
       display: flex;
       z-index: 5;
     }
-    .touch-half {
-      flex: 1;
-      height: 100%;
-      position: relative;
-    }
+    .touch-half { flex: 1; height: 100%; }
 
-    /* مؤشر الصوت والإضاءة عند اللمس */
     .indicator-badge {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.85);
       color: #fff;
-      padding: 12px 24px;
-      border-radius: 25px;
-      font-size: 18px;
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-size: 20px;
       font-weight: bold;
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.2s;
-      z-index: 20;
+      z-index: 30;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     .indicator-badge.show { opacity: 1; }
 
-    /* أزرار المشغل والأدوات Controls */
+    /* أزرار المشغل */
     .player-controls {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      background: linear-gradient(to top, rgba(0,0,0,0.92), transparent);
       padding: 20px 25px 30px;
       display: flex;
       flex-direction: column;
@@ -376,7 +378,7 @@
 
     .progress-bar-wrap {
       width: 100%;
-      height: 6px;
+      height: 8px;
       background: rgba(255,255,255,0.25);
       border-radius: 4px;
       cursor: pointer;
@@ -401,20 +403,18 @@
     }
     .time-display { font-size: 12px; color: #ccc; }
 
-    /* القوائم المنسدلة للجودات والأبعاد */
-    .menu-dropdown {
-      position: relative;
-    }
+    /* القوائم المنسدلة */
+    .menu-dropdown { position: relative; }
     .dropdown-content {
       display: none;
       position: absolute;
-      bottom: 40px;
+      bottom: 42px;
       left: 0;
       background: #181924;
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 8px;
       padding: 8px;
-      min-width: 120px;
+      min-width: 130px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.8);
       z-index: 30;
     }
@@ -435,14 +435,14 @@
       color: #fff;
     }
 
-    /* لوحة الحلقات داخل المشغل Side Drawer */
+    /* لوحة الحلقات الجانبية */
     .episodes-drawer {
       position: absolute;
       top: 0;
       bottom: 0;
       left: -340px;
       width: 320px;
-      background: rgba(18, 19, 26, 0.95);
+      background: rgba(18, 19, 26, 0.96);
       backdrop-filter: blur(12px);
       z-index: 25;
       padding: 20px;
@@ -466,22 +466,23 @@
     }
     .ep-item {
       padding: 10px;
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.06);
       border-radius: 6px;
       cursor: pointer;
       font-size: 13px;
       transition: 0.2s;
     }
-    .ep-item:hover, .ep-item.current {
+    .ep-item:hover, .ep-item:focus, .ep-item.current {
       background: var(--primary);
       color: #fff;
+      outline: none;
     }
   </style>
 </head>
 <body>
 
   <!-- شاشة البداية المطابقة للفيديو -->
-  <div id="splashScreen" onclick="enterSite()">
+  <div id="splashScreen" onclick="enterSite()" tabindex="0">
     <div class="splash-logo">Alameeere 🍿</div>
     <div class="splash-prompt">اضغط OK أو المس الشاشة للدخول</div>
   </div>
@@ -494,17 +495,17 @@
 
   <!-- الهيدر الرئيسي -->
   <header>
-    <div class="main-logo" onclick="resetToHome()">Alameeere <span>🍿</span></div>
+    <div class="main-logo focusable" tabindex="0" onclick="resetToHome()">Alameeere <span>🍿</span></div>
     <form class="search-box" onsubmit="handleSearch(event)">
-      <input type="text" id="searchInput" placeholder="ابحث بالعربي أو الإنجليزي (مثل: ديكستر، Batman...)" />
-      <button type="submit">بحث</button>
+      <input type="text" id="searchInput" class="focusable" tabindex="0" placeholder="ابحث بالعربي أو الإنجليزي (مثل: ديكستر، Batman...)" />
+      <button type="submit" class="focusable" tabindex="0">بحث</button>
     </form>
   </header>
 
   <!-- شريط الأقسام -->
   <nav class="categories" id="catList">
-    <button class="cat-btn active" onclick="loadCategory('', this)">الكل</button>
-    <button class="cat-btn" onclick="showFavorites(this)">❤️ المفضلة</button>
+    <button class="cat-btn focusable active" tabindex="0" onclick="loadCategory('', this)">الكل</button>
+    <button class="cat-btn focusable" tabindex="0" onclick="showFavorites(this)">❤️ المفضلة</button>
   </nav>
 
   <!-- قسم عرض المحتوى -->
@@ -513,83 +514,72 @@
     <div id="movieGrid" class="grid">جاري تحميل الأفلام والمسلسلات...</div>
 
     <div class="pagination" id="paginationWrap">
-      <button id="prevBtn" onclick="changePage(-1)" disabled>السابق</button>
+      <button id="prevBtn" class="focusable" tabindex="0" onclick="changePage(-1)" disabled>السابق</button>
       <span id="pageNumber">صفحة 1</span>
-      <button id="nextBtn" onclick="changePage(1)">التالي</button>
+      <button id="nextBtn" class="focusable" tabindex="0" onclick="changePage(1)">التالي</button>
     </div>
   </main>
 
   <!-- مشغل الفيديو الاحترافي الشامل -->
   <div class="player-modal" id="playerModal">
     <div class="player-container" id="playerBox">
-      
-      <!-- الفيديو -->
       <video id="mainVideo" playsinline></video>
 
-      <!-- مؤشر اللمس (الصوت والإضاءة) -->
       <div class="indicator-badge" id="indicatorBadge">
         <span id="indicatorIcon">🔊</span>
         <span id="indicatorText">50%</span>
       </div>
 
-      <!-- مناطق اللمس الحركية (اليمين للصوت، اليسار للإضاءة) -->
       <div class="touch-overlay" id="touchOverlay">
         <div class="touch-half" id="leftTouchHalf"></div>
         <div class="touch-half" id="rightTouchHalf"></div>
       </div>
 
-      <!-- أزرار المشغل العلوية -->
       <div class="top-controls" id="topControls">
         <div class="player-title" id="videoTitleDisplay">عنوان الفيديو</div>
         <div style="display:flex; gap:10px;">
-          <button class="ctrl-btn" onclick="toggleEpisodesDrawer()">📑 الحلقات</button>
-          <button class="ctrl-btn" onclick="closePlayer()">✕ إغلاق</button>
+          <button class="ctrl-btn focusable" tabindex="0" onclick="toggleEpisodesDrawer()">📑 الحلقات</button>
+          <button class="ctrl-btn focusable" tabindex="0" onclick="closePlayer()">✕ إغلاق</button>
         </div>
       </div>
 
-      <!-- أزرار التحكم السفلية -->
       <div class="player-controls" id="bottomControls">
-        <!-- شريط التقدم -->
         <div class="progress-bar-wrap" id="progressBar" onclick="seekVideo(event)">
           <div class="progress-bar-fill" id="progressFill"></div>
         </div>
 
         <div class="bottom-row">
           <div class="left-ctrls">
-            <button class="ctrl-btn" id="playBtn" onclick="togglePlay()">▶ تشغيل</button>
-            <button class="ctrl-btn" onclick="skipTime(-10)">↺ 10 ثوانٍ</button>
-            <button class="ctrl-btn" onclick="skipTime(10)">10 ثوانٍ ↻</button>
+            <button class="ctrl-btn focusable" tabindex="0" id="playBtn" onclick="togglePlay()">▶ تشغيل</button>
+            <button class="ctrl-btn focusable" tabindex="0" onclick="skipTime(-10)">↺ 10 ثوانٍ</button>
+            <button class="ctrl-btn focusable" tabindex="0" onclick="skipTime(10)">10 ثوانٍ ↻</button>
             <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
           </div>
 
           <div class="right-ctrls">
-            <!-- قائمة الجودات -->
             <div class="menu-dropdown">
-              <button class="ctrl-btn" onclick="toggleQualityMenu()">⚙️ الجودة</button>
+              <button class="ctrl-btn focusable" tabindex="0" onclick="toggleQualityMenu()">⚙️ الجودة</button>
               <div class="dropdown-content" id="qualityMenu"></div>
             </div>
 
-            <!-- أبعاد الشاشة -->
             <div class="menu-dropdown">
-              <button class="ctrl-btn" onclick="toggleAspectMenu()">📺 المقاس</button>
+              <button class="ctrl-btn focusable" tabindex="0" onclick="toggleAspectMenu()">📺 المقاس</button>
               <div class="dropdown-content" id="aspectMenu">
-                <button onclick="setAspectRatio('contain')">عادي (16:9)</button>
-                <button onclick="setAspectRatio('cover')">ملء الشاشة (Cover)</button>
-                <button onclick="setAspectRatio('fill')">تمدد (Fill)</button>
+                <button class="focusable" tabindex="0" onclick="setAspectRatio('contain')">عادي (16:9)</button>
+                <button class="focusable" tabindex="0" onclick="setAspectRatio('cover')">ملء الشاشة (Cover)</button>
+                <button class="focusable" tabindex="0" onclick="setAspectRatio('fill')">تمدد (Fill)</button>
               </div>
             </div>
 
-            <!-- تدوير الشاشة وملء الشاشة -->
-            <button class="ctrl-btn" onclick="toggleFullscreenRotate()">⛶ تكبير وتدوير</button>
+            <button class="ctrl-btn focusable" tabindex="0" onclick="toggleFullscreenRotate()">⛶ تكبير وتدوير</button>
           </div>
         </div>
       </div>
 
-      <!-- لوحة الحلقات الجانبية -->
       <div class="episodes-drawer" id="epDrawer">
         <div class="drawer-header">
           <h3>قائمة الحلقات</h3>
-          <button class="ctrl-btn" onclick="toggleEpisodesDrawer()">✕</button>
+          <button class="ctrl-btn focusable" tabindex="0" onclick="toggleEpisodesDrawer()">✕</button>
         </div>
         <div class="episodes-list" id="episodesListContainer">
           <p style="color:#aaa; font-size:13px;">جاري تحميل الحلقات...</p>
@@ -608,8 +598,8 @@
     let currentSeriesSlug = '';
     let hls = null;
     let favorites = JSON.parse(localStorage.getItem('alameeere_favs') || '[]');
+    let lastFocusedElement = null;
 
-    // قاموس تحويل الأسماء العربية الشائعة للإنجليزية
     const titleDictionary = {
       'ديكستر': 'dexter',
       'دكستر': 'dexter',
@@ -631,27 +621,22 @@
       'فريندز': 'friends'
     };
 
-    // ضبط تاريخ اليوم بالعربي
     function updateDate() {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      const dateStr = new Date().toLocaleDateString('ar-EG', options);
-      document.getElementById('currentDateText').innerText = dateStr;
+      document.getElementById('currentDateText').innerText = new Date().toLocaleDateString('ar-EG', options);
     }
     updateDate();
 
-    // إخفاء شاشة البداية والدخول
+    // الدخول من شاشة البداية وضبط أول تركيز
     function enterSite() {
       const splash = document.getElementById('splashScreen');
       splash.classList.add('hide');
+      setTimeout(() => {
+        const firstCard = document.querySelector('.card');
+        if (firstCard) firstCard.focus();
+      }, 300);
     }
-    // دعم أزرار الكيبورد والريموت (OK / Enter / Space)
-    window.addEventListener('keydown', (e) => {
-      if (['Enter', ' ', 'Select'].includes(e.key)) {
-        enterSite();
-      }
-    });
 
-    // جلب التصنيفات
     async function fetchCategories() {
       try {
         const res = await fetch(`${API}?action=categories`);
@@ -659,7 +644,8 @@
         const container = document.getElementById('catList');
         cats.forEach(cat => {
           const btn = document.createElement('button');
-          btn.className = 'cat-btn';
+          btn.className = 'cat-btn focusable';
+          btn.tabIndex = 0;
           btn.innerText = cat.name;
           btn.onclick = () => loadCategory(cat.slug, btn);
           container.appendChild(btn);
@@ -669,7 +655,6 @@
       }
     }
 
-    // جلب الأفلام والمسلسلات
     async function fetchMovies() {
       const grid = document.getElementById('movieGrid');
       grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">جاري التحميل...</p>';
@@ -691,15 +676,24 @@
           return;
         }
 
-        data.posts.forEach(post => {
+        data.posts.forEach((post, index) => {
           const isFav = favorites.some(f => f.realid === post.realid);
           const card = document.createElement('div');
-          card.className = 'card';
-          card.onclick = () => playMedia(post.realid, post.title, post.series_slug);
+          card.className = 'card focusable';
+          card.tabIndex = 0;
+          card.dataset.realid = post.realid;
+          card.dataset.title = post.title;
+          card.dataset.slug = post.series_slug || '';
+          
+          card.onclick = () => {
+            lastFocusedElement = card;
+            playMedia(post.realid, post.title, post.series_slug);
+          };
+
           card.innerHTML = `
             <div class="poster-wrap">
               <img src="${post.thumbnail}" alt="${post.title}" loading="lazy" />
-              <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFav(event, ${JSON.stringify(post).replace(/"/g, '&quot;')})">
+              <button class="fav-btn ${isFav ? 'active' : ''}" tabindex="-1" onclick="toggleFav(event, ${JSON.stringify(post).replace(/"/g, '&quot;')})">
                 ${isFav ? '❤️' : '🤍'}
               </button>
             </div>
@@ -710,19 +704,161 @@
 
         document.getElementById('pageNumber').innerText = `صفحة ${currentPage}`;
         document.getElementById('prevBtn').disabled = currentPage <= 1;
+
+        // تركيز أول بطاقة إذا لم تكن شاشة البداية ظاهرة
+        const splash = document.getElementById('splashScreen');
+        if (splash.classList.contains('hide')) {
+          const first = grid.querySelector('.card');
+          if (first) first.focus();
+        }
       } catch (e) {
         grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">حدث خطأ أثناء الاتصال بالسيرفر.</p>';
       }
     }
 
-    // البحث الذكي ثنائي اللغة
+    // ------------------- محرك التنقل بالريموت والأسهم (Spatial D-Pad Engine) ------------------- //
+    function handleSpatialNavigation(direction) {
+      const current = document.activeElement;
+      if (!current || current === document.body) {
+        const first = document.querySelector('.card') || document.querySelector('.cat-btn');
+        if (first) first.focus();
+        return;
+      }
+
+      const focusables = Array.from(document.querySelectorAll('.focusable, .card, .cat-btn, button, input'))
+        .filter(el => {
+          const rect = el.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0 && window.getComputedStyle(el).display !== 'none';
+        });
+
+      const curRect = current.getBoundingClientRect();
+      const curCenter = { x: curRect.left + curRect.width / 2, y: curRect.top + curRect.height / 2 };
+
+      let bestCandidate = null;
+      let minDistance = Infinity;
+
+      focusables.forEach(target => {
+        if (target === current) return;
+        const rect = target.getBoundingClientRect();
+        const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+
+        const dx = center.x - curCenter.x;
+        const dy = center.y - curCenter.y;
+
+        let isValidDirection = false;
+        if (direction === 'down' && dy > 15) isValidDirection = true;
+        else if (direction === 'up' && dy < -15) isValidDirection = true;
+        else if (direction === 'left' && dx < -15) isValidDirection = true;
+        else if (direction === 'right' && dx > 15) isValidDirection = true;
+
+        if (isValidDirection) {
+          // حساب المسافة الإقليدية مع إعطاء أولوية للمحور الأساسي للحركة
+          const weight = (direction === 'up' || direction === 'down') ? Math.abs(dx) * 1.5 : Math.abs(dy) * 1.5;
+          const dist = Math.hypot(dx, dy) + weight;
+
+          if (dist < minDistance) {
+            minDistance = dist;
+            bestCandidate = target;
+          }
+        }
+      });
+
+      if (bestCandidate) {
+        bestCandidate.focus();
+        bestCandidate.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      }
+    }
+
+    // استماع أزرار الريموت والكيبورد العالمية
+    window.addEventListener('keydown', (e) => {
+      const splash = document.getElementById('splashScreen');
+      const player = document.getElementById('playerModal');
+      const isPlayerOpen = player.classList.contains('active');
+
+      // شاشة البداية
+      if (!splash.classList.contains('hide')) {
+        if (['Enter', 'Select', ' ', 'Go', 'Ok'].includes(e.key) || e.keyCode === 13 || e.keyCode === 23) {
+          e.preventDefault();
+          enterSite();
+        }
+        return;
+      }
+
+      // أثناء تشغيل الفيديو
+      if (isPlayerOpen) {
+        if (['Escape', 'Back', 'BrowserBack', 'GoBack'].includes(e.key) || e.keyCode === 4 || e.keyCode === 27) {
+          e.preventDefault();
+          closePlayer();
+          return;
+        }
+
+        if (['Enter', 'Select', ' '].includes(e.key) || e.keyCode === 13 || e.keyCode === 23) {
+          if (document.activeElement.tagName !== 'BUTTON') {
+            e.preventDefault();
+            togglePlay();
+          }
+          return;
+        }
+
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          skipTime(10);
+          return;
+        }
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          skipTime(-10);
+          return;
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          video.volume = Math.min(1, video.volume + 0.1);
+          showIndicator(`صوت: ${Math.round(video.volume * 100)}%`, '🔊');
+          return;
+        }
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          video.volume = Math.max(0, video.volume - 0.1);
+          showIndicator(`صوت: ${Math.round(video.volume * 100)}%`, '🔊');
+          return;
+        }
+      }
+
+      // التنقل بالريموت في الصفحة الرئيسية
+      if (!isPlayerOpen) {
+        // زر OK يفتح العنصر المختار
+        if (['Enter', 'Select'].includes(e.key) || e.keyCode === 13 || e.keyCode === 23) {
+          const cur = document.activeElement;
+          if (cur && cur.classList.contains('card')) {
+            e.preventDefault();
+            cur.click();
+            return;
+          }
+        }
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          handleSpatialNavigation('down');
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          handleSpatialNavigation('up');
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          handleSpatialNavigation('left');
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          handleSpatialNavigation('right');
+        }
+      }
+    });
+
+    // ------------------- باقي الوظائف والمشغل ------------------- //
     function handleSearch(e) {
       e.preventDefault();
       const raw = document.getElementById('searchInput').value.trim();
       if (!raw) return;
 
       let searchTerm = raw;
-      // فحص القاموس الصوتي إذا كتب بالعربي
       const lower = raw.toLowerCase();
       if (titleDictionary[lower]) {
         searchTerm = titleDictionary[lower];
@@ -736,15 +872,11 @@
       fetchMovies();
     }
 
-    // المفضلة
     function toggleFav(e, post) {
       e.stopPropagation();
       const idx = favorites.findIndex(f => f.realid === post.realid);
-      if (idx > -1) {
-        favorites.splice(idx, 1);
-      } else {
-        favorites.push(post);
-      }
+      if (idx > -1) favorites.splice(idx, 1);
+      else favorites.push(post);
       localStorage.setItem('alameeere_favs', JSON.stringify(favorites));
       fetchMovies();
     }
@@ -764,17 +896,23 @@
 
       favorites.forEach(post => {
         const card = document.createElement('div');
-        card.className = 'card';
-        card.onclick = () => playMedia(post.realid, post.title, post.series_slug);
+        card.className = 'card focusable';
+        card.tabIndex = 0;
+        card.onclick = () => {
+          lastFocusedElement = card;
+          playMedia(post.realid, post.title, post.series_slug);
+        };
         card.innerHTML = `
           <div class="poster-wrap">
             <img src="${post.thumbnail}" alt="${post.title}" loading="lazy" />
-            <button class="fav-btn active" onclick="toggleFav(event, ${JSON.stringify(post).replace(/"/g, '&quot;')})">❤️</button>
+            <button class="fav-btn active" tabindex="-1" onclick="toggleFav(event, ${JSON.stringify(post).replace(/"/g, '&quot;')})">❤️</button>
           </div>
           <h3>${post.title}</h3>
         `;
         grid.appendChild(card);
       });
+      const first = grid.querySelector('.card');
+      if (first) first.focus();
     }
 
     function loadCategory(slug, btn) {
@@ -806,7 +944,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ------------------- المشغل الاحترافي Pro Player Logic ------------------- //
+    // ------------------- منطق المشغل ------------------- //
     const video = document.getElementById('mainVideo');
     let controlsTimeout = null;
 
@@ -815,8 +953,7 @@
       currentSeriesSlug = seriesSlug;
 
       const modal = document.getElementById('playerModal');
-      const titleDisplay = document.getElementById('videoTitleDisplay');
-      titleDisplay.innerText = title;
+      document.getElementById('videoTitleDisplay').innerText = title;
       modal.classList.add('active');
 
       try {
@@ -844,7 +981,6 @@
           video.play();
         }
 
-        // جلب حلقات المسلسل إذا كان مسلسلاً
         if (seriesSlug) {
           loadSeriesEpisodes(seriesSlug);
         } else {
@@ -858,7 +994,6 @@
       }
     }
 
-    // جلب وترتيب الحلقات داخل المشغل
     async function loadSeriesEpisodes(slug) {
       const clean = slug.replace('مسلسل-', '').replace('-مترجم', '').replace(/-/g, ' ');
       const epContainer = document.getElementById('episodesListContainer');
@@ -874,11 +1009,11 @@
           return;
         }
 
-        // ترتيب الحلقات تصاعدياً
         const sorted = data.posts.reverse();
         sorted.forEach(ep => {
           const item = document.createElement('div');
-          item.className = `ep-item ${ep.realid === currentRealId ? 'current' : ''}`;
+          item.className = `ep-item focusable ${ep.realid === currentRealId ? 'current' : ''}`;
+          item.tabIndex = 0;
           item.innerText = ep.title;
           item.onclick = () => {
             playMedia(ep.realid, ep.title, ep.series_slug);
@@ -892,7 +1027,12 @@
     }
 
     function toggleEpisodesDrawer() {
-      document.getElementById('epDrawer').classList.toggle('open');
+      const drawer = document.getElementById('epDrawer');
+      drawer.classList.toggle('open');
+      if (drawer.classList.contains('open')) {
+        const firstEp = drawer.querySelector('.ep-item');
+        if (firstEp) firstEp.focus();
+      }
     }
 
     function closePlayer() {
@@ -901,6 +1041,11 @@
       video.pause();
       if (hls) { hls.destroy(); hls = null; }
       document.getElementById('epDrawer').classList.remove('open');
+
+      // إعادة التركيز للعنصر الذي كان المشاهد واقفاً عليه
+      if (lastFocusedElement) {
+        setTimeout(() => lastFocusedElement.focus(), 100);
+      }
     }
 
     function togglePlay() {
@@ -920,7 +1065,6 @@
       showIndicator(seconds > 0 ? `+${seconds}s` : `${seconds}s`, '⏩');
     }
 
-    // تحديث شريط التقدم والوقت
     video.addEventListener('timeupdate', () => {
       const cur = video.currentTime;
       const dur = video.duration || 0;
@@ -942,12 +1086,13 @@
       return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
     }
 
-    // إعداد قائمة الجودات من HLS
     function setupQualityMenu(levels) {
       const menu = document.getElementById('qualityMenu');
-      menu.innerHTML = '<button class="active" onclick="setQuality(-1, this)">تلقائي (Auto)</button>';
+      menu.innerHTML = '<button class="focusable active" tabindex="0" onclick="setQuality(-1, this)">تلقائي (Auto)</button>';
       levels.forEach((lvl, idx) => {
         const btn = document.createElement('button');
+        btn.className = 'focusable';
+        btn.tabIndex = 0;
         btn.innerText = `${lvl.height}p`;
         btn.onclick = () => setQuality(idx, btn);
         menu.appendChild(btn);
@@ -975,7 +1120,6 @@
       document.getElementById('aspectMenu').classList.toggle('show');
     }
 
-    // تدوير الشاشة وتجاوز حواف الكاميرا
     function toggleFullscreenRotate() {
       const box = document.getElementById('playerBox');
       if (!document.fullscreenElement) {
@@ -991,7 +1135,6 @@
       }
     }
 
-    // إظهار وإخفاء أدوات التحكم تلقائياً
     function resetControlsTimer() {
       const top = document.getElementById('topControls');
       const bottom = document.getElementById('bottomControls');
@@ -1009,7 +1152,7 @@
     document.getElementById('playerBox').addEventListener('mousemove', resetControlsTimer);
     document.getElementById('playerBox').addEventListener('touchstart', resetControlsTimer);
 
-    // ------------------- التحكم باللمس (الصوت والإضاءة والنقر المزدوج) ------------------- //
+    // ------------------- التحكم باللمس ------------------- //
     let touchStartY = 0;
     let brightness = 1;
     let lastTapTime = 0;
@@ -1017,7 +1160,6 @@
     const rightHalf = document.getElementById('rightTouchHalf');
     const leftHalf = document.getElementById('leftTouchHalf');
 
-    // النصف الأيمن: التحكم بالصوت + نقر مزدوج لتقديم 10 ثوانٍ
     rightHalf.addEventListener('touchstart', (e) => {
       touchStartY = e.touches[0].clientY;
       handleDoubleTap(e, 10);
@@ -1029,7 +1171,6 @@
       showIndicator(`صوت: ${Math.round(video.volume * 100)}%`, '🔊');
     });
 
-    // النصف الأيسر: التحكم بالإضاءة + نقر مزدوج لتأخير 10 ثوانٍ
     leftHalf.addEventListener('touchstart', (e) => {
       touchStartY = e.touches[0].clientY;
       handleDoubleTap(e, -10);
@@ -1060,7 +1201,7 @@
       indTimeout = setTimeout(() => badge.classList.remove('show'), 1200);
     }
 
-    // بدء تشغيل الموقع
+    // بدء التشغيل
     fetchCategories();
     fetchMovies();
   </script>
