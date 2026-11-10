@@ -1,1209 +1,1251 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Alameeere 🍿</title>
+  <!-- خط تجوال العصري -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <!-- مشغل HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
   <style>
     :root {
       --primary: #e50914;
-      --bg: #0c0d12;
-      --card-bg: #161822;
-      --header-bg: #12131a;
-      --text: #f0f0f5;
-      --text-muted: #8e92a4;
+      --primary-hover: #b80710;
+      --bg: #0c0d10;
+      --surface: #15171e;
+      --surface-elevated: #1e212b;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #ffffff;
+      --text-muted: #8c909e;
+      --focus-ring: #00e5ff;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Cairo", sans-serif;
-      background: var(--bg);
+      font-family: 'Tajawal', sans-serif;
+      background-color: var(--bg);
       color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
-      padding-bottom: 60px;
+      padding-bottom: 50px;
     }
 
-    /* ------------------- إطار التركيز لشاشات التلفزيون والريموت ------------------- */
-    :focus {
-      outline: none;
-    }
-    .focusable:focus, .card:focus, .cat-btn:focus, .ctrl-btn:focus, input:focus, .pagination button:focus {
-      outline: 4px solid var(--primary) !important;
-      outline-offset: 3px;
-      transform: scale(1.06);
-      box-shadow: 0 0 25px rgba(229, 9, 20, 0.85);
-      z-index: 100;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    /* التركيز لأجهزة التلفاز والريموت */
+    :focus-visible {
+      outline: 3px solid var(--focus-ring) !important;
+      outline-offset: 3px !important;
+      transform: scale(1.04);
+      transition: transform 0.2s ease, outline 0.2s ease;
+      z-index: 10;
     }
 
-    /* ------------------- شاشة البداية Splash Screen ------------------- */
-    #splashScreen {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at center, #1b1c28 0%, #08090d 100%);
-      z-index: 10000;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 25px;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
-      cursor: pointer;
-    }
-    #splashScreen.hide {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-    .splash-logo {
-      font-size: clamp(38px, 8vw, 64px);
-      font-weight: 900;
-      background: linear-gradient(135deg, #ffffff 20%, #e50914 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 10px 30px rgba(229, 9, 20, 0.4);
-      animation: floatLogo 3s ease-in-out infinite;
-    }
-    .splash-prompt {
-      font-size: 18px;
-      color: #b0b4c8;
-      border: 2px solid rgba(255,255,255,0.2);
-      padding: 12px 32px;
-      border-radius: 30px;
-      background: rgba(255,255,255,0.04);
-      backdrop-filter: blur(8px);
-      animation: pulseText 2s infinite ease-in-out;
-    }
-    @keyframes floatLogo {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    @keyframes pulseText {
-      0%, 100% { opacity: 0.7; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.04); border-color: var(--primary); }
-    }
-
-    /* ------------------- الشريط العلوي Header ------------------- */
-    .top-bar {
-      background: #090a0e;
-      padding: 6px 20px;
-      font-size: 12px;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
+    /* الهيدر العلوي */
     header {
-      background: var(--header-bg);
-      padding: 14px 20px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
       position: sticky;
       top: 0;
-      z-index: 90;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      z-index: 100;
+      background: linear-gradient(180deg, rgba(12,13,16,0.98) 0%, rgba(12,13,16,0.85) 100%);
+      backdrop-filter: blur(12px);
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
     }
-    .main-logo {
-      font-size: 24px;
-      font-weight: 900;
-      color: #fff;
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
       display: flex;
       align-items: center;
       gap: 8px;
-      cursor: pointer;
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 10px rgba(229, 9, 20, 0.4);
     }
-    .main-logo span { color: var(--primary); }
 
-    .search-box {
-      display: flex;
-      flex: 1;
-      max-width: 440px;
-      background: #1d1f2b;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.1);
-      overflow: hidden;
+    .brand span {
+      color: var(--primary);
     }
-    .search-box input {
-      flex: 1;
-      padding: 10px 14px;
-      background: transparent;
-      border: none;
+
+    .server-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.04);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #00e676;
+      box-shadow: 0 0 8px #00e676;
+    }
+
+    /* شريط البحث */
+    .search-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 42px 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 0.95rem;
+      font-family: inherit;
       outline: none;
-      color: #fff;
-      font-size: 14px;
-    }
-    .search-box button {
-      padding: 10px 20px;
-      background: var(--primary);
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      font-weight: bold;
+      transition: all 0.2s ease;
     }
 
-    /* ------------------- شريط التصنيفات Categories ------------------- */
-    .categories {
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
       display: flex;
-      gap: 10px;
+    }
+
+    /* شريط التصنيفات */
+    .categories-bar {
+      display: flex;
+      gap: 8px;
       overflow-x: auto;
-      padding: 14px 20px;
-      background: #111218;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 4px 2px;
       scrollbar-width: none;
     }
-    .categories::-webkit-scrollbar { display: none; }
+    .categories-bar::-webkit-scrollbar { display: none; }
+
     .cat-btn {
-      background: #1c1e2a;
+      flex-shrink: 0;
+      padding: 8px 16px;
+      border-radius: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
       color: var(--text-muted);
-      border: 1px solid rgba(255,255,255,0.06);
-      padding: 8px 18px;
-      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
-      white-space: nowrap;
-      font-size: 13px;
-      transition: 0.2s;
+      transition: all 0.2s ease;
     }
+
     .cat-btn.active, .cat-btn:hover {
       background: var(--primary);
       color: #fff;
       border-color: var(--primary);
+      box-shadow: 0 2px 12px rgba(229, 9, 20, 0.35);
     }
 
-    /* ------------------- شبكة البطاقات Grid ------------------- */
-    .container {
+    /* المحتوى وشبكة العرض */
+    main {
+      padding: 18px;
       max-width: 1400px;
-      margin: 20px auto;
-      padding: 0 16px;
+      margin: 0 auto;
     }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
     .section-title {
-      font-size: 18px;
-      margin-bottom: 15px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
       display: flex;
       align-items: center;
       gap: 8px;
-      color: #fff;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-      gap: 18px;
-    }
-    @media (max-width: 600px) {
-      .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     }
 
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 14px;
+    }
+
+    @media (min-width: 768px) {
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 18px;
+      }
+    }
+
+    /* كرت الميديا */
     .card {
-      background: var(--card-bg);
-      border-radius: 10px;
+      position: relative;
+      background: var(--surface);
+      border-radius: 12px;
       overflow: hidden;
       cursor: pointer;
-      position: relative;
+      border: 1px solid var(--border);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
       display: flex;
       flex-direction: column;
-      border: 1px solid rgba(255,255,255,0.04);
-      transition: transform 0.2s, box-shadow 0.2s;
     }
-    .poster-wrap {
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .card-thumb {
       position: relative;
       width: 100%;
-      padding-top: 145%;
-      background: #202230;
+      aspect-ratio: 2 / 3;
+      background: #1a1c24;
+      overflow: hidden;
     }
-    .poster-wrap img {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
       object-fit: cover;
+      transition: transform 0.3s ease;
     }
-    .fav-btn {
+
+    .card:hover .card-thumb img {
+      transform: scale(1.05);
+    }
+
+    .card-badge {
       position: absolute;
       top: 8px;
       right: 8px;
-      background: rgba(0,0,0,0.7);
-      border: none;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
       color: #fff;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      font-size: 16px;
-      cursor: pointer;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.15);
       display: flex;
       align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(4px);
-      z-index: 2;
+      gap: 4px;
     }
-    .fav-btn.active { color: var(--primary); }
-    .card h3 {
-      font-size: 13px;
-      line-height: 1.4;
+
+    .card-badge.series {
+      background: rgba(229, 9, 20, 0.85);
+      border-color: rgba(229, 9, 20, 0.5);
+    }
+
+    .card-body {
       padding: 10px;
-      color: #e2e4ef;
-      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex-grow: 1;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.35;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
 
-    /* ------------------- أزرار التنقل Pagination ------------------- */
-    .pagination {
+    .card-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
       display: flex;
-      justify-content: center;
       align-items: center;
-      gap: 15px;
-      margin-top: 35px;
+      gap: 6px;
     }
-    .pagination button {
-      padding: 10px 22px;
-      background: #1c1e2a;
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .pagination button:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    /* ------------------- المشغل الاحترافي Pro Player ------------------- */
+    /* مشغل الفيديو السينمائي */
     .player-modal {
-      display: none;
       position: fixed;
       inset: 0;
       background: #000;
-      z-index: 9999;
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
     }
-    .player-modal.active { display: flex; }
+
+    .player-modal.active {
+      display: flex;
+    }
+
     .player-container {
       position: relative;
-      width: 100vw;
-      height: 100vh;
-      background: #000;
+      width: 100%;
+      height: 100%;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
+      background: #000;
       overflow: hidden;
+      touch-action: manipulation;
     }
+
     video {
       width: 100%;
       height: 100%;
       object-fit: contain;
       background: #000;
-      transition: filter 0.1s ease;
+      transition: object-fit 0.2s ease;
     }
 
-    /* اللمس للصوت والإضاءة */
-    .touch-overlay {
+    /* طبقة التحكم Overlay */
+    .player-controls {
       position: absolute;
       inset: 0;
       display: flex;
-      z-index: 5;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 18px 20px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.92) 100%);
+      opacity: 1;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
     }
-    .touch-half { flex: 1; height: 100%; }
 
-    .indicator-badge {
+    .player-controls.hidden {
+      opacity: 0;
+    }
+
+    .player-controls * {
+      pointer-events: auto;
+    }
+
+    /* شريط المشغل العلوي */
+    .player-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .player-title-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .player-media-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .player-media-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:hover {
+      background: rgba(229, 9, 20, 0.8);
+      border-color: var(--primary);
+    }
+
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* أزرار المنتصف */
+    .player-center-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 36px;
+    }
+
+    .play-btn-large {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(229, 9, 20, 0.5);
+      transition: transform 0.2s ease;
+    }
+
+    .play-btn-large:hover {
+      transform: scale(1.08);
+    }
+
+    .play-btn-large svg {
+      width: 28px;
+      height: 28px;
+      fill: currentColor;
+    }
+
+    .skip-btn {
+      background: rgba(255, 255, 255, 0.15);
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .skip-btn span {
+      position: absolute;
+      font-size: 0.65rem;
+      font-weight: 800;
+      bottom: 6px;
+    }
+
+    /* شريط المشغل السفلي */
+    .player-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .progress-bar-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .time-display {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #eee;
+      min-width: 90px;
+      direction: ltr;
+      text-align: center;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 4px;
+      width: 0%;
+      position: relative;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 6px rgba(0,0,0,0.5);
+    }
+
+    .player-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .actions-left, .actions-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-pill-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .action-pill-btn:active {
+      transform: scale(0.96);
+      background: rgba(229, 9, 20, 0.4);
+    }
+
+    .action-pill-btn svg {
+      width: 17px;
+      height: 17px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    /* إشعار خفيف عند تبديل القياس */
+    .player-toast {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.85);
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid var(--border);
       color: #fff;
-      padding: 14px 28px;
-      border-radius: 30px;
-      font-size: 20px;
-      font-weight: bold;
+      padding: 10px 22px;
+      border-radius: 24px;
+      font-size: 0.95rem;
+      font-weight: 700;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.2s;
-      z-index: 30;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .indicator-badge.show { opacity: 1; }
-
-    /* أزرار المشغل */
-    .player-controls {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.92), transparent);
-      padding: 20px 25px 30px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      z-index: 10;
-      transition: opacity 0.3s;
-    }
-    .player-controls.fade-out { opacity: 0; pointer-events: none; }
-
-    .top-controls {
-      position: absolute;
-      top: 15px;
-      left: 20px;
-      right: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 12;
-      transition: opacity 0.3s;
-    }
-    .player-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #fff;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-    }
-    .ctrl-btn {
-      background: rgba(255,255,255,0.15);
-      border: none;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      backdrop-filter: blur(5px);
-    }
-    .ctrl-btn:hover { background: var(--primary); }
-
-    .progress-bar-wrap {
-      width: 100%;
-      height: 8px;
-      background: rgba(255,255,255,0.25);
-      border-radius: 4px;
-      cursor: pointer;
-      position: relative;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--primary);
-      width: 0%;
-      border-radius: 4px;
+      transition: opacity 0.25s ease;
+      z-index: 150;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
     }
 
-    .bottom-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .left-ctrls, .right-ctrls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .time-display { font-size: 12px; color: #ccc; }
-
-    /* القوائم المنسدلة */
-    .menu-dropdown { position: relative; }
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      bottom: 42px;
-      left: 0;
-      background: #181924;
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 8px;
-      padding: 8px;
-      min-width: 130px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.8);
-      z-index: 30;
-    }
-    .dropdown-content.show { display: block; }
-    .dropdown-content button {
-      width: 100%;
-      padding: 8px 12px;
-      background: transparent;
-      border: none;
-      color: #ddd;
-      text-align: right;
-      cursor: pointer;
-      font-size: 13px;
-      border-radius: 4px;
-    }
-    .dropdown-content button:hover, .dropdown-content button.active {
-      background: var(--primary);
-      color: #fff;
+    .player-toast.show {
+      opacity: 1;
     }
 
-    /* لوحة الحلقات الجانبية */
+    /* درج الحلقات المنظم */
     .episodes-drawer {
       position: absolute;
       top: 0;
+      left: 0;
       bottom: 0;
-      left: -340px;
-      width: 320px;
-      background: rgba(18, 19, 26, 0.96);
-      backdrop-filter: blur(12px);
-      z-index: 25;
-      padding: 20px;
-      overflow-y: auto;
-      transition: left 0.3s ease;
-      border-right: 1px solid rgba(255,255,255,0.1);
-    }
-    .episodes-drawer.open { left: 0; }
-    .drawer-header {
+      width: min(360px, 85vw);
+      background: rgba(18, 20, 26, 0.96);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--border);
+      z-index: 200;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
+    .episodes-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
     .episodes-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
-    .ep-item {
-      padding: 10px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 6px;
+
+    .episode-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: #ddd;
+      font-size: 0.9rem;
+      font-weight: 600;
       cursor: pointer;
-      font-size: 13px;
-      transition: 0.2s;
+      transition: all 0.2s ease;
     }
-    .ep-item:hover, .ep-item:focus, .ep-item.current {
-      background: var(--primary);
+
+    .episode-item:hover, .episode-item.active {
+      background: rgba(229, 9, 20, 0.15);
+      border-color: var(--primary);
       color: #fff;
-      outline: none;
+    }
+
+    .episode-item.active {
+      font-weight: 800;
+    }
+
+    .episode-item.active::after {
+      content: 'يُعرض الآن';
+      font-size: 0.7rem;
+      color: var(--primary);
+      background: rgba(229, 9, 20, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* مؤشر التحميل */
+    .loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
 
-  <!-- شاشة البداية المطابقة للفيديو -->
-  <div id="splashScreen" onclick="enterSite()" tabindex="0">
-    <div class="splash-logo">Alameeere 🍿</div>
-    <div class="splash-prompt">اضغط OK أو المس الشاشة للدخول</div>
-  </div>
-
-  <!-- الشريط العلوي للتاريخ والمعلومات -->
-  <div class="top-bar">
-    <span id="currentDateText">جاري تحميل التاريخ...</span>
-    <span>سيرفر البث المباشر: متصل 🟢</span>
-  </div>
-
-  <!-- الهيدر الرئيسي -->
+  <!-- الهيدر -->
   <header>
-    <div class="main-logo focusable" tabindex="0" onclick="resetToHome()">Alameeere <span>🍿</span></div>
-    <form class="search-box" onsubmit="handleSearch(event)">
-      <input type="text" id="searchInput" class="focusable" tabindex="0" placeholder="ابحث بالعربي أو الإنجليزي (مثل: ديكستر، Batman...)" />
-      <button type="submit" class="focusable" tabindex="0">بحث</button>
-    </form>
+    <div class="header-top">
+      <div class="brand">
+        Alameeere <span>🍿</span>
+      </div>
+      <div class="server-status">
+        <div class="status-dot"></div>
+        <span>سيرفر البث نشط</span>
+      </div>
+    </div>
+
+    <!-- البحث -->
+    <div class="search-wrapper">
+      <input type="text" id="searchInput" class="search-input" placeholder="ابحث باسم الفلم أو المسلسل (عربي أو English)..." />
+      <div class="search-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      </div>
+    </div>
+
+    <!-- التصنيفات -->
+    <div class="categories-bar" id="categoriesBar">
+      <button class="cat-btn active" data-cat="all">الأحدث الكل</button>
+      <button class="cat-btn" data-cat="movies">الأفلام</button>
+      <button class="cat-btn" data-cat="series">المسلسلات</button>
+      <button class="cat-btn" data-cat="ramadan">مسلسلات رمضان</button>
+      <button class="cat-btn" data-cat="anime">الأنمي والكرتون</button>
+    </div>
   </header>
 
-  <!-- شريط الأقسام -->
-  <nav class="categories" id="catList">
-    <button class="cat-btn focusable active" tabindex="0" onclick="loadCategory('', this)">الكل</button>
-    <button class="cat-btn focusable" tabindex="0" onclick="showFavorites(this)">❤️ المفضلة</button>
-  </nav>
+  <!-- المحتوى الرئيسي -->
+  <main>
+    <div class="section-header">
+      <div class="section-title" id="sectionHeading">المحتوى المعروض</div>
+    </div>
 
-  <!-- قسم عرض المحتوى -->
-  <main class="container">
-    <h2 class="section-title" id="pageTitle">أحدث الإضافات</h2>
-    <div id="movieGrid" class="grid">جاري تحميل الأفلام والمسلسلات...</div>
+    <div class="grid" id="contentGrid">
+      <!-- يتم توليد البطاقات برمجياً هنا -->
+    </div>
 
-    <div class="pagination" id="paginationWrap">
-      <button id="prevBtn" class="focusable" tabindex="0" onclick="changePage(-1)" disabled>السابق</button>
-      <span id="pageNumber">صفحة 1</span>
-      <button id="nextBtn" class="focusable" tabindex="0" onclick="changePage(1)">التالي</button>
+    <div class="loader" id="loader" style="display: none;">
+      <div class="spinner"></div>
+      <span>جاري جلب المحتوى من السيرفر...</span>
     </div>
   </main>
 
-  <!-- مشغل الفيديو الاحترافي الشامل -->
+  <!-- مشغل الفيديو السينمائي -->
   <div class="player-modal" id="playerModal">
-    <div class="player-container" id="playerBox">
-      <video id="mainVideo" playsinline></video>
+    <div class="player-container" id="playerContainer">
+      <video id="videoPlayer" playsinline></video>
 
-      <div class="indicator-badge" id="indicatorBadge">
-        <span id="indicatorIcon">🔊</span>
-        <span id="indicatorText">50%</span>
-      </div>
+      <!-- إشعار عند التبديل -->
+      <div class="player-toast" id="playerToast">المقاس: تناسب الشاشة</div>
 
-      <div class="touch-overlay" id="touchOverlay">
-        <div class="touch-half" id="leftTouchHalf"></div>
-        <div class="touch-half" id="rightTouchHalf"></div>
-      </div>
-
-      <div class="top-controls" id="topControls">
-        <div class="player-title" id="videoTitleDisplay">عنوان الفيديو</div>
-        <div style="display:flex; gap:10px;">
-          <button class="ctrl-btn focusable" tabindex="0" onclick="toggleEpisodesDrawer()">📑 الحلقات</button>
-          <button class="ctrl-btn focusable" tabindex="0" onclick="closePlayer()">✕ إغلاق</button>
-        </div>
-      </div>
-
-      <div class="player-controls" id="bottomControls">
-        <div class="progress-bar-wrap" id="progressBar" onclick="seekVideo(event)">
-          <div class="progress-bar-fill" id="progressFill"></div>
+      <!-- طبقة التحكم (Controls Overlay) -->
+      <div class="player-controls" id="playerControls">
+        <!-- شريط علوي -->
+        <div class="player-header">
+          <div class="player-title-info">
+            <div class="player-media-title" id="playerTitle">اسم العمل</div>
+            <div class="player-media-sub" id="playerSubtitle">الحلقة 1</div>
+          </div>
+          <button class="icon-btn" id="closePlayerBtn" title="إغلاق المشغل">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
 
-        <div class="bottom-row">
-          <div class="left-ctrls">
-            <button class="ctrl-btn focusable" tabindex="0" id="playBtn" onclick="togglePlay()">▶ تشغيل</button>
-            <button class="ctrl-btn focusable" tabindex="0" onclick="skipTime(-10)">↺ 10 ثوانٍ</button>
-            <button class="ctrl-btn focusable" tabindex="0" onclick="skipTime(10)">10 ثوانٍ ↻</button>
+        <!-- أزرار الوسط -->
+        <div class="player-center-controls">
+          <button class="skip-btn" id="rewindBtn" title="تأخير 10 ثواني">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
+            <span>10</span>
+          </button>
+
+          <button class="play-btn-large" id="playPauseBtn" title="تشغيل / إيقاف">
+            <svg id="playIcon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <svg id="pauseIcon" viewBox="0 0 24 24" style="display:none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          </button>
+
+          <button class="skip-btn" id="forwardBtn" title="تقديم 10 ثواني">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
+            <span>10</span>
+          </button>
+        </div>
+
+        <!-- شريط سفلي -->
+        <div class="player-bottom">
+          <!-- شريط الوقت -->
+          <div class="progress-bar-container">
             <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
+            <div class="progress-track" id="progressTrack">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
           </div>
 
-          <div class="right-ctrls">
-            <div class="menu-dropdown">
-              <button class="ctrl-btn focusable" tabindex="0" onclick="toggleQualityMenu()">⚙️ الجودة</button>
-              <div class="dropdown-content" id="qualityMenu"></div>
+          <!-- خيارات المشغل -->
+          <div class="player-actions">
+            <div class="actions-left">
+              <button class="action-pill-btn" id="episodesBtn" style="display:none;">
+                <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                <span>الحلقات</span>
+              </button>
+
+              <!-- زر تبديل المقاس بنقرة واحدة مباشرة دون أي قائمة -->
+              <button class="action-pill-btn" id="aspectRatioBtn" title="انقر للتبديل بين المقاسات">
+                <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+                <span id="aspectRatioText">تناسب 16:9</span>
+              </button>
             </div>
 
-            <div class="menu-dropdown">
-              <button class="ctrl-btn focusable" tabindex="0" onclick="toggleAspectMenu()">📺 المقاس</button>
-              <div class="dropdown-content" id="aspectMenu">
-                <button class="focusable" tabindex="0" onclick="setAspectRatio('contain')">عادي (16:9)</button>
-                <button class="focusable" tabindex="0" onclick="setAspectRatio('cover')">ملء الشاشة (Cover)</button>
-                <button class="focusable" tabindex="0" onclick="setAspectRatio('fill')">تمدد (Fill)</button>
-              </div>
+            <div class="actions-right">
+              <button class="icon-btn" id="fullscreenBtn" title="ملء الشاشة">
+                <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+              </button>
             </div>
-
-            <button class="ctrl-btn focusable" tabindex="0" onclick="toggleFullscreenRotate()">⛶ تكبير وتدوير</button>
           </div>
         </div>
       </div>
 
-      <div class="episodes-drawer" id="epDrawer">
+      <!-- درج الحلقات المنظم -->
+      <div class="episodes-drawer" id="episodesDrawer">
         <div class="drawer-header">
-          <h3>قائمة الحلقات</h3>
-          <button class="ctrl-btn focusable" tabindex="0" onclick="toggleEpisodesDrawer()">✕</button>
+          <div class="drawer-title">حلقات المسلسل</div>
+          <button class="icon-btn" id="closeDrawerBtn">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
-        <div class="episodes-list" id="episodesListContainer">
-          <p style="color:#aaa; font-size:13px;">جاري تحميل الحلقات...</p>
-        </div>
+        <div class="episodes-list" id="episodesList"></div>
       </div>
-
     </div>
   </div>
 
   <script>
-    const API = 'https://mo.m737217130.workers.dev/';
-    let currentPage = 1;
-    let currentCategory = '';
-    let currentSearch = '';
-    let currentRealId = '';
-    let currentSeriesSlug = '';
-    let hls = null;
-    let favorites = JSON.parse(localStorage.getItem('alameeere_favs') || '[]');
-    let lastFocusedElement = null;
+    const WORKER_BASE = 'https://mo.m737217130.workers.dev/';
 
-    const titleDictionary = {
-      'ديكستر': 'dexter',
-      'دكستر': 'dexter',
-      'باتمان': 'batman',
-      'بريكنج باد': 'breaking bad',
-      'بريكنق باد': 'breaking bad',
-      'ون بيس': 'one piece',
-      'ناروتو': 'naruto',
-      'صراع العروش': 'game of thrones',
-      'قيم اوف ثرونز': 'game of thrones',
-      'لوكي': 'loki',
-      'فايكنج': 'vikings',
-      'فايكنجز': 'vikings',
-      'سبايدرمان': 'spider man',
-      'افنجرز': 'avengers',
-      'سترينجر ثينقز': 'stranger things',
-      'هاري بوتر': 'harry potter',
-      'بيكي بلاندرز': 'peaky blinders',
-      'فريندز': 'friends'
-    };
-
-    function updateDate() {
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      document.getElementById('currentDateText').innerText = new Date().toLocaleDateString('ar-EG', options);
-    }
-    updateDate();
-
-    // الدخول من شاشة البداية وضبط أول تركيز
-    function enterSite() {
-      const splash = document.getElementById('splashScreen');
-      splash.classList.add('hide');
-      setTimeout(() => {
-        const firstCard = document.querySelector('.card');
-        if (firstCard) firstCard.focus();
-      }, 300);
-    }
-
-    async function fetchCategories() {
-      try {
-        const res = await fetch(`${API}?action=categories`);
-        const cats = await res.json();
-        const container = document.getElementById('catList');
-        cats.forEach(cat => {
-          const btn = document.createElement('button');
-          btn.className = 'cat-btn focusable';
-          btn.tabIndex = 0;
-          btn.innerText = cat.name;
-          btn.onclick = () => loadCategory(cat.slug, btn);
-          container.appendChild(btn);
-        });
-      } catch (e) {
-        console.error('فشل جلب التصنيفات', e);
-      }
-    }
-
-    async function fetchMovies() {
-      const grid = document.getElementById('movieGrid');
-      grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">جاري التحميل...</p>';
-
-      let url = `${API}?action=posts&page=${currentPage}`;
-      if (currentSearch) {
-        url = `${API}?action=search&search=${encodeURIComponent(currentSearch)}&page=${currentPage}`;
-      } else if (currentCategory) {
-        url = `${API}?action=posts&category=${currentCategory}&page=${currentPage}`;
-      }
-
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        grid.innerHTML = '';
-
-        if (!data.posts || data.posts.length === 0) {
-          grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">لا توجد نتائج مطابقة.</p>';
-          return;
-        }
-
-        data.posts.forEach((post, index) => {
-          const isFav = favorites.some(f => f.realid === post.realid);
-          const card = document.createElement('div');
-          card.className = 'card focusable';
-          card.tabIndex = 0;
-          card.dataset.realid = post.realid;
-          card.dataset.title = post.title;
-          card.dataset.slug = post.series_slug || '';
-          
-          card.onclick = () => {
-            lastFocusedElement = card;
-            playMedia(post.realid, post.title, post.series_slug);
-          };
-
-          card.innerHTML = `
-            <div class="poster-wrap">
-              <img src="${post.thumbnail}" alt="${post.title}" loading="lazy" />
-              <button class="fav-btn ${isFav ? 'active' : ''}" tabindex="-1" onclick="toggleFav(event, ${JSON.stringify(post).replace(/"/g, '&quot;')})">
-                ${isFav ? '❤️' : '🤍'}
-              </button>
-            </div>
-            <h3>${post.title}</h3>
-          `;
-          grid.appendChild(card);
-        });
-
-        document.getElementById('pageNumber').innerText = `صفحة ${currentPage}`;
-        document.getElementById('prevBtn').disabled = currentPage <= 1;
-
-        // تركيز أول بطاقة إذا لم تكن شاشة البداية ظاهرة
-        const splash = document.getElementById('splashScreen');
-        if (splash.classList.contains('hide')) {
-          const first = grid.querySelector('.card');
-          if (first) first.focus();
-        }
-      } catch (e) {
-        grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">حدث خطأ أثناء الاتصال بالسيرفر.</p>';
-      }
-    }
-
-    // ------------------- محرك التنقل بالريموت والأسهم (Spatial D-Pad Engine) ------------------- //
-    function handleSpatialNavigation(direction) {
-      const current = document.activeElement;
-      if (!current || current === document.body) {
-        const first = document.querySelector('.card') || document.querySelector('.cat-btn');
-        if (first) first.focus();
-        return;
-      }
-
-      const focusables = Array.from(document.querySelectorAll('.focusable, .card, .cat-btn, button, input'))
-        .filter(el => {
-          const rect = el.getBoundingClientRect();
-          return rect.width > 0 && rect.height > 0 && window.getComputedStyle(el).display !== 'none';
-        });
-
-      const curRect = current.getBoundingClientRect();
-      const curCenter = { x: curRect.left + curRect.width / 2, y: curRect.top + curRect.height / 2 };
-
-      let bestCandidate = null;
-      let minDistance = Infinity;
-
-      focusables.forEach(target => {
-        if (target === current) return;
-        const rect = target.getBoundingClientRect();
-        const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-
-        const dx = center.x - curCenter.x;
-        const dy = center.y - curCenter.y;
-
-        let isValidDirection = false;
-        if (direction === 'down' && dy > 15) isValidDirection = true;
-        else if (direction === 'up' && dy < -15) isValidDirection = true;
-        else if (direction === 'left' && dx < -15) isValidDirection = true;
-        else if (direction === 'right' && dx > 15) isValidDirection = true;
-
-        if (isValidDirection) {
-          // حساب المسافة الإقليدية مع إعطاء أولوية للمحور الأساسي للحركة
-          const weight = (direction === 'up' || direction === 'down') ? Math.abs(dx) * 1.5 : Math.abs(dy) * 1.5;
-          const dist = Math.hypot(dx, dy) + weight;
-
-          if (dist < minDistance) {
-            minDistance = dist;
-            bestCandidate = target;
-          }
-        }
-      });
-
-      if (bestCandidate) {
-        bestCandidate.focus();
-        bestCandidate.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-      }
-    }
-
-    // استماع أزرار الريموت والكيبورد العالمية
-    window.addEventListener('keydown', (e) => {
-      const splash = document.getElementById('splashScreen');
-      const player = document.getElementById('playerModal');
-      const isPlayerOpen = player.classList.contains('active');
-
-      // شاشة البداية
-      if (!splash.classList.contains('hide')) {
-        if (['Enter', 'Select', ' ', 'Go', 'Ok'].includes(e.key) || e.keyCode === 13 || e.keyCode === 23) {
-          e.preventDefault();
-          enterSite();
-        }
-        return;
-      }
-
-      // أثناء تشغيل الفيديو
-      if (isPlayerOpen) {
-        if (['Escape', 'Back', 'BrowserBack', 'GoBack'].includes(e.key) || e.keyCode === 4 || e.keyCode === 27) {
-          e.preventDefault();
-          closePlayer();
-          return;
-        }
-
-        if (['Enter', 'Select', ' '].includes(e.key) || e.keyCode === 13 || e.keyCode === 23) {
-          if (document.activeElement.tagName !== 'BUTTON') {
-            e.preventDefault();
-            togglePlay();
-          }
-          return;
-        }
-
-        if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          skipTime(10);
-          return;
-        }
-        if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          skipTime(-10);
-          return;
-        }
-        if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          video.volume = Math.min(1, video.volume + 0.1);
-          showIndicator(`صوت: ${Math.round(video.volume * 100)}%`, '🔊');
-          return;
-        }
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          video.volume = Math.max(0, video.volume - 0.1);
-          showIndicator(`صوت: ${Math.round(video.volume * 100)}%`, '🔊');
-          return;
-        }
-      }
-
-      // التنقل بالريموت في الصفحة الرئيسية
-      if (!isPlayerOpen) {
-        // زر OK يفتح العنصر المختار
-        if (['Enter', 'Select'].includes(e.key) || e.keyCode === 13 || e.keyCode === 23) {
-          const cur = document.activeElement;
-          if (cur && cur.classList.contains('card')) {
-            e.preventDefault();
-            cur.click();
-            return;
-          }
-        }
-
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          handleSpatialNavigation('down');
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          handleSpatialNavigation('up');
-        } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          handleSpatialNavigation('left');
-        } else if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          handleSpatialNavigation('right');
-        }
-      }
-    });
-
-    // ------------------- باقي الوظائف والمشغل ------------------- //
-    function handleSearch(e) {
-      e.preventDefault();
-      const raw = document.getElementById('searchInput').value.trim();
-      if (!raw) return;
-
-      let searchTerm = raw;
-      const lower = raw.toLowerCase();
-      if (titleDictionary[lower]) {
-        searchTerm = titleDictionary[lower];
-      }
-
-      currentSearch = searchTerm;
-      currentCategory = '';
-      currentPage = 1;
-      document.getElementById('pageTitle').innerText = `نتائج البحث عن: ${raw}`;
-      document.getElementById('paginationWrap').style.display = 'flex';
-      fetchMovies();
-    }
-
-    function toggleFav(e, post) {
-      e.stopPropagation();
-      const idx = favorites.findIndex(f => f.realid === post.realid);
-      if (idx > -1) favorites.splice(idx, 1);
-      else favorites.push(post);
-      localStorage.setItem('alameeere_favs', JSON.stringify(favorites));
-      fetchMovies();
-    }
-
-    function showFavorites(btn) {
-      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('pageTitle').innerText = 'قائمة المفضلة ❤️';
-      document.getElementById('paginationWrap').style.display = 'none';
-
-      const grid = document.getElementById('movieGrid');
-      grid.innerHTML = '';
-      if (favorites.length === 0) {
-        grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center;">لم تقم بإضافة أي فيلم أو مسلسل للمفضلة بعد.</p>';
-        return;
-      }
-
-      favorites.forEach(post => {
-        const card = document.createElement('div');
-        card.className = 'card focusable';
-        card.tabIndex = 0;
-        card.onclick = () => {
-          lastFocusedElement = card;
-          playMedia(post.realid, post.title, post.series_slug);
-        };
-        card.innerHTML = `
-          <div class="poster-wrap">
-            <img src="${post.thumbnail}" alt="${post.title}" loading="lazy" />
-            <button class="fav-btn active" tabindex="-1" onclick="toggleFav(event, ${JSON.stringify(post).replace(/"/g, '&quot;')})">❤️</button>
-          </div>
-          <h3>${post.title}</h3>
-        `;
-        grid.appendChild(card);
-      });
-      const first = grid.querySelector('.card');
-      if (first) first.focus();
-    }
-
-    function loadCategory(slug, btn) {
-      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentCategory = slug;
-      currentSearch = '';
-      currentPage = 1;
-      document.getElementById('pageTitle').innerText = slug ? btn.innerText : 'أحدث الإضافات';
-      document.getElementById('paginationWrap').style.display = 'flex';
-      fetchMovies();
-    }
-
-    function resetToHome() {
-      currentCategory = '';
-      currentSearch = '';
-      currentPage = 1;
-      document.getElementById('searchInput').value = '';
-      document.getElementById('pageTitle').innerText = 'أحدث الإضافات';
-      document.querySelectorAll('.cat-btn').forEach((b, i) => i === 0 ? b.classList.add('active') : b.classList.remove('active'));
-      document.getElementById('paginationWrap').style.display = 'flex';
-      fetchMovies();
-    }
-
-    function changePage(delta) {
-      currentPage += delta;
-      if (currentPage < 1) currentPage = 1;
-      fetchMovies();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // ------------------- منطق المشغل ------------------- //
-    const video = document.getElementById('mainVideo');
+    let allPosts = [];
+    let groupedItems = [];
+    let currentEpisodes = [];
+    let currentPlayingIndex = 0;
+    let hlsInstance = null;
     let controlsTimeout = null;
 
-    async function playMedia(realid, title, seriesSlug) {
-      currentRealId = realid;
-      currentSeriesSlug = seriesSlug;
+    const contentGrid = document.getElementById('contentGrid');
+    const loader = document.getElementById('loader');
+    const searchInput = document.getElementById('searchInput');
+    const sectionHeading = document.getElementById('sectionHeading');
+    const playerModal = document.getElementById('playerModal');
+    const playerContainer = document.getElementById('playerContainer');
+    const video = document.getElementById('videoPlayer');
+    const playerControls = document.getElementById('playerControls');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const rewindBtn = document.getElementById('rewindBtn');
+    const forwardBtn = document.getElementById('forwardBtn');
+    const progressTrack = document.getElementById('progressTrack');
+    const progressFill = document.getElementById('progressFill');
+    const timeDisplay = document.getElementById('timeDisplay');
+    const playerTitle = document.getElementById('playerTitle');
+    const playerSubtitle = document.getElementById('playerSubtitle');
+    const episodesBtn = document.getElementById('episodesBtn');
+    const episodesDrawer = document.getElementById('episodesDrawer');
+    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+    const episodesList = document.getElementById('episodesList');
+    const closePlayerBtn = document.getElementById('closePlayerBtn');
+    const aspectRatioBtn = document.getElementById('aspectRatioBtn');
+    const aspectRatioText = document.getElementById('aspectRatioText');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const playerToast = document.getElementById('playerToast');
 
-      const modal = document.getElementById('playerModal');
-      document.getElementById('videoTitleDisplay').innerText = title;
-      modal.classList.add('active');
-
-      try {
-        const res = await fetch(`${API}?action=stream&realid=${realid}`);
-        const streamData = await res.json();
-
-        if (!streamData.url) {
-          alert('تعذر استخراج رابط المشاهدة.');
-          closePlayer();
-          return;
-        }
-
-        if (Hls.isSupported()) {
-          if (hls) hls.destroy();
-          hls = new Hls();
-          hls.loadSource(streamData.url);
-          hls.attachMedia(video);
-
-          hls.on(Hls.Events.MANIFEST_PARSED, (e, data) => {
-            setupQualityMenu(data.levels);
-            video.play();
-          });
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          video.src = streamData.url;
-          video.play();
-        }
-
-        if (seriesSlug) {
-          loadSeriesEpisodes(seriesSlug);
-        } else {
-          document.getElementById('episodesListContainer').innerHTML = '<p style="color:#aaa; font-size:13px;">هذا المحتوى فيلم ولا يحتوي على حلقات.</p>';
-        }
-
-        resetControlsTimer();
-      } catch (err) {
-        alert('حدث خطأ أثناء تشغيل الفيديو.');
-        closePlayer();
-      }
+    function showToast(text) {
+      playerToast.textContent = text;
+      playerToast.classList.add('show');
+      setTimeout(() => playerToast.classList.remove('show'), 1600);
     }
 
-    async function loadSeriesEpisodes(slug) {
-      const clean = slug.replace('مسلسل-', '').replace('-مترجم', '').replace(/-/g, ' ');
-      const epContainer = document.getElementById('episodesListContainer');
-      epContainer.innerHTML = '<p style="color:#aaa; font-size:13px;">جاري جلب الحلقات...</p>';
+    // استخراج اسم المسلسل لمنع التكرار وخلط المحتوى
+    function parseMediaTitle(title) {
+      if (!title) return { cleanTitle: 'عمل غير معروف', episodeNum: null, isSeries: false };
 
+      const epMatch = title.match(/الحلقة\s*([0-9\u0660-\u0669]+)/i);
+      const isSeries = /مسلسل|برنامج|انمي|أنمي|كرتون|الحلقة/i.test(title);
+
+      let cleanTitle = title;
+      let episodeNum = null;
+
+      if (epMatch) {
+        episodeNum = parseInt(epMatch[1].replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+        cleanTitle = title.split(/الحلقة/i)[0].trim();
+      }
+
+      cleanTitle = cleanTitle
+        .replace(/^(مشاهدة|تحميل|مسلسل|برنامج|فلم|فيلم)\s+/gi, '')
+        .replace(/مترجم|مدبلج|كاملة|HD|اون لاين|اونلاين/gi, '')
+        .trim();
+
+      return { cleanTitle, episodeNum, isSeries };
+    }
+
+    // جلب البيانات من Worker
+    async function loadFeed() {
+      showLoader(true);
       try {
-        const res = await fetch(`${API}?action=search&search=${encodeURIComponent(clean)}`);
+        const res = await fetch(`${WORKER_BASE}?action=posts&page=1`);
         const data = await res.json();
-        epContainer.innerHTML = '';
+        allPosts = Array.isArray(data) ? data : (data.posts || []);
+        processAndRender(allPosts);
+      } catch (err) {
+        console.error('Fetch error:', err);
+        contentGrid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#ff5252;">تعذر الاتصال بالسيرفر.</div>`;
+      } finally {
+        showLoader(false);
+      }
+    }
 
-        if (!data.posts || data.posts.length === 0) {
-          epContainer.innerHTML = '<p style="color:#aaa; font-size:13px;">لا توجد حلقات إضافية مسجلة.</p>';
-          return;
+    // تجميع الحلقات بذكاء
+    function processAndRender(posts) {
+      const seriesMap = new Map();
+      const standaloneMovies = [];
+
+      posts.forEach(post => {
+        const info = parseMediaTitle(post.title);
+        
+        if (info.isSeries && info.episodeNum !== null) {
+          const groupKey = info.cleanTitle.toLowerCase();
+          if (!seriesMap.has(groupKey)) {
+            seriesMap.set(groupKey, {
+              type: 'series',
+              title: info.cleanTitle,
+              image: post.image || post.poster || '',
+              episodes: []
+            });
+          }
+          seriesMap.get(groupKey).episodes.push({
+            id: post.id || post.realid,
+            realid: post.realid || post.id,
+            episodeNum: info.episodeNum,
+            fullTitle: post.title,
+            image: post.image || post.poster || ''
+          });
+        } else {
+          standaloneMovies.push({
+            type: 'movie',
+            title: post.title,
+            realid: post.realid || post.id,
+            image: post.image || post.poster || ''
+          });
         }
+      });
 
-        const sorted = data.posts.reverse();
-        sorted.forEach(ep => {
-          const item = document.createElement('div');
-          item.className = `ep-item focusable ${ep.realid === currentRealId ? 'current' : ''}`;
-          item.tabIndex = 0;
-          item.innerText = ep.title;
-          item.onclick = () => {
-            playMedia(ep.realid, ep.title, ep.series_slug);
-            toggleEpisodesDrawer();
-          };
-          epContainer.appendChild(item);
+      seriesMap.forEach(series => {
+        series.episodes.sort((a, b) => a.episodeNum - b.episodeNum);
+        if (series.episodes.length > 0 && series.episodes[0].image) {
+          series.image = series.episodes[0].image;
+        }
+      });
+
+      groupedItems = [...seriesMap.values(), ...standaloneMovies];
+      renderGrid(groupedItems);
+    }
+
+    function renderGrid(items) {
+      contentGrid.innerHTML = '';
+      if (!items.length) {
+        contentGrid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:var(--text-muted);">لا توجد نتائج مطابقة.</div>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.tabIndex = 0;
+
+        const isSeries = item.type === 'series';
+        const badgeHTML = isSeries 
+          ? `<div class="card-badge series">${item.episodes.length} حلقات</div>`
+          : `<div class="card-badge">فلم</div>`;
+
+        card.innerHTML = `
+          <div class="card-thumb">
+            <img src="${item.image || 'https://via.placeholder.com/300x450?text=Alameeere'}" alt="${item.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=Alameeere'" />
+            ${badgeHTML}
+          </div>
+          <div class="card-body">
+            <div class="card-title">${item.title}</div>
+            <div class="card-meta">
+              <span>${isSeries ? 'مسلسل كامل' : 'فيديو كامل'}</span>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => handleCardClick(item));
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') handleCardClick(item);
         });
-      } catch (e) {
-        epContainer.innerHTML = '<p style="color:#aaa; font-size:13px;">تعذر تحميل قائمة الحلقات.</p>';
-      }
-    }
 
-    function toggleEpisodesDrawer() {
-      const drawer = document.getElementById('epDrawer');
-      drawer.classList.toggle('open');
-      if (drawer.classList.contains('open')) {
-        const firstEp = drawer.querySelector('.ep-item');
-        if (firstEp) firstEp.focus();
-      }
-    }
-
-    function closePlayer() {
-      const modal = document.getElementById('playerModal');
-      modal.classList.remove('active');
-      video.pause();
-      if (hls) { hls.destroy(); hls = null; }
-      document.getElementById('epDrawer').classList.remove('open');
-
-      // إعادة التركيز للعنصر الذي كان المشاهد واقفاً عليه
-      if (lastFocusedElement) {
-        setTimeout(() => lastFocusedElement.focus(), 100);
-      }
-    }
-
-    function togglePlay() {
-      if (video.paused) {
-        video.play();
-        document.getElementById('playBtn').innerText = '⏸ إيقاف';
-      } else {
-        video.pause();
-        document.getElementById('playBtn').innerText = '▶ تشغيل';
-      }
-    }
-    video.addEventListener('play', () => document.getElementById('playBtn').innerText = '⏸ إيقاف');
-    video.addEventListener('pause', () => document.getElementById('playBtn').innerText = '▶ تشغيل');
-
-    function skipTime(seconds) {
-      video.currentTime += seconds;
-      showIndicator(seconds > 0 ? `+${seconds}s` : `${seconds}s`, '⏩');
-    }
-
-    video.addEventListener('timeupdate', () => {
-      const cur = video.currentTime;
-      const dur = video.duration || 0;
-      const pct = (cur / dur) * 100;
-      document.getElementById('progressFill').style.width = `${pct}%`;
-      document.getElementById('timeDisplay').innerText = `${formatTime(cur)} / ${formatTime(dur)}`;
-    });
-
-    function seekVideo(e) {
-      const bar = document.getElementById('progressBar');
-      const rect = bar.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      video.currentTime = pos * video.duration;
-    }
-
-    function formatTime(s) {
-      const m = Math.floor(s / 60);
-      const sec = Math.floor(s % 60);
-      return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-    }
-
-    function setupQualityMenu(levels) {
-      const menu = document.getElementById('qualityMenu');
-      menu.innerHTML = '<button class="focusable active" tabindex="0" onclick="setQuality(-1, this)">تلقائي (Auto)</button>';
-      levels.forEach((lvl, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'focusable';
-        btn.tabIndex = 0;
-        btn.innerText = `${lvl.height}p`;
-        btn.onclick = () => setQuality(idx, btn);
-        menu.appendChild(btn);
+        contentGrid.appendChild(card);
       });
     }
 
-    function setQuality(lvlIndex, btn) {
-      if (hls) hls.currentLevel = lvlIndex;
-      document.querySelectorAll('#qualityMenu button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('qualityMenu').classList.remove('show');
-    }
-
-    function toggleQualityMenu() {
-      document.getElementById('qualityMenu').classList.toggle('show');
-    }
-
-    function setAspectRatio(fit) {
-      video.style.objectFit = fit;
-      document.getElementById('aspectMenu').classList.remove('show');
-      showIndicator(`مقاس: ${fit}`, '📺');
-    }
-
-    function toggleAspectMenu() {
-      document.getElementById('aspectMenu').classList.toggle('show');
-    }
-
-    function toggleFullscreenRotate() {
-      const box = document.getElementById('playerBox');
-      if (!document.fullscreenElement) {
-        box.requestFullscreen().catch(() => {});
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').catch(() => {});
-        }
+    function handleCardClick(item) {
+      if (item.type === 'series') {
+        currentEpisodes = item.episodes;
+        currentPlayingIndex = 0;
+        playEpisode(0, item.title);
       } else {
-        document.exitFullscreen().catch(() => {});
-        if (screen.orientation && screen.orientation.unlock) {
-          screen.orientation.unlock();
-        }
+        currentEpisodes = [];
+        playStream(item.realid, item.title, 'فيلم كامل');
       }
     }
 
-    function resetControlsTimer() {
-      const top = document.getElementById('topControls');
-      const bottom = document.getElementById('bottomControls');
-      top.classList.remove('fade-out');
-      bottom.classList.remove('fade-out');
+    function playEpisode(index, seriesTitle) {
+      currentPlayingIndex = index;
+      const ep = currentEpisodes[index];
+      playStream(ep.realid, seriesTitle, `الحلقة ${ep.episodeNum}`);
+      buildEpisodesDrawer(seriesTitle);
+    }
 
+    async function playStream(realid, mainTitle, subTitle) {
+      playerTitle.textContent = mainTitle;
+      playerSubtitle.textContent = subTitle;
+      playerModal.classList.add('active');
+      episodesBtn.style.display = currentEpisodes.length > 0 ? 'inline-flex' : 'none';
+
+      try {
+        const res = await fetch(`${WORKER_BASE}?action=stream&realid=${realid}`);
+        const data = await res.json();
+        
+        let streamUrl = '';
+        if (typeof data === 'string' && data.includes('.m3u8')) {
+          streamUrl = data;
+        } else if (data.stream_url) {
+          streamUrl = data.stream_url;
+        } else if (data.url) {
+          streamUrl = data.url;
+        } else if (Array.isArray(data) && data[0]?.url) {
+          streamUrl = data[0].url;
+        }
+
+        if (!streamUrl) {
+          alert('تعذر استخراج رابط البث لهذه الحلقة حالياً.');
+          return;
+        }
+
+        startVideoPlayback(streamUrl);
+      } catch (err) {
+        console.error('Stream load error:', err);
+        alert('حدث خطأ أثناء تحميل البث.');
+      }
+    }
+
+    function startVideoPlayback(url) {
+      if (hlsInstance) {
+        hlsInstance.destroy();
+      }
+
+      if (Hls.isSupported() && url.includes('.m3u8')) {
+        hlsInstance = new Hls({ enableWorker: true });
+        hlsInstance.loadSource(url);
+        hlsInstance.attachMedia(video);
+        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play().catch(() => {});
+        });
+      } else {
+        video.src = url;
+        video.play().catch(() => {});
+      }
+
+      showControls();
+    }
+
+    function buildEpisodesDrawer(seriesTitle) {
+      episodesList.innerHTML = '';
+      currentEpisodes.forEach((ep, idx) => {
+        const epDiv = document.createElement('div');
+        epDiv.className = `episode-item ${idx === currentPlayingIndex ? 'active' : ''}`;
+        epDiv.textContent = `الحلقة ${ep.episodeNum}`;
+        epDiv.addEventListener('click', () => {
+          episodesDrawer.classList.remove('open');
+          playEpisode(idx, seriesTitle);
+        });
+        episodesList.appendChild(epDiv);
+      });
+    }
+
+    // تشغيل / إيقاف
+    playPauseBtn.addEventListener('click', () => {
+      if (video.paused) video.play();
+      else video.pause();
+    });
+
+    video.addEventListener('play', () => {
+      playIcon.style.display = 'none';
+      pauseIcon.style.display = 'block';
+    });
+
+    video.addEventListener('pause', () => {
+      playIcon.style.display = 'block';
+      pauseIcon.style.display = 'none';
+    });
+
+    rewindBtn.addEventListener('click', () => {
+      video.currentTime = Math.max(0, video.currentTime - 10);
+    });
+
+    forwardBtn.addEventListener('click', () => {
+      video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
+    });
+
+    // تحديث الدقائق وشريط الوقت
+    video.addEventListener('timeupdate', () => {
+      if (!video.duration) return;
+      const progress = (video.currentTime / video.duration) * 100;
+      progressFill.style.width = `${progress}%`;
+      timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+    });
+
+    progressTrack.addEventListener('click', (e) => {
+      const rect = progressTrack.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      video.currentTime = pos * video.duration;
+    });
+
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return '00:00';
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    /* ========================================================
+       1. زر قياس الفيديو: كل نقرة تغير المقاس مباشرة بدون أي قائمة
+       ======================================================== */
+    const aspectModes = [
+      { fit: 'contain', label: 'تناسب 16:9', desc: 'المقاس الأصلي (تناسب)' },
+      { fit: 'cover',   label: 'ملء الشاشة', desc: 'ملء الشاشة مع قص الحواف (Cover)' },
+      { fit: 'fill',    label: 'تمدد كامل', desc: 'تمدد لكامل أبعاد الشاشة (Stretch)' }
+    ];
+    let currentAspectIdx = 0;
+
+    aspectRatioBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      currentAspectIdx = (currentAspectIdx + 1) % aspectModes.length;
+      const mode = aspectModes[currentAspectIdx];
+      video.style.objectFit = mode.fit;
+      aspectRatioText.textContent = mode.label;
+      showToast(mode.desc);
+    });
+
+    /* ========================================================
+       2. النقر مرتين للدخول / الخروج من كامل الشاشة + تدوير
+       ======================================================== */
+    async function toggleFullscreenAndRotate() {
+      try {
+        if (!document.fullscreenElement) {
+          if (playerContainer.requestFullscreen) {
+            await playerContainer.requestFullscreen();
+          } else if (playerContainer.webkitRequestFullscreen) {
+            await playerContainer.webkitRequestFullscreen();
+          } else if (video.webkitEnterFullscreen) {
+            video.webkitEnterFullscreen(); // دعم خاص لـ iOS Safari
+            return;
+          }
+
+          // تدوير الشاشة أفقياً عند ملء الشاشة إذا دعم الهاتف
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(() => {});
+          }
+        } else {
+          if (document.exitFullscreen) {
+            await document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            await document.webkitExitFullscreen();
+          }
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
+        }
+      } catch (err) {
+        console.warn('Fullscreen error:', err);
+      }
+    }
+
+    fullscreenBtn.addEventListener('click', toggleFullscreenAndRotate);
+
+    // معالجة النقر المزدوج (Double Tap للهواتف و Double Click للماوس)
+    let lastTapTime = 0;
+    playerContainer.addEventListener('click', (e) => {
+      // تجاهل النقر إذا كان على زر تحكم مباشر
+      if (e.target.closest('button') || e.target.closest('.progress-track') || e.target.closest('.episodes-drawer')) {
+        return;
+      }
+
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - lastTapTime;
+
+      if (tapLength < 320 && tapLength > 0) {
+        // تم اكتشاف نقر مزدوج!
+        e.preventDefault();
+        toggleFullscreenAndRotate();
+        lastTapTime = 0;
+      } else {
+        lastTapTime = currentTime;
+        showControls();
+      }
+    });
+
+    // فتح وإغلاق الحلقات
+    episodesBtn.addEventListener('click', () => episodesDrawer.classList.add('open'));
+    closeDrawerBtn.addEventListener('click', () => episodesDrawer.classList.remove('open'));
+
+    // إغلاق المشغل
+    closePlayerBtn.addEventListener('click', () => {
+      video.pause();
+      if (hlsInstance) hlsInstance.destroy();
+      video.src = '';
+      playerModal.classList.remove('active');
+      episodesDrawer.classList.remove('open');
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    // إخفاء أزرار التحكم
+    function showControls() {
+      playerControls.classList.remove('hidden');
       clearTimeout(controlsTimeout);
       controlsTimeout = setTimeout(() => {
-        if (!video.paused) {
-          top.classList.add('fade-out');
-          bottom.classList.add('fade-out');
+        if (!video.paused && !episodesDrawer.classList.contains('open')) {
+          playerControls.classList.add('hidden');
         }
       }, 3500);
     }
-    document.getElementById('playerBox').addEventListener('mousemove', resetControlsTimer);
-    document.getElementById('playerBox').addEventListener('touchstart', resetControlsTimer);
 
-    // ------------------- التحكم باللمس ------------------- //
-    let touchStartY = 0;
-    let brightness = 1;
-    let lastTapTime = 0;
+    playerContainer.addEventListener('mousemove', showControls);
 
-    const rightHalf = document.getElementById('rightTouchHalf');
-    const leftHalf = document.getElementById('leftTouchHalf');
-
-    rightHalf.addEventListener('touchstart', (e) => {
-      touchStartY = e.touches[0].clientY;
-      handleDoubleTap(e, 10);
-    });
-    rightHalf.addEventListener('touchmove', (e) => {
-      const deltaY = touchStartY - e.touches[0].clientY;
-      touchStartY = e.touches[0].clientY;
-      video.volume = Math.min(1, Math.max(0, video.volume + deltaY * 0.005));
-      showIndicator(`صوت: ${Math.round(video.volume * 100)}%`, '🔊');
-    });
-
-    leftHalf.addEventListener('touchstart', (e) => {
-      touchStartY = e.touches[0].clientY;
-      handleDoubleTap(e, -10);
-    });
-    leftHalf.addEventListener('touchmove', (e) => {
-      const deltaY = touchStartY - e.touches[0].clientY;
-      touchStartY = e.touches[0].clientY;
-      brightness = Math.min(1.8, Math.max(0.2, brightness + deltaY * 0.005));
-      video.style.filter = `brightness(${brightness})`;
-      showIndicator(`إضاءة: ${Math.round(brightness * 100)}%`, '☀️');
-    });
-
-    function handleDoubleTap(e, seconds) {
-      const now = Date.now();
-      if (now - lastTapTime < 300) {
-        skipTime(seconds);
+    // البحث
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim().toLowerCase();
+      if (!query) {
+        renderGrid(groupedItems);
+        return;
       }
-      lastTapTime = now;
+      const filtered = groupedItems.filter(item => item.title.toLowerCase().includes(query));
+      renderGrid(filtered);
+    });
+
+    function showLoader(visible) {
+      loader.style.display = visible ? 'flex' : 'none';
     }
 
-    let indTimeout = null;
-    function showIndicator(text, icon) {
-      const badge = document.getElementById('indicatorBadge');
-      document.getElementById('indicatorIcon').innerText = icon;
-      document.getElementById('indicatorText').innerText = text;
-      badge.classList.add('show');
-      clearTimeout(indTimeout);
-      indTimeout = setTimeout(() => badge.classList.remove('show'), 1200);
-    }
-
-    // بدء التشغيل
-    fetchCategories();
-    fetchMovies();
+    loadFeed();
   </script>
 </body>
 </html>
