@@ -9,7 +9,7 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; outline: none; }
     body { background: #0f1015; color: #fff; min-height: 100vh; padding-bottom: 50px; overflow-x: hidden; }
-    
+
     /* Splash */
     .splash-screen { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; cursor: pointer; transition: opacity 0.6s; }
     .splash-title h1 { font-size: 3.5rem; font-weight: 900; text-shadow: 0 0 25px rgba(255,255,255,0.25); }
@@ -40,20 +40,31 @@
     .poster-wrap img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
     .card h3 { font-size: 13px; line-height: 1.4; padding: 12px; color: #eee; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
+    /* Episode count badge */
+    .ep-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(229,9,20,0.92); color: #fff; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.6); z-index: 2; }
+    .series-badge { display: inline-block; background: #e50914; color: #fff; padding: 3px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; }
+    .load-status { display: none; color: #aaa; font-size: 0.9rem; }
+
     /* Focus (Remote) */
     [tabindex="0"]:focus, .card:focus, .cat-btn:focus, button:focus { outline: 3px solid #e50914 !important; outline-offset: 3px; transform: scale(1.04); box-shadow: 0 0 25px rgba(229,9,20,0.6); z-index: 10; }
+
+    /* More button */
+    .more-wrap { display: none; justify-content: center; margin-top: 30px; }
+    .more-btn { display: flex; align-items: center; gap: 10px; padding: 12px 34px; background: #e50914; color: #fff; border: none; border-radius: 30px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+    .more-btn .ico { font-size: 1.2rem; }
+    .more-btn:disabled { opacity: 0.6; cursor: wait; }
 
     /* Pagination */
     .pagination { display: flex; justify-content: center; gap: 15px; margin-top: 35px; align-items: center; }
     .pagination button { padding: 10px 20px; background: #232530; color: #fff; border: 1px solid #444; border-radius: 6px; cursor: pointer; }
     .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* ===== Series Modal (المواسم والحلقات) ===== */
+    /* ===== Series Modal ===== */
     .series-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 998; justify-content: center; align-items: flex-start; padding: 40px 20px; overflow-y: auto; }
     .series-modal.show { display: flex; }
     .series-content { background: #181920; border-radius: 12px; width: 100%; max-width: 900px; overflow: hidden; position: relative; padding: 25px; display: flex; flex-direction: column; gap: 20px; }
     .close-btn { position: absolute; top: 15px; left: 15px; background: #e50914; color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 18px; z-index: 10; }
-    
+
     .series-header-info { display: flex; gap: 20px; align-items: flex-start; }
     .series-header-info img { width: 120px; border-radius: 8px; }
     .series-header-info h2 { font-size: 1.5rem; margin-bottom: 10px; }
@@ -67,11 +78,6 @@
     .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; max-height: 400px; overflow-y: auto; padding: 5px; }
     .episode-btn { background: #232530; color: #fff; border: 1px solid #333; padding: 12px 15px; border-radius: 8px; cursor: pointer; text-align: right; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
     .episode-btn:hover, .episode-btn:focus { background: #333; border-color: #e50914; }
-    
-    /* زر تحميل المزيد */
-    .load-more-container { display: flex; justify-content: center; margin-top: 20px; width: 100%; grid-column: 1 / -1; }
-    .load-more-btn { background: #e50914; color: #fff; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; }
-    .load-more-btn:hover { background: #b80710; }
 
     /* Player Modal */
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999; justify-content: center; align-items: center; padding: 20px; }
@@ -94,7 +100,11 @@
 
     @media (max-width: 768px) {
       .splash-title h1 { font-size: 2.5rem; }
-      .grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+      .container { padding: 0 8px; margin: 12px auto; }
+      .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .card { border-radius: 8px; }
+      .card h3 { font-size: 11px; padding: 6px; }
+      .ep-badge { font-size: 10px; padding: 2px 6px; bottom: 4px; right: 4px; }
       .series-header-info { flex-direction: column; align-items: center; text-align: center; }
       .episodes-grid { grid-template-columns: 1fr 1fr; }
     }
@@ -130,10 +140,8 @@
 
     <main class="container">
       <div id="movieGrid" class="grid">جاري تحميل الأفلام...</div>
-      <div class="pagination">
-        <button id="prevBtn" onclick="changePage(-1)" disabled tabindex="0">السابق</button>
-        <span id="pageNumber" style="align-self:center;">صفحة 1</span>
-        <button id="nextBtn" onclick="changePage(1)" tabindex="0">التالي</button>
+      <div class="more-wrap" id="moreWrap">
+        <button class="more-btn" id="moreBtn" onclick="loadMore()" tabindex="0"><span class="ico">⬇️</span><span id="moreLabel">المزيد</span></button>
       </div>
     </main>
   </div>
@@ -146,10 +154,12 @@
         <img id="seriesPoster" src="" alt="Poster">
         <div>
           <h2 id="seriesTitle"></h2>
+          <span class="series-badge" id="seriesCount"></span>
           <p id="seriesStory"></p>
         </div>
       </div>
       <div class="season-tabs" id="seasonTabs"></div>
+      <div class="load-status" id="loadStatus"></div>
       <div class="episodes-grid" id="episodesGrid"></div>
     </div>
   </div>
@@ -190,12 +200,25 @@
     let currentSearch = '';
     let hls = null;
     let hideControlsTimer;
-    let groupedContent = [];
 
-    // بيانات النافذة الحالية
+    // حالة القائمة (تراكمية: المزيد يضيف ولا يمسح)
+    const shownKeys = new Set();
+    const seenPostIds = new Set();
+    const seriesMap = new Map();   // series_slug -> المسلسل (يحتفظ بحلقاته)
+    let hasMore = true;
+    let loadingMore = false;
+    let listToken = 0;
+
+    // حالة نافذة المسلسل
     let activeSeries = null;
-    let activeSeasonEpisodes = [];
-    let currentSeriesPage = 1;
+    let activeSeasonName = null;
+
+    // طابور حساب عدد الحلقات في الخلفية
+    const pending = [];
+    let workers = 0;
+    const MAX_WORKERS = 3;
+
+    const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
 
     // ===== Splash =====
     const splash = document.getElementById('splash-screen');
@@ -207,7 +230,7 @@
         splash.style.display = 'none';
         mainApp.style.display = 'block';
         fetchCategories();
-        fetchMovies();
+        loadMore(true);
         setTimeout(() => { const first = document.querySelector('.cat-btn'); if (first) first.focus(); }, 100);
       }, 600);
     }
@@ -216,11 +239,144 @@
       if (splash.style.display !== 'none' && (e.key === 'Enter' || e.key === ' ')) enterSite();
     });
 
+    // ===== Helpers =====
+    function normAr(s) {
+      return String(s || '')
+        .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+        .replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه');
+    }
+
+    function seasonOrder(name) {
+      const n = normAr(name);
+      const m = n.match(/\d+/);
+      if (m) return parseInt(m[0], 10);
+      const words = ['اول', 'ثاني', 'ثالث', 'رابع', 'خامس', 'سادس', 'سابع', 'ثامن', 'تاسع', 'عاشر'];
+      for (let i = 0; i < words.length; i++) if (n.includes(words[i])) return i + 1;
+      return 999;
+    }
+
+    function episodeNumber(ep) {
+      let m = normAr(ep.meta?.number).match(/\d+/);
+      if (!m) m = normAr(ep.title).match(/الحلقه\s*(\d+)/);
+      return m ? parseInt(m[1] || m[0], 10) : 9999;
+    }
+
+    function seasonNameOf(ep) {
+      return ep.season_info?.name || ep.movie_season || 'الموسم الأول';
+    }
+
+    function addEpisodes(series, eps) {
+      eps.forEach(ep => {
+        if (!series.episodes.some(e => e.realid === ep.realid)) series.episodes.push(ep);
+      });
+    }
+
+    async function fetchJSON(url) {
+      const res = await fetch(url);
+      return res.json();
+    }
+
+    function cleanQuery(s) {
+      return String(s || '')
+        .replace(/الحلقة\s*[\d٠-٩]*/g, ' ')
+        .replace(/(الموسم|موسم)\s*\S*/g, ' ')
+        .replace(/season\s*\d*/gi, ' ')
+        .replace(/episode\s*\d*/gi, ' ')
+        .replace(/مترجم[ةه]?|مدبلج[ةه]?/g, ' ')
+        .replace(/\s+/g, ' ').trim();
+    }
+
+    function buildQueries(series) {
+      const raw = [
+        series.title.replace('الحلقة', '').trim(),
+        cleanQuery(series.title),
+        series.infoName,
+        cleanQuery(series.episodes[0]?.title)
+      ];
+      return [...new Set(raw.map(q => (q || '').trim()).filter(q => q.length > 1))].slice(0, 3);
+    }
+
+    // ===== Badge (عدد الحلقات) =====
+    function badgeText(series) {
+      return series.countReady ? `${series.episodes.length} حلقة` : '…';
+    }
+
+    function updateBadge(series) {
+      if (series.badgeEl) series.badgeEl.textContent = badgeText(series);
+      if (series === activeSeries) {
+        const n = series.episodes.length;
+        document.getElementById('seriesCount').textContent = series.countReady ? `${n} حلقة` : `${n} حلقة…`;
+      }
+    }
+
+    function updateLoadStatus() {
+      const st = document.getElementById('loadStatus');
+      if (activeSeries && activeSeries.loading) {
+        st.style.display = 'block';
+        st.textContent = 'جاري تحميل باقي الحلقات...';
+      } else {
+        st.style.display = 'none';
+      }
+    }
+
+    function progress(series) {
+      updateBadge(series);
+      if (series === activeSeries) { renderSeries(); updateLoadStatus(); }
+    }
+
+    // ===== جلب كل حلقات المسلسل (مرة واحدة لكل مسلسل) =====
+    function startLoad(series) {
+      if (series.loadPromise) return series.loadPromise;
+      series.loading = true;
+      series.loadPromise = (async () => {
+        const seen = new Set();
+        for (const q of buildQueries(series)) {
+          let stalls = 0, noMatch = 0;
+          for (let page = 1; page <= 40; page++) {
+            let data;
+            try { data = await fetchJSON(`${API}?action=search&search=${encodeURIComponent(q)}&page=${page}`); }
+            catch (e) { break; }
+            const posts = data?.posts || [];
+            if (!posts.length) break;
+
+            const fresh = posts.filter(p => !seen.has(p.realid));
+            if (!fresh.length) { if (++stalls >= 2) break; continue; }
+            stalls = 0;
+            fresh.forEach(p => seen.add(p.realid));
+
+            const mine = fresh.filter(p => p.series_slug === series.series_slug);
+            if (mine.length) {
+              noMatch = 0;
+              addEpisodes(series, mine);
+              progress(series);
+            } else if (++noMatch >= 3) break;
+          }
+        }
+        series.loading = false;
+        series.countReady = true;
+        progress(series);
+      })();
+      return series.loadPromise;
+    }
+
+    function queueCounts(items) {
+      items.forEach(i => { if (i.isSeries && !i.loadPromise) pending.push(i); });
+      pump();
+    }
+
+    function pump() {
+      while (workers < MAX_WORKERS && pending.length) {
+        const it = pending.shift();
+        if (it.loadPromise) continue;
+        workers++;
+        startLoad(it).finally(() => { workers--; pump(); });
+      }
+    }
+
     // ===== Categories =====
     async function fetchCategories() {
       try {
-        const res = await fetch(`${API}?action=categories`);
-        const cats = await res.json();
+        const cats = await fetchJSON(`${API}?action=categories`);
         const container = document.getElementById('catList');
         const arr = Array.isArray(cats) ? cats : (cats.categories || cats.terms || []);
         arr.forEach(cat => {
@@ -234,83 +390,71 @@
       } catch (e) { console.error(e); }
     }
 
-    // ===== Movies & Grouping =====
-    async function fetchMovies() {
-      const grid = document.getElementById('movieGrid');
-      grid.innerHTML = '<p>جاري التحميل...</p>';
-
-      let url = `${API}?action=posts&page=${currentPage}`;
-      if (currentSearch) {
-        url = `${API}?action=search&search=${encodeURIComponent(currentSearch)}&page=${currentPage}`;
-      } else if (currentCategory) {
-        url = `${API}?action=posts&category=${currentCategory}&page=${currentPage}`;
-      }
-
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        grid.innerHTML = '';
-
-        if (!data.posts || data.posts.length === 0) {
-          grid.innerHTML = '<p>لا توجد نتائج لعرضها.</p>';
-          return;
-        }
-
-        groupPosts(data.posts);
-        renderGroupedContent();
-
-        document.getElementById('pageNumber').innerText = `صفحة ${currentPage}`;
-        document.getElementById('prevBtn').disabled = currentPage <= 1;
-      } catch (e) {
-        grid.innerHTML = '<p>حدث خطأ أثناء تحميل البيانات.</p>';
-      }
+    // ===== Movies list (زر المزيد) =====
+    function pageUrl(page) {
+      if (currentSearch) return `${API}?action=search&search=${encodeURIComponent(currentSearch)}&page=${page}`;
+      if (currentCategory) return `${API}?action=posts&category=${currentCategory}&page=${page}`;
+      return `${API}?action=posts&page=${page}`;
     }
 
-    function groupPosts(posts) {
-      groupedContent = [];
+    // يضيف المنشورات للقائمة: المسلسل المكرر يندمج في بوستر واحد
+    function addPosts(posts) {
+      const newItems = [];
+      let unseen = 0;
       posts.forEach(post => {
+        const pid = post.realid ?? post.slug ?? post.title;
+        if (seenPostIds.has(pid)) return;
+        seenPostIds.add(pid);
+        unseen++;
+
         if (post.series_slug) {
-          let existingSeries = groupedContent.find(item => item.series_slug === post.series_slug);
-          if (existingSeries) {
-            existingSeries.episodes.push(post);
-          } else {
-            groupedContent.push({
+          let s = seriesMap.get(post.series_slug);
+          if (!s) {
+            s = {
               isSeries: true,
               series_slug: post.series_slug,
               title: post.series_info?.name || post.movie_season || post.title,
+              infoName: post.series_info?.name || '',
               thumbnail: post.thumbnail,
               story: post.meta?.story || '',
-              episodes: [post]
+              episodes: [],
+              countReady: false,
+              loading: false,
+              loadPromise: null,
+              badgeEl: null
+            };
+            seriesMap.set(post.series_slug, s);
+          }
+          addEpisodes(s, [post]);
+          const key = 's' + post.series_slug;
+          if (!shownKeys.has(key)) { shownKeys.add(key); newItems.push(s); }
+        } else {
+          const key = 'm' + pid;
+          if (!shownKeys.has(key)) {
+            shownKeys.add(key);
+            newItems.push({
+              isSeries: false,
+              title: post.title,
+              thumbnail: post.thumbnail,
+              realid: post.realid,
+              story: post.meta?.story || ''
             });
           }
-        } else {
-          groupedContent.push({
-            isSeries: false,
-            title: post.title,
-            thumbnail: post.thumbnail,
-            realid: post.realid,
-            story: post.meta?.story || ''
-          });
         }
       });
+      return { newItems, unseen };
     }
 
-    function renderGroupedContent() {
+    function renderCards(items) {
       const grid = document.getElementById('movieGrid');
-      grid.innerHTML = '';
-
-      groupedContent.forEach(item => {
+      items.forEach(item => {
         const card = document.createElement('div');
         card.className = 'card';
         card.tabIndex = 0;
 
-        if (item.isSeries) {
-          card.onclick = () => openSeriesModal(item);
-          card.addEventListener('keydown', (e) => { if (e.key === 'Enter') openSeriesModal(item); });
-        } else {
-          card.onclick = () => playMovie(item.realid, item.title);
-          card.addEventListener('keydown', (e) => { if (e.key === 'Enter') playMovie(item.realid, item.title); });
-        }
+        const open = item.isSeries ? () => openSeriesModal(item) : () => playMovie(item.realid, item.title);
+        card.onclick = open;
+        card.addEventListener('keydown', (e) => { if (e.key === 'Enter') open(); });
 
         card.innerHTML = `
           <div class="poster-wrap">
@@ -318,8 +462,71 @@
           </div>
           <h3>${item.title}</h3>
         `;
+
+        if (item.isSeries) {
+          const badge = document.createElement('span');
+          badge.className = 'ep-badge';
+          badge.textContent = badgeText(item);
+          item.badgeEl = badge;
+          card.querySelector('.poster-wrap').appendChild(badge);
+        }
         grid.appendChild(card);
       });
+    }
+
+    function updateMoreBtn() {
+      document.getElementById('moreWrap').style.display = (hasMore && shownKeys.size > 0) ? 'flex' : 'none';
+      document.getElementById('moreBtn').disabled = loadingMore;
+      document.getElementById('moreLabel').textContent = loadingMore ? 'جاري التحميل...' : 'المزيد';
+    }
+
+    async function loadMore(reset = false) {
+      if (loadingMore && !reset) return;
+      const token = reset ? ++listToken : listToken;
+      const grid = document.getElementById('movieGrid');
+
+      if (reset) {
+        currentPage = 1;
+        hasMore = true;
+        pending.length = 0;
+        shownKeys.clear();
+        seenPostIds.clear();
+        grid.innerHTML = '<p>جاري التحميل...</p>';
+      }
+      loadingMore = true;
+      updateMoreBtn();
+
+      const target = isMobile() ? 9 : 14;   // أقل عدد بوسترات جديدة في كل ضغطة
+      let added = 0, fetches = 0, stalls = 0, failed = false;
+      let firstRender = reset;
+
+      try {
+        while (added < target && hasMore && fetches < 8) {
+          const data = await fetchJSON(pageUrl(currentPage));
+          if (token !== listToken) return;
+          fetches++;
+
+          const posts = data?.posts || [];
+          if (!posts.length) { hasMore = false; break; }
+          currentPage++;
+
+          const { newItems, unseen } = addPosts(posts);
+          if (unseen === 0) { if (++stalls >= 2) { hasMore = false; break; } continue; }
+          stalls = 0;
+
+          if (firstRender) { grid.innerHTML = ''; firstRender = false; }
+          renderCards(newItems);
+          queueCounts(newItems);
+          added += newItems.length;
+        }
+      } catch (e) { console.error(e); failed = true; }
+
+      if (token !== listToken) return;
+      loadingMore = false;
+      if (shownKeys.size === 0) {
+        grid.innerHTML = failed ? '<p>حدث خطأ أثناء تحميل البيانات.</p>' : '<p>لا توجد نتائج لعرضها.</p>';
+      }
+      updateMoreBtn();
     }
 
     // ===== Series Modal (المواسم والحلقات) =====
@@ -327,145 +534,91 @@
 
     function openSeriesModal(series) {
       activeSeries = series;
+      activeSeasonName = null;
+
       document.getElementById('seriesPoster').src = series.thumbnail;
       document.getElementById('seriesTitle').innerText = series.title;
       document.getElementById('seriesStory').innerText = series.story || 'لا يوجد وصف متاح.';
-      
-      // إظهار النافذة
+
       seriesModal.classList.add('show');
-
-      // تجميع الحلقات التي تم تحميلها مسبقاً في الصفحة الرئيسية
-      const initialSeasons = {};
-      series.episodes.forEach(ep => {
-        const seasonName = ep.season_info?.name || ep.movie_season || 'الموسم الأول';
-        if (!initialSeasons[seasonName]) initialSeasons[seasonName] = [];
-        initialSeasons[seasonName].push(ep);
-      });
-
-      renderSeasonsAndEpisodes(initialSeasons);
-      
-      // تصفير عداد الصفحات الخاص بالمسلسل
-      currentSeriesPage = 1;
+      startLoad(series);
+      updateBadge(series);
+      renderSeries();
+      updateLoadStatus();
     }
 
-    function renderSeasonsAndEpisodes(seasonsObj) {
-      const seasonTabs = document.getElementById('seasonTabs');
-      seasonTabs.innerHTML = '';
-      
-      const seasonNames = Object.keys(seasonsObj);
-      
-      if (seasonNames.length === 0) {
-        seasonTabs.innerHTML = '<span style="color:#aaa;">لا توجد حلقات متاحة.</span>';
+    function groupSeasons(series) {
+      const seasons = {};
+      series.episodes.forEach(ep => {
+        const name = seasonNameOf(ep);
+        (seasons[name] = seasons[name] || []).push(ep);
+      });
+      return seasons;
+    }
+
+    function renderSeries() {
+      const series = activeSeries;
+      if (!series) return;
+
+      const seasons = groupSeasons(series);
+      // المواسم مرتبة من الموسم الأول
+      const names = Object.keys(seasons).sort((a, b) => seasonOrder(a) - seasonOrder(b) || a.localeCompare(b, 'ar'));
+      const tabs = document.getElementById('seasonTabs');
+      const grid = document.getElementById('episodesGrid');
+
+      // حفظ التركيز الحالي (للريموت)
+      const ae = document.activeElement;
+      const focusedTab = ae && ae.classList && ae.classList.contains('season-tab') ? ae.dataset.name : null;
+      const focusedEp = ae && ae.classList && ae.classList.contains('episode-btn') ? ae.dataset.id : null;
+
+      tabs.innerHTML = '';
+      if (names.length === 0) {
+        tabs.innerHTML = '<span style="color:#aaa;">لا توجد حلقات متاحة.</span>';
+        grid.innerHTML = '';
         return;
       }
 
-      seasonNames.forEach((seasonName, index) => {
+      if (!activeSeasonName || !seasons[activeSeasonName]) activeSeasonName = names[0];
+
+      names.forEach(name => {
         const btn = document.createElement('button');
-        btn.className = 'season-tab' + (index === 0 ? ' active' : '');
-        btn.innerText = seasonName;
+        btn.className = 'season-tab' + (name === activeSeasonName ? ' active' : '');
+        btn.dataset.name = name;
         btn.tabIndex = 0;
-        btn.onclick = () => {
-          document.querySelectorAll('.season-tab').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          
-          // ترتيب الحلقات
-          seasonsObj[seasonName].sort((a, b) => parseInt(a.meta?.number||0) - parseInt(b.meta?.number||0));
-          activeSeasonEpisodes = seasonsObj[seasonName];
-          renderEpisodes(activeSeasonEpisodes, true);
-        };
-        seasonTabs.appendChild(btn);
+        btn.innerText = names.length > 1 ? `${name} (${seasons[name].length})` : name;
+        btn.onclick = () => { activeSeasonName = name; renderSeries(); };
+        tabs.appendChild(btn);
       });
 
-      // عرض حلقات الموسم الأول افتراضياً
-      seasonsObj[seasonNames[0]].sort((a, b) => parseInt(a.meta?.number||0) - parseInt(b.meta?.number||0));
-      activeSeasonEpisodes = seasonsObj[seasonNames[0]];
-      renderEpisodes(activeSeasonEpisodes, true);
-    }
-
-    function renderEpisodes(episodes, showLoadMore) {
-      const grid = document.getElementById('episodesGrid');
+      // الحلقات مرتبة من الحلقة 1 إلى الأخيرة
+      const eps = seasons[activeSeasonName].slice().sort((a, b) => episodeNumber(a) - episodeNumber(b));
       grid.innerHTML = '';
-      
-      episodes.forEach(ep => {
+      eps.forEach(ep => {
         const btn = document.createElement('button');
         btn.className = 'episode-btn';
+        btn.dataset.id = ep.realid;
         btn.tabIndex = 0;
-        
-        const epNum = ep.meta?.number || '?';
-        btn.innerHTML = `<span>الحلقة ${epNum}</span> <span>▶️</span>`;
-        
-        btn.onclick = () => {
-          closeSeriesModal();
-          playMovie(ep.realid, ep.title);
-        };
-        btn.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            closeSeriesModal();
-            playMovie(ep.realid, ep.title);
-          }
-        });
-        
+        const n = episodeNumber(ep);
+        btn.innerHTML = `<span>الحلقة ${n === 9999 ? '?' : n}</span> <span>▶️</span>`;
+        const go = () => { closeSeriesModal(); playMovie(ep.realid, ep.title); };
+        btn.onclick = go;
+        btn.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
         grid.appendChild(btn);
       });
 
-      // إضافة زر "تحميل المزيد" لجلب باقي الحلقات
-      if (showLoadMore) {
-        const loadMoreDiv = document.createElement('div');
-        loadMoreDiv.className = 'load-more-container';
-        const loadMoreBtn = document.createElement('button');
-        loadMoreBtn.className = 'load-more-btn';
-        loadMoreBtn.innerText = '⬇️ تحميل المزيد من الحلقات';
-        loadMoreBtn.tabIndex = 0;
-        loadMoreBtn.onclick = () => fetchMoreEpisodes(loadMoreBtn);
-        loadMoreDiv.appendChild(loadMoreBtn);
-        grid.appendChild(loadMoreDiv);
-      }
-    }
-
-    // دالة جلب المزيد من الحلقات (لن تفشل أبداً مع الـ API الخاص بك)
-    async function fetchMoreEpisodes(btn) {
-      btn.innerText = 'جاري التحميل...';
-      btn.disabled = true;
-      
-      currentSeriesPage++;
-      // نبحث باسم المسلسل لجلب الصفحة التالية
-      let query = activeSeries.title.replace("الحلقة", "").trim(); // تنظيف الاسم
-      
-      try {
-        const res = await fetch(`${API}?action=search&search=${encodeURIComponent(query)}&page=${currentSeriesPage}`);
-        const data = await res.json();
-        
-        if (data && data.posts && data.posts.length > 0) {
-          // تصفية النتائج للتأكد من أنها لنفس المسلسل
-          const newEps = data.posts.filter(p => p.series_slug === activeSeries.series_slug);
-          
-          if (newEps.length > 0) {
-            // دمج الحلقات الجديدة
-            newEps.forEach(ep => {
-              if(!activeSeasonEpisodes.find(e => e.realid === ep.realid)) {
-                activeSeasonEpisodes.push(ep);
-              }
-            });
-            
-            // إعادة ترتيب وعرض
-            activeSeasonEpisodes.sort((a, b) => parseInt(a.meta?.number||0) - parseInt(b.meta?.number||0));
-            renderEpisodes(activeSeasonEpisodes, true);
-            return;
-          }
-        }
-        
-        // إذا لم يجد المزيد
-        btn.innerText = 'لا توجد حلقات أخرى متاحة';
-        btn.disabled = true;
-        btn.style.background = '#444';
-
-      } catch (error) {
-        btn.innerText = 'حدث خطأ، جرب مرة أخرى';
-        btn.disabled = false;
+      // استعادة التركيز
+      if (focusedTab) {
+        const t = Array.from(tabs.children).find(el => el.dataset.name === focusedTab);
+        if (t) t.focus();
+      } else if (focusedEp) {
+        const b = Array.from(grid.children).find(el => el.dataset.id === focusedEp);
+        if (b) b.focus();
       }
     }
 
     function closeSeriesModal() {
+      activeSeries = null;
+      document.getElementById('loadStatus').style.display = 'none';
       seriesModal.classList.remove('show');
     }
 
@@ -559,14 +712,13 @@
     videoWrapper.addEventListener('mousemove', showControls);
     videoWrapper.addEventListener('touchstart', showControls);
 
-    // ===== Pagination & Search =====
+    // ===== Search & Categories =====
     function loadCategory(slug, btn) {
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentCategory = slug;
       currentSearch = '';
-      currentPage = 1;
-      fetchMovies();
+      loadMore(true);
     }
 
     function handleSearch(e) {
@@ -575,16 +727,8 @@
       if (!val) return;
       currentSearch = val;
       currentCategory = '';
-      currentPage = 1;
       document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-      fetchMovies();
-    }
-
-    function changePage(direction) {
-      currentPage += direction;
-      if (currentPage < 1) currentPage = 1;
-      fetchMovies();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      loadMore(true);
     }
 
     // ===== Remote Navigation =====
