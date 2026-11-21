@@ -3,12 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090909">
-<title>ALAMEEERE TV</title>
+<meta name="theme-color" content="#080808">
+<meta name="description" content="AlameeereTv - منصة القنوات والأفلام والمسلسلات">
+<title>AlameeereTv</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 <style>
-:root {
+:root{
  --red:#e50914;
  --bg:#080808;
  --card:#171717;
@@ -16,149 +19,256 @@
 }
 *{box-sizing:border-box}
 body{
- margin:0;background:var(--bg);color:#fff;
+ margin:0;
+ background:var(--bg);
+ color:#fff;
  font-family:Cairo,sans-serif;
 }
+button,input{font-family:inherit}
+button{cursor:pointer}
 header{
- height:68px;position:sticky;top:0;z-index:20;
- display:flex;align-items:center;justify-content:space-between;
- padding:0 5%;background:#090909ed;
+ min-height:65px;
+ position:sticky;
+ top:0;
+ z-index:30;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ padding:0 4%;
+ background:#090909f5;
  border-bottom:1px solid #222;
 }
-.logo{font-size:25px;font-weight:900}
-.logo span{color:var(--red)}
-nav{display:flex;gap:20px}
-nav button{
- background:none;border:0;color:#ccc;
- font:inherit;cursor:pointer;
+.logo{
+ font-size:23px;
+ font-weight:900;
+ direction:ltr;
 }
-nav button:hover,.active{color:var(--red)}
-main{max-width:1450px;margin:auto;padding:22px 4%}
+.logo span{color:var(--red)}
+nav{
+ display:flex;
+ align-items:center;
+ gap:12px;
+}
+nav button{
+ background:none;
+ border:0;
+ color:#ccc;
+ font-size:14px;
+ padding:9px;
+}
+nav button.active,
+nav button:hover{color:var(--red)}
+main{
+ max-width:1450px;
+ margin:auto;
+ padding:18px 4%;
+}
 .player-box{
- position:sticky;top:68px;z-index:10;
- background:#080808;padding:10px 0;
+ background:#080808;
+ padding:8px 0 14px;
 }
 video{
- width:100%;aspect-ratio:16/9;
- background:#000;border-radius:12px;
+ display:block;
+ width:100%;
+ aspect-ratio:16/9;
+ max-height:70vh;
+ background:#000;
+ border-radius:12px;
 }
 .player-info{
- display:flex;justify-content:space-between;
- align-items:center;padding:8px 2px;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ padding:10px 3px;
 }
 .live{color:#ff3030;font-size:13px}
 .hero{
- min-height:210px;border-radius:15px;
- background:linear-gradient(90deg,#080808,#330609,#090909);
- padding:28px;margin:20px 0;
- display:flex;flex-direction:column;
+ min-height:190px;
+ border:1px solid #351014;
+ border-radius:15px;
+ background:linear-gradient(100deg,#080808,#330609,#090909);
+ padding:25px;
+ margin:18px 0;
+ display:flex;
+ flex-direction:column;
  justify-content:center;
 }
-.hero h1{font-size:30px;margin:0}
-.hero p{color:#bbb}
-.section-head{
- display:flex;justify-content:space-between;
- align-items:center;margin:28px 0 14px;
+.hero h1{font-size:29px;margin:0}
+.hero p{color:#bbb;margin:8px 0}
+.install-btn{
+ display:none;
+ width:max-content;
+ background:var(--red);
+ color:white;
+ border:0;
+ padding:10px 20px;
+ border-radius:8px;
+ font-weight:700;
 }
-.section-head h2{font-size:19px}
 .search{
- width:100%;padding:13px;border-radius:9px;
- border:1px solid #333;background:#171717;
- color:white;font:inherit;outline:none;
+ width:100%;
+ padding:13px;
+ border-radius:9px;
+ border:1px solid #333;
+ background:#171717;
+ color:white;
+ font-size:15px;
+ outline:none;
 }
+.search:focus{border-color:var(--red)}
 .categories{
- display:flex;gap:9px;overflow-x:auto;
- padding:8px 0 16px;
+ display:flex;
+ gap:9px;
+ overflow-x:auto;
+ padding:12px 0;
+ scrollbar-width:thin;
 }
 .cat{
- white-space:nowrap;padding:9px 17px;
- border:1px solid #333;background:#171717;
- color:white;border-radius:30px;cursor:pointer;
+ white-space:nowrap;
+ padding:8px 17px;
+ border:1px solid #333;
+ background:#171717;
+ color:white;
+ border-radius:30px;
 }
-.cat.selected{background:var(--red);border-color:var(--red)}
+.cat.selected{
+ background:var(--red);
+ border-color:var(--red);
+}
+.section-head{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin:20px 0 12px;
+}
+.section-head h2{font-size:19px}
+#count{font-size:12px;color:var(--muted)}
 .grid{
  display:grid;
  grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
  gap:15px;
 }
 .item{
- background:var(--card);border-radius:10px;
- overflow:hidden;cursor:pointer;
- transition:.2s;position:relative;
+ background:var(--card);
+ border:1px solid #252525;
+ border-radius:10px;
+ overflow:hidden;
+ cursor:pointer;
+ position:relative;
+ transition:transform .2s,border-color .2s;
 }
-.item:hover{transform:translateY(-4px)}
+.item:hover,
+.item:focus{
+ transform:translateY(-3px);
+ border-color:var(--red);
+ outline:none;
+}
 .item img{
- width:100%;aspect-ratio:4/5;
- object-fit:cover;background:#252525;
+ display:block;
+ width:100%;
+ aspect-ratio:4/5;
+ object-fit:cover;
+ background:#252525;
 }
-.item-name{padding:10px;font-size:13px}
+.item-name{
+ padding:10px;
+ font-size:13px;
+}
 .fav{
- position:absolute;top:8px;left:8px;
- background:#111d;color:white;
- border:0;border-radius:50%;
- width:32px;height:32px;cursor:pointer;
+ position:absolute;
+ top:8px;
+ left:8px;
+ background:#111d;
+ color:white;
+ border:0;
+ border-radius:50%;
+ width:34px;
+ height:34px;
+ font-size:19px;
 }
 .empty{
- padding:35px;text-align:center;color:#aaa;
+ padding:35px;
+ text-align:center;
+ color:#aaa;
  grid-column:1/-1;
 }
+.message{
+ padding:25px;
+ text-align:center;
+ color:#aaa;
+}
 footer{
- text-align:center;color:#777;
+ text-align:center;
+ color:#777;
  border-top:1px solid #222;
- padding:25px;margin-top:40px;
+ padding:25px;
+ margin-top:40px;
+}
+button:focus-visible,
+input:focus-visible,
+.item:focus-visible{
+ outline:2px solid var(--red);
+ outline-offset:3px;
 }
 @media(max-width:600px){
- header{padding:0 3%;height:60px}
- .logo{font-size:19px}
- nav{gap:10px}
- nav button{font-size:11px}
+ header{padding:0 3%;min-height:60px}
+ .logo{font-size:18px}
+ nav{gap:3px}
+ nav button{font-size:11px;padding:7px 4px}
  main{padding:12px 3%}
- .hero{min-height:160px;padding:18px}
- .hero h1{font-size:23px}
+ .hero{min-height:150px;padding:18px}
+ .hero h1{font-size:22px}
  .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
- .item-name{font-size:11px}
- .player-box{top:60px}
+ .item-name{font-size:11px;padding:7px}
+ .section-head h2{font-size:16px}
 }
 </style>
 </head>
 <body>
 <header>
-ALAMEEERE
-TV
+Alameeere
+Tv
  <nav>
-  <button onclick="loadSection('live')">الرئيسية</button>
-  <button onclick="loadSection('live')">القنوات</button>
-  <button onclick="loadSection('movie')">الأفلام</button>
-  <button onclick="loadSection('series')">المسلسلات</button>
+  <button class="active" data-section="live"
+   onclick="loadSection('live')">الرئيسية</button>
+  <button data-section="live"
+   onclick="loadSection('live')">القنوات</button>
+  <button data-section="movie"
+   onclick="loadSection('movie')">الأفلام</button>
+  <button data-section="series"
+   onclick="loadSection('series')">المسلسلات</button>
  </nav>
 </header>
 <main>
 <section class="player-box">
- <video id="player" controls playsinline></video>
-  <strong id="playingTitle">ALAMEEERE TV
-**● LIVE**
-**</section>**
-**<section class="hero">**
-**<h1>عالم الترفيه بين يديك</h1>**
-**قنوات مباشرة، رياضة، أفلام ومسلسلات**
-ALAMEEERE TV
+ <video id="player" controls playsinline
+  preload="none"></video>
+  <strong id="playingTitle">AlameeereTv
+● LIVE
+</section>
+<section class="hero">
+ <h1>عالم الترفيه بين يديك</h1>
+قنوات مباشرة، رياضة، أفلام ومسلسلات
+ <button id="installBtn" class="install-btn">
+  تنزيل تطبيق AlameeereTv
+ </button>
 </section>
 <input id="search" class="search"
  placeholder="ابحث عن قناة أو فيلم أو مسلسل..."
- oninput="renderItems()">
+ autocomplete="off">
  <h2 id="sectionTitle">القنوات المباشرة</h2>
+0 عنصر
+<section id="items" class="grid">
 جاري الاتصال بالسيرفر...
+</section>
 <footer>
- ALAMEEERE TV © 2026
-جميع الحقوق محفوظة
+ AlameeereTv © 2026
+ جميع الحقوق محفوظة
 </footer>
 </main>
 <script>
 "use strict";
-/*
-  عنوان وسيط Cloudflare Worker.
-  يجب أن يوفر المسارات الموضحة في تعليمات الربط.
-*/
+/* إعداد السيرفر الأصلي */
 const API = "https://b.m737217130.workers.dev";
 let section = "live";
 let items = [];
@@ -166,18 +276,26 @@ let categories = [];
 let selectedCategory = "all";
 let favorites = new Set();
 const player = document.getElementById("player");
+const itemsBox = document.getElementById("items");
+const categoriesBox = document.getElementById("categories");
+const searchInput = document.getElementById("search");
 let hls = null;
+let installPrompt = null;
+let requestNumber = 0;
 const blocked = [
  "xxx","porn","adult","erotic","sex",
  "إباحي","اباحي","جنس","للكبار",
  "إباحية","اباحية"
 ];
+/* منع المحتوى غير المناسب */
 function isAllowed(item){
- const name = (item.name || "").toLowerCase();
- const category = (item.category_name || "").toLowerCase();
- const text = name + " " + category;
+ const text = (
+  (item.name || "") + " " +
+  (item.category_name || "")
+ ).toLowerCase();
  return !blocked.some(word => text.includes(word));
 }
+/* الاتصال بالسيرفر */
 async function api(path){
  const response = await fetch(API + path);
  if(!response.ok){
@@ -185,9 +303,11 @@ async function api(path){
  }
  return response.json();
 }
+/* تحميل الأقسام */
 async function loadSection(type){
  section = type;
  selectedCategory = "all";
+ const currentRequest = ++requestNumber;
  const titles = {
   live:"القنوات المباشرة",
   movie:"الأفلام",
@@ -195,30 +315,46 @@ async function loadSection(type){
  };
  document.getElementById("sectionTitle").textContent =
   titles[type] || "المحتوى";
- document.getElementById("items").innerHTML =
+ document.querySelectorAll("nav button").forEach(button=>{
+  button.classList.toggle(
+   "active",
+   button.dataset.section === type
+  );
+ });
+ categoriesBox.innerHTML = "";
+ itemsBox.innerHTML =
   '
 جاري تحميل المحتوى...
 ';
  try{
-  const data = await api("/api/catalog?type=" + type);
-  items = Array.isArray(data.items) ? data.items : [];
+  const data = await api(
+   "/api/catalog?type=" + encodeURIComponent(type)
+  );
+  if(currentRequest !== requestNumber) return;
+  items = Array.isArray(data.items)
+   ? data.items.filter(isAllowed)
+   : [];
   categories = Array.isArray(data.categories)
-   ? data.categories : [];
-  items = items.filter(isAllowed);
-  categories = categories.filter(isAllowed);
+   ? data.categories.filter(cat => {
+      return !blocked.some(word =>
+       String(cat.name || "").toLowerCase().includes(word)
+      );
+     })
+   : [];
   renderCategories();
   renderItems();
  }catch(error){
-  document.getElementById("items").innerHTML =
+  if(currentRequest !== requestNumber) return;
+  itemsBox.innerHTML =
    '
-تعذر الاتصال بالسيرفر. تحقق من إعدادات Worker.
+تعذر الاتصال بالسيرفر. حاول مرة أخرى.
 ';
   console.error(error);
  }
 }
+/* التصنيفات */
 function renderCategories(){
- const box = document.getElementById("categories");
- box.innerHTML = "";
+ categoriesBox.innerHTML = "";
  addCategory("all","الكل");
  categories.forEach(cat=>{
   addCategory(String(cat.id),cat.name);
@@ -226,19 +362,19 @@ function renderCategories(){
 }
 function addCategory(id,name){
  const button = document.createElement("button");
- button.className = "cat" +
-  (selectedCategory === id ? " selected":"");
+ button.className =
+  "cat" + (selectedCategory === id ? " selected":"");
  button.textContent = name;
  button.onclick = ()=>{
   selectedCategory = id;
   renderCategories();
   renderItems();
  };
- document.getElementById("categories").appendChild(button);
+ categoriesBox.appendChild(button);
 }
+/* عرض المحتوى */
 function renderItems(){
- const query = document.getElementById("search")
-  .value.toLowerCase().trim();
+ const query = searchInput.value.toLowerCase().trim();
  const filtered = items.filter(item=>{
   const categoryMatch =
    selectedCategory === "all" ||
@@ -249,40 +385,57 @@ function renderItems(){
  });
  document.getElementById("count").textContent =
   filtered.length + " عنصر";
- const box = document.getElementById("items");
- box.innerHTML = "";
+ itemsBox.innerHTML = "";
  if(!filtered.length){
-  box.innerHTML =
+  itemsBox.innerHTML =
    '
 لا توجد نتائج حالياً
 ';
   return;
  }
+ const fragment = document.createDocumentFragment();
  filtered.forEach(item=>{
   const card = document.createElement("article");
   card.className = "item";
+  card.tabIndex = 0;
+  card.setAttribute("role","button");
   const img = document.createElement("img");
   img.loading = "lazy";
+  img.decoding = "async";
   img.src = item.image || "";
   img.alt = item.name || "محتوى";
-  img.onerror = ()=>{img.style.display="none"};
+  img.onerror = ()=>{
+   img.removeAttribute("src");
+   img.alt = "الصورة غير متاحة";
+  };
   const name = document.createElement("div");
   name.className = "item-name";
   name.textContent = item.name || "بدون اسم";
   const fav = document.createElement("button");
   fav.className = "fav";
-  fav.textContent = favorites.has(String(item.id)) ? "♥":"♡";
+  fav.type = "button";
+  fav.textContent =
+   favorites.has(String(item.id)) ? "♥" : "♡";
+  fav.setAttribute("aria-label","إضافة للمفضلة");
   fav.onclick = event=>{
    event.stopPropagation();
    toggleFavorite(item.id);
    fav.textContent =
-    favorites.has(String(item.id)) ? "♥":"♡";
+    favorites.has(String(item.id)) ? "♥" : "♡";
   };
   card.append(img,name,fav);
   card.onclick = ()=>playItem(item);
-  box.appendChild(card);
+  card.onkeydown = event=>{
+   if(event.key === "Enter" || event.key === " "){
+    event.preventDefault();
+    playItem(item);
+   }
+  };
+  fragment.appendChild(card);
  });
+ itemsBox.appendChild(fragment);
 }
+/* المفضلة */
 function toggleFavorite(id){
  const key = String(id);
  if(favorites.has(key)){
@@ -295,17 +448,17 @@ function toggleFavorite(id){
    "alameeere_favorites",
    JSON.stringify([...favorites])
   );
- }catch(e){}
+ }catch(error){
+  console.warn("تعذر حفظ المفضلة",error);
+ }
 }
+/* اختيار المحتوى */
 function playItem(item){
  document.getElementById("playingTitle").textContent =
-  item.name || "ALAMEEERE TV";
- /*
-  لا نستخدم رابط Xtream المباشر هنا.
-  يسترجع Worker رابط تشغيل مصرحاً به.
- */
+  item.name || "AlameeereTv";
  playStream(item.id);
 }
+/* تشغيل HLS */
 async function playStream(id){
  try{
   const data = await api(
@@ -313,19 +466,35 @@ async function playStream(id){
    encodeURIComponent(section) +
    "&id=" + encodeURIComponent(id)
   );
-  if(!data.url) throw new Error("Stream URL missing");
+  if(!data.url){
+   throw new Error("Stream URL missing");
+  }
   if(hls){
    hls.destroy();
    hls = null;
   }
-  if(Hls.isSupported()){
-   hls = new Hls();
+  player.pause();
+  player.removeAttribute("src");
+  player.load();
+  if(typeof Hls !== "undefined" && Hls.isSupported()){
+   hls = new Hls({
+    enableWorker:true,
+    lowLatencyMode:true,
+    backBufferLength:30
+   });
    hls.loadSource(data.url);
    hls.attachMedia(player);
    hls.on(Hls.Events.MANIFEST_PARSED,()=>{
     player.play().catch(()=>{});
    });
-  }else if(player.canPlayType("application/vnd.apple.mpegurl")){
+   hls.on(Hls.Events.ERROR,(event,data)=>{
+    if(data.fatal){
+     console.error("HLS error:",data);
+    }
+   });
+  }else if(
+   player.canPlayType("application/vnd.apple.mpegurl")
+  ){
    player.src = data.url;
    player.play().catch(()=>{});
   }else{
@@ -336,11 +505,72 @@ async function playStream(id){
   console.error(error);
  }
 }
+/* التحكم بالريموت */
+document.addEventListener("keydown",event=>{
+ if(
+  ["INPUT","TEXTAREA"].includes(
+   document.activeElement.tagName
+  )
+ ) return;
+ const cards = [...document.querySelectorAll(".item")];
+ const current = cards.indexOf(document.activeElement);
+ if(event.key === "ArrowRight" ||
+    event.key === "ArrowLeft"){
+  if(cards.length && current >= 0){
+   event.preventDefault();
+   const direction =
+    event.key === "ArrowLeft" ? 1 : -1;
+   cards[
+    Math.max(0,Math.min(cards.length-1,current+direction))
+   ].focus();
+  }
+ }
+ if(event.key === "ArrowDown" && cards.length){
+  event.preventDefault();
+  cards[Math.min(cards.length-1,Math.max(0,current+1))].focus();
+ }
+ if(event.key === "ArrowUp" && cards.length){
+  event.preventDefault();
+  cards[Math.max(0,current-1)].focus();
+ }
+ if(event.key === "Escape" || event.key === "Backspace"){
+  if(document.activeElement === player){
+   player.pause();
+  }
+ }
+});
+/* البحث */
+searchInput.addEventListener("input",renderItems);
+/* تحميل المفضلة */
 try{
  favorites = new Set(
-  JSON.parse(localStorage.getItem("alameeere_favorites") || "[]")
+  JSON.parse(
+   localStorage.getItem("alameeere_favorites") || "[]"
+  )
  );
-}catch(e){}
+}catch(error){
+ favorites = new Set();
+}
+/* تثبيت التطبيق عند دعم المتصفح */
+window.addEventListener("beforeinstallprompt",event=>{
+ event.preventDefault();
+ installPrompt = event;
+ const button = document.getElementById("installBtn");
+ button.style.display = "block";
+});
+document.getElementById("installBtn").onclick = async ()=>{
+ if(!installPrompt){
+  alert("استخدم قائمة المتصفح واختر إضافة إلى الشاشة الرئيسية.");
+  return;
+ }
+ await installPrompt.prompt();
+ installPrompt = null;
+ document.getElementById("installBtn").style.display = "none";
+};
+window.addEventListener("appinstalled",()=>{
+ document.getElementById("installBtn").style.display = "none";
+});
+/* بدء التطبيق */
 loadSection("live");
 </script>
 </body>
