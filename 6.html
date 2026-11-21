@@ -144,7 +144,7 @@
           <span id="noticeText" class="font-medium text-neutral-200">اختر محتوى لبدء التشغيل</span>
         </div>
 
-        <!-- Floating Controls Bar (Always inside player for fullscreen) -->
+        <!-- Floating Controls Bar -->
         <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-2 sm:p-3 flex items-center justify-between gap-2 z-30">
           
           <!-- Play / Pause / Mute -->
@@ -160,7 +160,7 @@
             </button>
           </div>
 
-          <!-- Icons: Audio Track + Subtitle Track + 4 Aspect Modes (Logo Only) + Fullscreen -->
+          <!-- Track Controls + Aspect Mode + Fullscreen -->
           <div class="flex items-center gap-1.5 sm:gap-2 relative">
             
             <!-- Audio Tracks Button -->
@@ -187,7 +187,7 @@
               <div id="subsList" class="flex flex-col gap-0.5"></div>
             </div>
 
-            <!-- 4-Cycle Aspect Ratio Button (Symbol Only) -->
+            <!-- 4-Cycle Aspect Ratio Button (Logo Only) -->
             <button id="btnAspect" onclick="cycleAspectMode()" title="قياسات الفيديو (4 قياسات)" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
@@ -229,12 +229,12 @@
 
     </section>
 
-    <!-- Channels & Content List Section -->
+    <!-- Content List Section -->
     <section class="bg-[#0a0a0a] border border-neutral-900 rounded-2xl p-3 sm:p-4 flex flex-col gap-3 min-h-[420px] lg:max-h-[calc(100vh-90px)]">
       
       <!-- Category Chips Bar -->
       <div id="categoriesBar" class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-        <!-- dynamic categories -->
+        <button class="cat-btn active shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#111] text-neutral-300">الكل</button>
       </div>
 
       <!-- Content Header Counter -->
@@ -247,7 +247,7 @@
 
       <!-- Scrollable List of Channels / Movies / Series -->
       <div id="contentList" class="flex-1 overflow-y-auto pr-0.5 max-h-[60vh] lg:max-h-none">
-        <!-- dynamic items -->
+        <div class="p-8 text-center text-neutral-400 text-xs">جارٍ جلب المحتوى من السيرفر...</div>
       </div>
 
     </section>
@@ -267,15 +267,13 @@
   </div>
 
   <script>
-    // الإعدادات المباشرة لسيرفر البروكسي وحساب الإكستريم
     const PROXY_URL = "https://b.m737217130.workers.dev";
     const AUTH_QUERY = "username=4116039046&password=6281134156";
     const USER = "4116039046";
     const PASS = "6281134156";
 
-    // المتغيرات العامة
     let currentLang = "ar";
-    let currentSection = "live"; // live | movie | series
+    let currentSection = "live";
     let rawCategories = [];
     let rawItems = [];
     let activeCategoryId = "all";
@@ -289,7 +287,6 @@
     const video = document.getElementById("videoPlayer");
     const playerContainer = document.getElementById("playerContainer");
 
-    // نصوص الترجمة للواجهة
     const i18n = {
       ar: {
         langBtn: "English",
@@ -298,7 +295,7 @@
         tabMovies: "الأفلام",
         tabSeries: "المسلسلات",
         catAll: "الكل",
-        loading: "جارٍ التحميل...",
+        loading: "جارٍ جلب المحتوى من السيرفر...",
         noResults: "لا توجد نتائج مطابقة",
         ready: "جاهز",
         playing: "قيد التشغيل",
@@ -319,7 +316,7 @@
         tabMovies: "Movies",
         tabSeries: "Series",
         catAll: "All",
-        loading: "Loading...",
+        loading: "Loading content from server...",
         noResults: "No results found",
         ready: "Ready",
         playing: "Playing",
@@ -355,11 +352,11 @@
 
     async function apiFetch(action) {
       try {
-        const res = await fetch(`${PROXY_URL}/player_api.php?${AUTH_QUERY}&action=${action}`);
+        const res = await fetch(PROXY_URL + "/player_api.php?" + AUTH_QUERY + "&action=" + action);
         if (!res.ok) throw new Error("API Error " + res.status);
         return await res.json();
       } catch (e) {
-        console.error("Fetch failed:", action, e);
+        console.error("Fetch failed for action:", action, e);
         return [];
       }
     }
@@ -375,16 +372,20 @@
       if (sec === "movie") document.getElementById("tabMovies").classList.add("active");
       if (sec === "series") document.getElementById("tabSeries").classList.add("active");
 
-      document.getElementById("contentList").innerHTML = `<div class="p-8 text-center text-neutral-400 text-xs">${i18n[currentLang].loading}</div>`;
+      document.getElementById("contentList").innerHTML = "<div class='p-8 text-center text-neutral-400 text-xs'>" + i18n[currentLang].loading + "</div>";
 
       let catAction = "get_live_categories";
       let streamAction = "get_live_streams";
       if (sec === "movie") { catAction = "get_vod_categories"; streamAction = "get_vod_streams"; }
       if (sec === "series") { catAction = "get_series_categories"; streamAction = "get_series"; }
 
-      const [cats, items] = await Promise.all([apiFetch(catAction), apiFetch(streamAction)]);
-      rawCategories = Array.isArray(cats) ? cats : [];
-      rawItems = Array.isArray(items) ? items : [];
+      try {
+        const [cats, items] = await Promise.all([apiFetch(catAction), apiFetch(streamAction)]);
+        rawCategories = Array.isArray(cats) ? cats : [];
+        rawItems = Array.isArray(items) ? items : [];
+      } catch (err) {
+        console.error("Section switch failed:", err);
+      }
 
       renderCategories();
       renderContent();
@@ -392,15 +393,24 @@
 
     function renderCategories() {
       const bar = document.getElementById("categoriesBar");
+      bar.innerHTML = "";
       const t = i18n[currentLang];
-      let html = `<button onclick="filterCategory('all')" class="cat-btn shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#111] text-neutral-300 transition ${activeCategoryId === "all" ? "active" : ""}">${t.catAll}</button>`;
-      
+
+      const allBtn = document.createElement("button");
+      allBtn.className = "cat-btn shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#111] text-neutral-300 transition " + (activeCategoryId === "all" ? "active" : "");
+      allBtn.textContent = t.catAll;
+      allBtn.onclick = () => filterCategory("all");
+      bar.appendChild(allBtn);
+
       rawCategories.forEach(c => {
         const id = String(c.category_id);
         const name = c.category_name;
-        html += `<button onclick="filterCategory('${id}')" class="cat-btn shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#111] text-neutral-300 transition ${activeCategoryId === id ? "active" : ""}">${name}</button>`;
+        const btn = document.createElement("button");
+        btn.className = "cat-btn shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#111] text-neutral-300 transition " + (activeCategoryId === id ? "active" : "");
+        btn.textContent = name;
+        btn.onclick = () => filterCategory(id);
+        bar.appendChild(btn);
       });
-      bar.innerHTML = html;
     }
 
     function filterCategory(catId) {
@@ -416,8 +426,9 @@
 
     function renderContent() {
       const container = document.getElementById("contentList");
+      container.innerHTML = "";
       const t = i18n[currentLang];
-      
+
       let filtered = rawItems.filter(item => {
         const matchCat = activeCategoryId === "all" || String(item.category_id) === activeCategoryId;
         const name = (item.name || item.title || "").toLowerCase();
@@ -428,80 +439,125 @@
       document.getElementById("count").textContent = filtered.length;
 
       if (!filtered.length) {
-        container.innerHTML = `<div class="p-8 text-center text-neutral-500 text-xs">${t.noResults}</div>`;
+        container.innerHTML = "<div class='p-8 text-center text-neutral-500 text-xs'>" + t.noResults + "</div>";
         return;
       }
 
       if (currentSection === "live") {
-        let html = `<div class="space-y-1">`;
-        filtered.slice(0, 200).forEach(item => {
+        const listDiv = document.createElement("div");
+        listDiv.className = "space-y-1";
+
+        filtered.slice(0, 300).forEach(item => {
           const streamId = item.stream_id;
           const name = item.name || "قناة";
           const logo = item.stream_icon || "";
-          html += `
-            <div onclick="playStream('live', '${streamId}', '${escapeHtml(name)}', '${escapeHtml(logo)}')" class="item-card flex items-center gap-2.5 p-2 rounded-xl bg-[#0d0d0d] hover:bg-neutral-900 border border-neutral-850 cursor-pointer transition">
-              <div class="w-8 h-8 rounded-lg bg-black border border-neutral-800 flex items-center justify-center shrink-0 overflow-hidden">
-                ${logo ? `<img src="${logo}" class="w-full h-full object-contain" onerror="this.remove()">` : `📺`}
-              </div>
-              <span class="text-xs sm:text-sm font-medium text-neutral-200 truncate flex-1">${name}</span>
-            </div>
-          `;
+
+          const card = document.createElement("div");
+          card.className = "item-card flex items-center gap-2.5 p-2 rounded-xl bg-[#0d0d0d] hover:bg-neutral-900 border border-neutral-850 cursor-pointer transition";
+          
+          const iconDiv = document.createElement("div");
+          iconDiv.className = "w-8 h-8 rounded-lg bg-black border border-neutral-800 flex items-center justify-center shrink-0 overflow-hidden";
+          if (logo) {
+            const img = document.createElement("img");
+            img.src = logo;
+            img.className = "w-full h-full object-contain";
+            img.onerror = () => { iconDiv.textContent = "📺"; };
+            iconDiv.appendChild(img);
+          } else {
+            iconDiv.textContent = "📺";
+          }
+
+          const span = document.createElement("span");
+          span.className = "text-xs sm:text-sm font-medium text-neutral-200 truncate flex-1";
+          span.textContent = name;
+
+          card.appendChild(iconDiv);
+          card.appendChild(span);
+
+          card.onclick = () => playStream("live", streamId, name, logo);
+          listDiv.appendChild(card);
         });
-        html += `</div>`;
-        container.innerHTML = html;
+
+        container.appendChild(listDiv);
       } else {
-        // Movies & Series Grid with Posters
-        let html = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">`;
-        filtered.slice(0, 150).forEach(item => {
+        const gridDiv = document.createElement("div");
+        gridDiv.className = "grid grid-cols-2 sm:grid-cols-3 gap-2";
+
+        filtered.slice(0, 200).forEach(item => {
           const id = item.stream_id || item.series_id;
           const name = item.name || item.title || "";
           const poster = item.stream_icon || item.cover || "";
           const ext = item.container_extension || "mp4";
-          const rating = item.rating ? `★ ${item.rating}` : "";
+          const rating = item.rating ? "★ " + item.rating : "";
+
+          const card = document.createElement("div");
+          card.className = "item-card flex flex-col bg-[#0d0d0d] hover:bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden cursor-pointer transition";
+
+          const posterBox = document.createElement("div");
+          posterBox.className = "aspect-[2/3] bg-black relative flex items-center justify-center overflow-hidden";
+
+          if (poster) {
+            const img = document.createElement("img");
+            img.src = poster;
+            img.loading = "lazy";
+            img.className = "w-full h-full object-cover";
+            img.onerror = () => { posterBox.textContent = currentSection === "movie" ? "🎬" : "🍿"; };
+            posterBox.appendChild(img);
+          } else {
+            posterBox.textContent = currentSection === "movie" ? "🎬" : "🍿";
+          }
+
+          if (rating) {
+            const badge = document.createElement("span");
+            badge.className = "absolute top-1 right-1 bg-black/80 text-amber-400 text-[10px] px-1.5 py-0.5 rounded font-bold";
+            badge.textContent = rating;
+            posterBox.appendChild(badge);
+          }
+
+          const infoBox = document.createElement("div");
+          infoBox.className = "p-1.5";
+          const title = document.createElement("h4");
+          title.className = "text-xs font-semibold truncate text-neutral-200";
+          title.textContent = name;
+          infoBox.appendChild(title);
+
+          card.appendChild(posterBox);
+          card.appendChild(infoBox);
 
           if (currentSection === "movie") {
-            html += `
-              <div onclick="playStream('movie', '${id}', '${escapeHtml(name)}', '${escapeHtml(poster)}', '${ext}')" class="item-card flex flex-col bg-[#0d0d0d] hover:bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden cursor-pointer transition">
-                <div class="aspect-[2/3] bg-black relative flex items-center justify-center overflow-hidden">
-                  ${poster ? `<img src="${poster}" class="w-full h-full object-cover" loading="lazy" onerror="this.remove()">` : `🎬`}
-                  ${rating ? `<span class="absolute top-1 right-1 bg-black/80 text-amber-400 text-[10px] px-1.5 py-0.5 rounded font-bold">${rating}</span>` : ""}
-                </div>
-                <div class="p-1.5">
-                  <h4 class="text-xs font-semibold truncate text-neutral-200">${name}</h4>
-                </div>
-              </div>
-            `;
+            card.onclick = () => playStream("movie", id, name, poster, ext);
           } else {
-            // Series Card (Opens episodes modal)
-            html += `
-              <div onclick="openSeriesDetails('${id}', '${escapeHtml(name)}')" class="item-card flex flex-col bg-[#0d0d0d] hover:bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden cursor-pointer transition">
-                <div class="aspect-[2/3] bg-black relative flex items-center justify-center overflow-hidden">
-                  ${poster ? `<img src="${poster}" class="w-full h-full object-cover" loading="lazy" onerror="this.remove()">` : `🍿`}
-                  ${rating ? `<span class="absolute top-1 right-1 bg-black/80 text-amber-400 text-[10px] px-1.5 py-0.5 rounded font-bold">${rating}</span>` : ""}
-                </div>
-                <div class="p-1.5">
-                  <h4 class="text-xs font-semibold truncate text-neutral-200">${name}</h4>
-                </div>
-              </div>
-            `;
+            card.onclick = () => openSeriesDetails(id, name);
           }
+
+          gridDiv.appendChild(card);
         });
-        html += `</div>`;
-        container.innerHTML = html;
+
+        container.appendChild(gridDiv);
       }
     }
 
-    function playStream(type, id, name, logo, ext = "mp4") {
+    function playStream(type, id, name, logo, ext) {
+      ext = ext || "mp4";
       document.getElementById("notice").classList.add("hidden");
       document.getElementById("currentName").textContent = name;
       document.getElementById("currentCat").textContent = type === "live" ? i18n[currentLang].tabLive : (type === "movie" ? i18n[currentLang].tabMovies : i18n[currentLang].tabSeries);
       
       const logoEl = document.getElementById("currentLogo");
-      if (logo) logoEl.innerHTML = `<img src="${logo}" class="w-full h-full object-contain" onerror="this.remove()">`;
-      else logoEl.innerHTML = type === "live" ? "📺" : (type === "movie" ? "🎬" : "🍿");
+      logoEl.innerHTML = "";
+      if (logo) {
+        const img = document.createElement("img");
+        img.src = logo;
+        img.className = "w-full h-full object-contain";
+        img.onerror = () => { logoEl.textContent = type === "live" ? "📺" : (type === "movie" ? "🎬" : "🍿"); };
+        logoEl.appendChild(img);
+      } else {
+        logoEl.textContent = type === "live" ? "📺" : (type === "movie" ? "🎬" : "🍿");
+      }
 
-      document.getElementById("statusBadge").textContent = i18n[currentLang].playing;
-      document.getElementById("statusBadge").className = "text-[10px] sm:text-xs bg-emerald-950/60 text-emerald-400 border border-emerald-800 px-2.5 py-1 rounded-full font-medium shrink-0";
+      const statusBadge = document.getElementById("statusBadge");
+      statusBadge.textContent = i18n[currentLang].playing;
+      statusBadge.className = "text-[10px] sm:text-xs bg-emerald-950/60 text-emerald-400 border border-emerald-800 px-2.5 py-1 rounded-full font-medium shrink-0";
 
       if (hlsInstance) {
         hlsInstance.destroy();
@@ -513,21 +569,21 @@
 
       let streamUrl = "";
       if (type === "live") {
-        streamUrl = `${PROXY_URL}/live/${USER}/${PASS}/${id}.m3u8`;
-        if (Hls.isSupported()) {
-          hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: true });
+        streamUrl = PROXY_URL + "/live/" + USER + "/" + PASS + "/" + id + ".m3u8";
+        if (window.Hls && window.Hls.isSupported()) {
+          hlsInstance = new window.Hls({ enableWorker: true, lowLatencyMode: true });
           hlsInstance.loadSource(streamUrl);
           hlsInstance.attachMedia(video);
-          hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+          hlsInstance.on(window.Hls.Events.MANIFEST_PARSED, () => {
             video.play().catch(() => {});
             refreshTrackOptions();
           });
-          hlsInstance.on(Hls.Events.AUDIO_TRACKS_UPDATED, refreshTrackOptions);
-          hlsInstance.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, refreshTrackOptions);
-          hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+          hlsInstance.on(window.Hls.Events.AUDIO_TRACKS_UPDATED, refreshTrackOptions);
+          hlsInstance.on(window.Hls.Events.SUBTITLE_TRACKS_UPDATED, refreshTrackOptions);
+          hlsInstance.on(window.Hls.Events.ERROR, (event, data) => {
             if (data.fatal) {
-              console.warn("HLS fatal error, retrying TS fallback...");
-              video.src = `${PROXY_URL}/live/${USER}/${PASS}/${id}.ts`;
+              console.warn("HLS fatal error, falling back to TS...");
+              video.src = PROXY_URL + "/live/" + USER + "/" + PASS + "/" + id + ".ts";
               video.play().catch(() => {});
             }
           });
@@ -535,15 +591,15 @@
           video.src = streamUrl;
           video.play().catch(() => {});
         } else {
-          video.src = `${PROXY_URL}/live/${USER}/${PASS}/${id}.ts`;
+          video.src = PROXY_URL + "/live/" + USER + "/" + PASS + "/" + id + ".ts";
           video.play().catch(() => {});
         }
       } else if (type === "movie") {
-        streamUrl = `${PROXY_URL}/movie/${USER}/${PASS}/${id}.${ext || "mp4"}`;
+        streamUrl = PROXY_URL + "/movie/" + USER + "/" + PASS + "/" + id + "." + ext;
         video.src = streamUrl;
         video.play().catch(() => {});
       } else if (type === "series_ep") {
-        streamUrl = `${PROXY_URL}/series/${USER}/${PASS}/${id}.${ext || "mp4"}`;
+        streamUrl = PROXY_URL + "/series/" + USER + "/" + PASS + "/" + id + "." + ext;
         video.src = streamUrl;
         video.play().catch(() => {});
       }
@@ -554,60 +610,79 @@
     async function openSeriesDetails(seriesId, seriesTitle) {
       document.getElementById("seriesModal").classList.remove("hidden");
       document.getElementById("seriesModalTitle").textContent = seriesTitle;
-      document.getElementById("seriesModalSeasons").innerHTML = `<span class="text-xs text-neutral-400">${i18n[currentLang].loading}</span>`;
+      document.getElementById("seriesModalSeasons").innerHTML = "<span class='text-xs text-neutral-400'>" + i18n[currentLang].loading + "</span>";
       document.getElementById("seriesModalEpisodes").innerHTML = "";
 
-      const details = await apiFetch(`get_series_info&series_id=${seriesId}`);
+      const details = await apiFetch("get_series_info&series_id=" + seriesId);
       const seasonsData = details.episodes || {};
       const seasonKeys = Object.keys(seasonsData);
 
       if (!seasonKeys.length) {
-        document.getElementById("seriesModalEpisodes").innerHTML = `<div class="text-center text-xs text-neutral-500 py-4">${i18n[currentLang].noResults}</div>`;
+        document.getElementById("seriesModalEpisodes").innerHTML = "<div class='text-center text-xs text-neutral-500 py-4'>" + i18n[currentLang].noResults + "</div>";
         return;
       }
 
-      let seasonsHtml = "";
+      const seasonsContainer = document.getElementById("seriesModalSeasons");
+      seasonsContainer.innerHTML = "";
+
       seasonKeys.forEach((sKey, idx) => {
-        seasonsHtml += `
-          <button onclick="renderEpisodes(${JSON.stringify(seasonsData[sKey]).replace(/"/g, "&quot;")}, '${sKey}')" class="shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#151515] hover:bg-neutral-800 text-neutral-300 font-medium transition ${idx === 0 ? "border-red-600 text-white" : ""}">
-            ${i18n[currentLang].season} ${sKey}
-          </button>
-        `;
+        const btn = document.createElement("button");
+        btn.className = "shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#151515] hover:bg-neutral-800 text-neutral-300 font-medium transition " + (idx === 0 ? "border-red-600 text-white" : "");
+        btn.textContent = i18n[currentLang].season + " " + sKey;
+        btn.onclick = () => {
+          seasonsContainer.querySelectorAll("button").forEach(b => b.classList.remove("border-red-600", "text-white"));
+          btn.classList.add("border-red-600", "text-white");
+          renderEpisodes(seasonsData[sKey], sKey);
+        };
+        seasonsContainer.appendChild(btn);
       });
-      document.getElementById("seriesModalSeasons").innerHTML = seasonsHtml;
+
       renderEpisodes(seasonsData[seasonKeys[0]], seasonKeys[0]);
     }
 
     function renderEpisodes(episodes, sKey) {
       const container = document.getElementById("seriesModalEpisodes");
+      container.innerHTML = "";
       if (!Array.isArray(episodes) || !episodes.length) {
-        container.innerHTML = `<div class="text-center text-xs text-neutral-500 py-4">${i18n[currentLang].noResults}</div>`;
+        container.innerHTML = "<div class='text-center text-xs text-neutral-500 py-4'>" + i18n[currentLang].noResults + "</div>";
         return;
       }
 
-      let html = "";
       episodes.forEach(ep => {
         const epId = ep.id;
-        const epTitle = ep.title || `${i18n[currentLang].episode} ${ep.episode_num || ""}`;
+        const epTitle = ep.title || (i18n[currentLang].episode + " " + (ep.episode_num || ""));
         const ext = ep.container_extension || "mp4";
-        html += `
-          <div onclick="playStream('series_ep', '${epId}', '${escapeHtml(epTitle)}', '', '${ext}'); closeSeriesModal();" class="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 cursor-pointer transition">
-            <span class="text-xs sm:text-sm text-neutral-200 truncate flex-1">${epTitle}</span>
-            <span class="text-xs text-red-500 font-bold ml-2">▶</span>
-          </div>
-        `;
+
+        const div = document.createElement("div");
+        div.className = "flex items-center justify-between p-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 cursor-pointer transition";
+
+        const span = document.createElement("span");
+        span.className = "text-xs sm:text-sm text-neutral-200 truncate flex-1";
+        span.textContent = epTitle;
+
+        const icon = document.createElement("span");
+        icon.className = "text-xs text-red-500 font-bold ml-2";
+        icon.textContent = "▶";
+
+        div.appendChild(span);
+        div.appendChild(icon);
+
+        div.onclick = () => {
+          playStream("series_ep", epId, epTitle, "", ext);
+          closeSeriesModal();
+        };
+
+        container.appendChild(div);
       });
-      container.innerHTML = html;
     }
 
     function closeSeriesModal() {
       document.getElementById("seriesModal").classList.add("hidden");
     }
 
-    // قياسات الفيديو الـ 4
     function cycleAspectMode() {
       aspectIndex = (aspectIndex + 1) % 4;
-      video.className = `w-full h-full bg-black transition-all duration-200 ${aspectModes[aspectIndex]}`;
+      video.className = "w-full h-full bg-black transition-all duration-200 " + aspectModes[aspectIndex];
       
       const toast = document.getElementById("aspectToast");
       toast.textContent = currentLang === "ar" ? aspectNamesAr[aspectIndex] : aspectNamesEn[aspectIndex];
@@ -616,7 +691,6 @@
       window.aspectToastTimeout = setTimeout(() => toast.classList.add("opacity-0"), 1800);
     }
 
-    // إدارة المسارات الصوتية
     function toggleAudioMenu() {
       const menu = document.getElementById("audioMenu");
       closeSubsMenu();
@@ -631,7 +705,6 @@
       document.getElementById("audioMenu").classList.add("hidden");
     }
 
-    // إدارة مسارات الترجمة
     function toggleSubsMenu() {
       const menu = document.getElementById("subsMenu");
       closeAudioMenu();
@@ -649,6 +722,8 @@
     function refreshTrackOptions() {
       const aList = document.getElementById("audioList");
       const sList = document.getElementById("subsList");
+      aList.innerHTML = "";
+      sList.innerHTML = "";
       const t = i18n[currentLang];
 
       let audioTracks = [];
@@ -660,67 +735,102 @@
       } else if (video.audioTracks) {
         for (let i = 0; i < video.audioTracks.length; i++) {
           const at = video.audioTracks[i];
-          audioTracks.push({ name: at.label || at.language || `Audio ${i + 1}`, id: i, selected: at.enabled });
+          audioTracks.push({ name: at.label || at.language || ("Audio " + (i + 1)), id: i, selected: at.enabled });
         }
       }
 
-      // عرض الصوتيات
       if (!audioTracks.length) {
-        aList.innerHTML = `<span class="text-[11px] text-neutral-500 px-2 py-1">${t.noAudio}</span>`;
+        aList.innerHTML = "<span class='text-[11px] text-neutral-500 px-2 py-1'>" + t.noAudio + "</span>";
       } else {
-        let html = "";
         audioTracks.forEach((track, idx) => {
           const isSelected = hlsInstance ? (idx === hlsInstance.audioTrack) : track.selected;
-          const label = track.name || track.lang || `Track ${idx + 1}`;
-          html += `
-            <button onclick="selectAudioTrack(${idx})" class="text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium">
-              <span>${label}</span>
-              ${isSelected ? `<span class="text-red-500 font-bold">✓</span>` : ""}
-            </button>
-          `;
+          const label = track.name || track.lang || ("Track " + (idx + 1));
+          
+          const btn = document.createElement("button");
+          btn.className = "text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium";
+          
+          const labelSpan = document.createElement("span");
+          labelSpan.textContent = label;
+          btn.appendChild(labelSpan);
+
+          if (isSelected) {
+            const check = document.createElement("span");
+            check.className = "text-red-500 font-bold";
+            check.textContent = "✓";
+            btn.appendChild(check);
+          }
+
+          btn.onclick = () => selectAudioTrack(idx);
+          aList.appendChild(btn);
         });
-        aList.innerHTML = html;
       }
 
-      // عرض الترجمات
       if (hlsInstance && subTracks.length) {
-        let html = `
-          <button onclick="selectSubtitleTrack(-1)" class="text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium">
-            <span>${t.subsOff}</span>
-            ${(hlsInstance.subtitleTrack === -1 || !hlsInstance.subtitleDisplay) ? `<span class="text-red-500 font-bold">✓</span>` : ""}
-          </button>
-        `;
+        const offBtn = document.createElement("button");
+        offBtn.className = "text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium";
+        const offSpan = document.createElement("span");
+        offSpan.textContent = t.subsOff;
+        offBtn.appendChild(offSpan);
+
+        if (hlsInstance.subtitleTrack === -1 || !hlsInstance.subtitleDisplay) {
+          const check = document.createElement("span");
+          check.className = "text-red-500 font-bold";
+          check.textContent = "✓";
+          offBtn.appendChild(check);
+        }
+        offBtn.onclick = () => selectSubtitleTrack(-1);
+        sList.appendChild(offBtn);
+
         subTracks.forEach((track, idx) => {
           const isSelected = hlsInstance.subtitleDisplay && idx === hlsInstance.subtitleTrack;
-          const label = track.name || track.lang || `Sub ${idx + 1}`;
-          html += `
-            <button onclick="selectSubtitleTrack(${idx})" class="text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium">
-              <span>${label}</span>
-              ${isSelected ? `<span class="text-red-500 font-bold">✓</span>` : ""}
-            </button>
-          `;
+          const label = track.name || track.lang || ("Sub " + (idx + 1));
+          
+          const btn = document.createElement("button");
+          btn.className = "text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium";
+          const labelSpan = document.createElement("span");
+          labelSpan.textContent = label;
+          btn.appendChild(labelSpan);
+
+          if (isSelected) {
+            const check = document.createElement("span");
+            check.className = "text-red-500 font-bold";
+            check.textContent = "✓";
+            btn.appendChild(check);
+          }
+
+          btn.onclick = () => selectSubtitleTrack(idx);
+          sList.appendChild(btn);
         });
-        sList.innerHTML = html;
       } else if (video.textTracks && video.textTracks.length) {
-        let html = `
-          <button onclick="selectNativeSubtitle(-1)" class="text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium">
-            <span>${t.subsOff}</span>
-          </button>
-        `;
+        const offBtn = document.createElement("button");
+        offBtn.className = "text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium";
+        offBtn.textContent = t.subsOff;
+        offBtn.onclick = () => selectNativeSubtitle(-1);
+        sList.appendChild(offBtn);
+
         for (let i = 0; i < video.textTracks.length; i++) {
           const tr = video.textTracks[i];
           const isSelected = tr.mode === "showing";
-          const label = tr.label || tr.language || `Sub ${i + 1}`;
-          html += `
-            <button onclick="selectNativeSubtitle(${i})" class="text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium">
-              <span>${label}</span>
-              ${isSelected ? `<span class="text-red-500 font-bold">✓</span>` : ""}
-            </button>
-          `;
+          const label = tr.label || tr.language || ("Sub " + (i + 1));
+
+          const btn = document.createElement("button");
+          btn.className = "text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium";
+          const labelSpan = document.createElement("span");
+          labelSpan.textContent = label;
+          btn.appendChild(labelSpan);
+
+          if (isSelected) {
+            const check = document.createElement("span");
+            check.className = "text-red-500 font-bold";
+            check.textContent = "✓";
+            btn.appendChild(check);
+          }
+
+          btn.onclick = () => selectNativeSubtitle(i);
+          sList.appendChild(btn);
         }
-        sList.innerHTML = html;
       } else {
-        sList.innerHTML = `<span class="text-[11px] text-neutral-500 px-2 py-1">${t.noSubs}</span>`;
+        sList.innerHTML = "<span class='text-[11px] text-neutral-500 px-2 py-1'>" + t.noSubs + "</span>";
       }
     }
 
@@ -753,7 +863,6 @@
       closeSubsMenu();
     }
 
-    // Playback Controls
     function togglePlay() {
       if (video.paused) {
         video.play();
@@ -799,14 +908,12 @@
       if (!e.target.closest("#btnSubs") && !e.target.closest("#subsMenu")) closeSubsMenu();
     });
 
-    function escapeHtml(str) {
-      return String(str || "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", """: "&quot;", "'": "&#39;" })[m]);
-    }
-
-    // بدء التشغيل التلقائي عند فتح الصفحة
-    window.addEventListener("DOMContentLoaded", () => {
+    // Start immediately
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => switchSection("live"));
+    } else {
       switchSection("live");
-    });
+    }
   </script>
 </body>
 </html>
