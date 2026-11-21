@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#09090d">
+<title>AlameeereTv | عالم المشاهدة</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+:root {
+  --bg:#09090d;
+  --panel:#15151d;
+  --panel2:#20202a;
+  --red:#e50935;
+  --text:#fff;
+  --muted:#a5a5b1;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Tahoma,Arial,sans-serif;
+  padding-bottom:75px;
+}
+button,input{font-family:inherit}
+button{cursor:pointer}
+header{
+  height:68px;
+  background:rgba(12,12,17,.97);
+  border-bottom:1px solid #262630;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 5%;
+  position:sticky;
+  top:0;
+  z-index:100;
+  backdrop-filter:blur(15px);
+}
+.logo{
+  font-size:25px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.logo span{color:var(--red)}
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.icon-btn{
+  background:var(--panel2);
+  color:white;
+  border:0;
+  border-radius:9px;
+  padding:10px 13px;
+}
+.player-section{
+  position:sticky;
+  top:68px;
+  z-index:90;
+  background:#09090d;
+  padding:10px 5%;
+}
+.player-box{
+  background:#000;
+  border:1px solid #292933;
+  border-radius:12px;
+  overflow:hidden;
+}
+.player-screen{
+  aspect-ratio:16/9;
+  width:100%;
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:
+    radial-gradient(ellipse,#29202b,#050507 75%);
+}
+.player-screen video{
+  width:100%;
+  height:100%;
+  position:absolute;
+  inset:0;
+  object-fit:contain;
+}
+.player-placeholder{
+  text-align:center;
+  z-index:2;
+  pointer-events:none;
+}
+.player-placeholder .play{
+  font-size:55px;
+  color:var(--red);
+}
+.player-placeholder h2{
+  font-size:22px;
+  margin:8px;
+}
+.player-placeholder p{
+  color:var(--muted);
+  font-size:12px;
+}
+.player-info{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  background:#15151d;
+  font-size:13px;
+}
+.live-indicator{
+  color:#ff4055;
+}
+.container{
+  padding:15px 5%;
+}
+.hero{
+  min-height:180px;
+  border-radius:16px;
+  padding:25px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.94),rgba(0,0,0,.35)),
+    linear-gradient(135deg,#4c1022,#181522,#09090d);
+  margin-bottom:25px;
+}
+.hero h1{
+  font-size:27px;
+  margin:0 0 10px;
+}
+.hero p{
+  color:#c5c5cc;
+  font-size:13px;
+}
+.primary-btn{
+  background:var(--red);
+  border:0;
+  color:white;
+  padding:12px 20px;
+  border-radius:7px;
+  font-weight:bold;
+  width:max-content;
+}
+.tabs{
+  display:flex;
+  gap:9px;
+  overflow-x:auto;
+  padding:10px 0 18px;
+  scrollbar-width:none;
+}
+.tabs button{
+  border:1px solid #30303a;
+  background:var(--panel);
+  color:white;
+  padding:11px 19px;
+  border-radius:8px;
+  white-space:nowrap;
+}
+.tabs button.active{
+  background:var(--red);
+  border-color:var(--red);
+}
+.section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:22px 0 15px;
+}
+.section-head h2{
+  font-size:19px;
+  border-right:4px solid var(--red);
+  padding-right:11px;
+  margin:0;
+}
+.section-head span{
+  color:var(--muted);
+  font-size:12px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
+  gap:14px;
+}
+.item{
+  min-width:0;
+  background:var(--panel);
+  border-radius:10px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:.2s;
+  border:1px solid #252530;
+  position:relative;
+}
+.item:hover{
+  transform:translateY(-4px);
+  border-color:var(--red);
+}
+.poster{
+  width:100%;
+  aspect-ratio:2/3;
+  object-fit:cover;
+  background:#252530;
+  display:block;
+}
+.item-details{
+  padding:10px;
+}
+.item-title{
+  font-size:13px;
+  font-weight:bold;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.item-subtitle{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:7px;
+}
+.channel-poster{
+  aspect-ratio:1/1;
+  object-fit:contain;
+  padding:22px;
+  background:#1a1a24;
+}
+.fav{
+  position:absolute;
+  top:8px;
+  left:8px;
+  background:#09090dcc;
+  color:white;
+  border:0;
+  border-radius:50%;
+  width:31px;
+  height:31px;
+  font-size:17px;
+}
+.search-box{
+  display:none;
+  padding:10px 5%;
+}
+.search-box.show{display:block}
+.search-box input{
+  width:100%;
+  padding:14px;
+  background:var(--panel);
+  color:white;
+  border:1px solid #343440;
+  border-radius:9px;
+  outline:none;
+}
+.search-box input:focus{
+  border-color:var(--red);
+}
+.loading{
+  color:var(--muted);
+  text-align:center;
+  padding:35px 10px;
+  grid-column:1/-1;
+}
+.error{
+  background:#38131d;
+  color:#ffb3bd;
+  padding:15px;
+  border-radius:9px;
+  font-size:13px;
+  grid-column:1/-1;
+}
+.empty{
+  text-align:center;
+  color:var(--muted);
+  padding:40px 10px;
+  grid-column:1/-1;
+}
+footer{
+  text-align:center;
+  color:#777;
+  border-top:1px solid #22222a;
+  padding:25px;
+  margin-top:40px;
+  font-size:12px;
+}
+.bottom-nav{
+  display:none;
+}
+@media(max-width:600px){
+  header{padding:0 4%}
+  .logo{font-size:21px}
+  .player-section{padding:7px 3%}
+  .container{padding:12px 4%}
+  .grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:9px;
+  }
+  .item-details{padding:7px}
+  .item-title{font-size:11px}
+  .hero{min-height:155px;padding:18px}
+  .hero h1{font-size:23px}
+  .bottom-nav{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    display:flex;
+    justify-content:space-around;
+    background:#15151d;
+    border-top:1px solid #333;
+    padding:10px 3px;
+    z-index:120;
+  }
+  .bottom-nav button{
+    background:none;
+    border:0;
+    color:#aaa;
+    font-size:11px;
+  }
+  .bottom-nav button.active{color:#ed2945}
+}
+</style>
+</head>
+<body>
+<header>
+Alameeere
+Tv
+    <button class="icon-btn" onclick="toggleSearch()">⌕</button>
+    <button class="icon-btn" onclick="showFavorites()">♥</button>
+</header>
+<!-- المشغل الثابت -->
+<section class="player-section">
+▶
+        <h2>AlameeereTv</h2>
+اختر القناة أو الفيلم لبدء المشاهدة
+      <video id="video"
+        controls
+        playsinline
+        webkit-playsinline
+        preload="metadata">
+      </video>
+المشغل الرئيسي
+● ALAMEEERE TV
+</section>
+  <input id="searchInput"
+    type="search"
+    placeholder="ابحث عن قناة أو فيلم أو مسلسل..."
+    oninput="searchContent(this.value)">
+<main class="container">
+  <section class="hero">
+    <h1>مرحباً بك في AlameeereTv</h1>
+عالم القنوات والأفلام والمسلسلات في مكان واحد.
+    <button class="primary-btn" onclick="showSection('live')">
+      استكشف القنوات ▶
+    </button>
+  </section>
+    <button class="active" onclick="showSection('home',this)">الرئيسية</button>
+    <button onclick="showSection('live',this)">القنوات المباشرة</button>
+    <button onclick="showSection('movies',this)">الأفلام</button>
+    <button onclick="showSection('series',this)">المسلسلات</button>
+    <button onclick="showFavorites(this)">المفضلة ♥</button>
+  <section id="contentArea">
+        <h2>القنوات المباشرة</h2>
+0 قناة
+جاري تحميل القنوات...
+        <h2>الأفلام</h2>
+0 فيلم
+جاري تحميل الأفلام...
+        <h2>المسلسلات</h2>
+0 مسلسل
+جاري تحميل المسلسلات...
+  </section>
+</main>
+<footer>
+Alameeere
+Tv
+جميع الحقوق محفوظة © 2026
+</footer>
+<nav class="bottom-nav">
+  <button onclick="showSection('home')">⌂
+الرئيسية</button>
+  <button onclick="showSection('live')">▣
+القنوات</button>
+  <button onclick="showSection('movies')">🎬
+الأفلام</button>
+  <button onclick="showSection('series')">▤
+المسلسلات</button>
+  <button onclick="showFavorites()">♥
+المفضلة</button>
+</nav>
+<script>
+/* =====================================
+   إعدادات AlameeereTv
+===================================== */
+const CONFIG = {
+  API_BASE: "https://b.m737217130.workers.dev",
+  // مسار Xtream API القياسي.
+  // يجب أن يكون هذا المسار مدعوماً من الـ Worker.
+  API_PATH: "/player_api.php",
+  // لا تضع بيانات الدخول في هذا الملف.
+  // يفترض أن الـ Worker يتولى المصادقة داخلياً.
+};
+/* =====================================
+   تخزين المحتوى
+===================================== */
+let liveChannels = [];
+let movies = [];
+let series = [];
+let favorites = JSON.parse(
+  localStorage.getItem("alameeere_favorites") || "[]"
+);
+let currentSection = "home";
+let hlsInstance = null;
+const video = document.getElementById("video");
+/* =====================================
+   طلبات السيرفر
+===================================== */
+async function apiRequest(params = {}) {
+  const url = new URL(
+    CONFIG.API_PATH,
+    CONFIG.API_BASE
+  );
+  Object.entries(params).forEach(([key,value]) => {
+    url.searchParams.set(key,value);
+  });
+  const response = await fetch(url.toString(), {
+    method:"GET",
+    headers:{
+      "Accept":"application/json"
+    }
+  });
+  if(!response.ok){
+    throw new Error("فشل الاتصال بالسيرفر: " + response.status);
+  }
+  const data = await response.json();
+  if(!Array.isArray(data) && typeof data !== "object"){
+    throw new Error("استجابة غير متوقعة من السيرفر");
+  }
+  return data;
+}
+/* =====================================
+   تحميل البيانات
+===================================== */
+async function loadAll(){
+  try{
+    const results = await Promise.allSettled([
+      apiRequest({action:"get_live_streams"}),
+      apiRequest({action:"get_vod_streams"}),
+      apiRequest({action:"get_series"})
+    ]);
+    const names = ["القنوات","الأفلام","المسلسلات"];
+    results.forEach((result,index)=>{
+      if(result.status === "fulfilled"){
+        const data = result.value;
+        if(index === 0 && Array.isArray(data)){
+          liveChannels = data;
+          renderItems(liveChannels,"liveGrid","live");
+        }
+        if(index === 1 && Array.isArray(data)){
+          movies = data;
+          renderItems(movies,"moviesGrid","movie");
+        }
+        if(index === 2 && Array.isArray(data)){
+          series = data;
+          renderItems(series,"seriesGrid","series");
+        }
+      }else{
+        const grid = [
+          "liveGrid",
+          "moviesGrid",
+          "seriesGrid"
+        ][index];
+        document.getElementById(grid).innerHTML =
+          '
+تعذر تحميل '+names[index]+
+          '. تحقق من مسار API المدعوم في Worker.
+';
+        console.error(result.reason);
+      }
+    });
+    updateCounts();
+  }catch(error){
+    console.error(error);
+  }
+}
+/* =====================================
+   عرض المحتوى
+===================================== */
+function renderItems(items,gridId,type){
+  const grid = document.getElementById(gridId);
+  if(!items || !items.length){
+    grid.innerHTML =
+      '
+لا يوجد محتوى متاح حالياً
+';
+    return;
+  }
+  grid.innerHTML = "";
+  items.forEach(item=>{
+    const id = String(
+      item.stream_id ??
+      item.series_id ??
+      item.id ??
+      ""
+    );
+    const name = item.name || item.title || "بدون اسم";
+    const image =
+      item.stream_icon ||
+      item.cover ||
+      item.movie_image ||
+      item.cover_big ||
+      "";
+    const category = item.category_name || "";
+    const isFavorite = favorites.some(x=>x.id===id);
+    const card = document.createElement("article");
+    card.className = "item";
+    const poster = document.createElement("img");
+    poster.className = type === "live"
+      ? "poster channel-poster"
+      : "poster";
+    poster.loading = "lazy";
+    poster.alt = name;
+    poster.src = image || "https://placehold.co/300x450/20202a/ffffff?text=AlameeereTv";
+    poster.onerror = ()=>{
+      poster.src = "https://placehold.co/300x450/20202a/ffffff?text=AlameeereTv";
+    };
+    const fav = document.createElement("button");
+    fav.className = "fav";
+    fav.textContent = isFavorite ? "♥" : "♡";
+    fav.onclick = (e)=>{
+      e.stopPropagation();
+      toggleFavorite(item,type);
+      fav.textContent = favorites.some(x=>x.id===id) ? "♥" : "♡";
+    };
+    const details = document.createElement("div");
+    details.className = "item-details";
+    const title = document.createElement("div");
+    title.className = "item-title";
+    title.textContent = name;
+    const subtitle = document.createElement("div");
+    subtitle.className = "item-subtitle";
+    subtitle.textContent =
+      type === "live" ? "● قناة مباشرة" : category;
+    details.append(title,subtitle);
+    card.append(poster,fav,details);
+    card.onclick = ()=>{
+      playItem(item,type);
+    };
+    grid.appendChild(card);
+  });
+}
+/* =====================================
+   تشغيل المحتوى
+===================================== */
+function playItem(item,type){
+  const id = item.stream_id || item.series_id || item.id;
+  const name = item.name || item.title || "المحتوى";
+  const streamUrl =
+    item.stream_url ||
+    item.direct_source ||
+    item.url ||
+    "";
+  if(!streamUrl){
+    alert(
+      "تم اختيار: "+name+
+      "\nلكن السيرفر لم يرجع رابط تشغيل مباشر.\n"+
+      "يجب توصيل مسار البث الخاص بالـ Worker."
+    );
+    return;
+  }
+  document.getElementById("playingTitle").textContent = name;
+  document.getElementById("placeholder").style.display = "none";
+  if(hlsInstance){
+    hlsInstance.destroy();
+    hlsInstance = null;
+  }
+  video.pause();
+  video.removeAttribute("src");
+  video.load();
+  if(
+    streamUrl.includes(".m3u8") &&
+    Hls.isSupported()
+  ){
+    hlsInstance = new Hls();
+    hlsInstance.loadSource(streamUrl);
+    hlsInstance.attachMedia(video);
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>{
+      video.play().catch(()=>{});
+    });
+  }else{
+    video.src = streamUrl;
+    video.play().catch(()=>{});
+  }
+  document.getElementById("playerScreen")
+    .scrollIntoView({
+      behavior:"smooth",
+      block:"start"
+    });
+}
+/* =====================================
+   المفضلة
+===================================== */
+function toggleFavorite(item,type){
+  const id = String(
+    item.stream_id ??
+    item.series_id ??
+    item.id
+  );
+  const exists = favorites.some(x=>x.id===id);
+  if(exists){
+    favorites = favorites.filter(x=>x.id!==id);
+  }else{
+    favorites.push({
+      id,
+      type,
+      item
+    });
+  }
+  localStorage.setItem(
+    "alameeere_favorites",
+    JSON.stringify(favorites)
+  );
+}
+function showFavorites(button){
+  currentSection = "favorites";
+  hideSections();
+  const area = document.getElementById("contentArea");
+  area.innerHTML = `
+      <h2>المفضلة ♥</h2>
+  `;
+  const list = favorites.map(x=>x.item);
+  renderItems(
+    list,
+    "favoritesGrid",
+    "live"
+  );
+}
+/* =====================================
+   التنقل بين الأقسام
+===================================== */
+function hideSections(){
+  document.getElementById("liveSection").style.display = "none";
+  document.getElementById("moviesSection").style.display = "none";
+  document.getElementById("seriesSection").style.display = "none";
+}
+function showSection(section,button){
+  const area = document.getElementById("contentArea");
+  if(!document.getElementById("liveSection")){
+    location.reload();
+    return;
+  }
+  hideSections();
+  currentSection = section;
+  if(section === "home"){
+    document.getElementById("liveSection").style.display = "block";
+    document.getElementById("moviesSection").style.display = "block";
+    document.getElementById("seriesSection").style.display = "block";
+  }
+  if(section === "live"){
+    document.getElementById("liveSection").style.display = "block";
+  }
+  if(section === "movies"){
+    document.getElementById("moviesSection").style.display = "block";
+  }
+  if(section === "series"){
+    document.getElementById("seriesSection").style.display = "block";
+  }
+  if(button){
+    document.querySelectorAll(".tabs button").forEach(btn=>{
+      btn.classList.remove("active");
+    });
+    button.classList.add("active");
+  }
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+}
+/* =====================================
+   البحث
+===================================== */
+function toggleSearch(){
+  document.getElementById("searchBox")
+    .classList.toggle("show");
+  document.getElementById("searchInput").focus();
+}
+function searchContent(query){
+  const q = query.trim().toLowerCase();
+  if(!q){
+    showSection("home");
+    return;
+  }
+  hideSections();
+  const all = [
+    ...liveChannels.map(x=>({...x,_type:"live"})),
+    ...movies.map(x=>({...x,_type:"movie"})),
+    ...series.map(x=>({...x,_type:"series"}))
+  ];
+  const filtered = all.filter(item=>
+    (item.name || item.title || "")
+      .toLowerCase()
+      .includes(q)
+  );
+  document.getElementById("contentArea").innerHTML = `
+      <h2>نتائج البحث</h2>
+${filtered.length} نتيجة
+  `;
+  const grid = document.getElementById("searchResults");
+  if(!filtered.length){
+    grid.innerHTML = '
+لا توجد نتائج
+';
+    return;
+  }
+  filtered.forEach(item=>{
+    const type = item._type;
+    const copy = {...item};
+    delete copy._type;
+    const temp = document.createElement("div");
+    temp.className = "item";
+    const img = document.createElement("img");
+    img.className = "poster";
+    img.src = item.stream_icon || item.cover || item.movie_image ||
+      "https://placehold.co/300x450/20202a/ffffff?text=AlameeereTv";
+    const details = document.createElement("div");
+    details.className = "item-details";
+    const title = document.createElement("div");
+    title.className = "item-title";
+    title.textContent = item.name || item.title || "";
+    details.append(title);
+    temp.append(img,details);
+    temp.onclick = ()=>playItem(copy,type);
+    grid.append(temp);
+  });
+}
+/* =====================================
+   العدادات
+===================================== */
+function updateCounts(){
+  document.getElementById("liveCount").textContent =
+    liveChannels.length + " قناة";
+  document.getElementById("moviesCount").textContent =
+    movies.length + " فيلم";
+  document.getElementById("seriesCount").textContent =
+    series.length + " مسلسل";
+}
+/* =====================================
+   بدء الموقع
+===================================== */
+loadAll();
+</script>
+</body>
+</html>
