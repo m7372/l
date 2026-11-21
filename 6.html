@@ -3,295 +3,239 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>AlameeereTv - المشغل المتكامل</title>
+  <title>AlameeereTv - البث المباشر والأفلام والمسلسلات</title>
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AlameeereTv">
+  
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
+  <!-- HLS.js for Live Streaming -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
+  
   <style>
     :root {
-      --sat: env(safe-area-inset-top, 0px);
-      --sab: env(safe-area-inset-bottom, 0px);
-      --sal: env(safe-area-inset-left, 0px);
-      --sar: env(safe-area-inset-right, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
-      background-color: #000000 !important;
-      color: #ffffff;
-      padding-top: var(--sat);
-      padding-bottom: var(--sab);
-      padding-left: var(--sal);
-      padding-right: var(--sar);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
+      background-color: #070707;
+      color: #f3f4f6;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
       overflow-x: hidden;
     }
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: #000000; }
-    ::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #333333; }
+    /* Aspect Ratio Modes */
+    .mode-0 { object-fit: contain !important; }
+    .mode-1 { object-fit: fill !important; }
+    .mode-2 { object-fit: cover !important; }
+    .mode-3 { object-fit: contain !important; aspect-ratio: 16/9 !important; }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar { height: 4px; width: 4px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: #262626; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #404040; }
 
-    /* Video Aspect Modes */
-    video.mode-0 { object-fit: contain !important; aspect-ratio: auto !important; }
-    video.mode-1 { object-fit: fill !important; aspect-ratio: auto !important; }
-    video.mode-2 { object-fit: cover !important; aspect-ratio: auto !important; }
-    video.mode-3 { object-fit: fill !important; aspect-ratio: 16/9 !important; }
-
-    .brand-glow {
-      background: linear-gradient(90deg, #ffffff 0%, #e50914 50%, #ffffff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 16px rgba(229, 9, 20, 0.35);
-    }
-    .section-tab.active {
+    .cat-btn.active {
       background-color: #e50914 !important;
       color: #ffffff !important;
-      font-weight: 700;
       border-color: #e50914 !important;
-    }
-    .cat-btn.active {
-      background-color: #ffffff !important;
-      color: #000000 !important;
       font-weight: 700;
-      border-color: #ffffff !important;
     }
-    .item-card:hover {
-      transform: translateY(-2px);
-      border-color: #e50914;
-    }
-    .player-container:fullscreen {
-      width: 100vw !important;
-      height: 100vh !important;
-      max-height: none !important;
-      border-radius: 0 !important;
+    .section-tab.active {
+      background-color: #1c1c1c;
+      color: #ffffff;
+      border-bottom: 2px solid #e50914;
+      font-weight: 700;
     }
   </style>
 </head>
-<body class="bg-black text-white flex flex-col min-h-screen">
+<body class="min-h-screen flex flex-col pb-16">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-50 bg-black/95 backdrop-blur-md border-b border-neutral-900 px-3 py-2 sm:px-6">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
-      
-      <!-- Logo -->
-      <div class="flex items-center gap-2 shrink-0 cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-        <div class="w-2.5 h-2.5 bg-red-600 rounded-full animate-ping"></div>
-        <span class="text-xl sm:text-2xl font-black tracking-wide brand-glow">AlameeereTv</span>
-      </div>
-
-      <!-- Search Box -->
-      <div class="flex-1 max-w-lg relative">
-        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-neutral-500">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-        </div>
-        <input 
-          id="searchInput" 
-          type="text" 
-          placeholder="ابحث عن قناة أو فيلم أو مسلسل..." 
-          class="w-full bg-[#0d0d0d] border border-neutral-800 text-xs sm:text-sm rounded-full pr-9 pl-4 py-1.5 sm:py-2 text-white placeholder-neutral-500 focus:outline-none focus:border-red-600 transition"
-          oninput="handleSearch(this.value)"
-        >
-      </div>
-
-      <!-- Lang Toggle -->
-      <button id="langToggleBtn" onclick="toggleLang()" class="shrink-0 px-2.5 py-1 text-xs rounded-full bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 transition font-medium">
-        English
-      </button>
-
-    </div>
-  </header>
-
-  <!-- Navigation Sections -->
-  <nav class="max-w-7xl mx-auto w-full px-3 sm:px-6 pt-2 pb-1 flex items-center gap-2">
-    <button id="tabLive" onclick="switchSection('live')" class="section-tab active px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-[#111] text-neutral-300 border border-neutral-800 transition">
-      📺 <span id="labelTabLive">القنوات</span>
-    </button>
-    <button id="tabMovies" onclick="switchSection('movie')" class="section-tab px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-[#111] text-neutral-300 border border-neutral-800 transition">
-      🎬 <span id="labelTabMovies">الأفلام</span>
-    </button>
-    <button id="tabSeries" onclick="switchSection('series')" class="section-tab px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-[#111] text-neutral-300 border border-neutral-800 transition">
-      🍿 <span id="labelTabSeries">المسلسلات</span>
-    </button>
-  </nav>
-
-  <!-- Main Content Layout -->
-  <main class="flex-1 max-w-7xl mx-auto w-full p-2 sm:p-4 grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-6 items-start">
-    
-    <!-- Player Column (Sticky at top) -->
-    <section class="lg:col-span-2 sticky top-[53px] lg:top-[60px] z-40 flex flex-col gap-2">
+  <!-- Fixed Top Player Section -->
+  <div class="sticky top-0 z-40 bg-[#070707] border-b border-neutral-800 shadow-2xl">
+    <div class="max-w-6xl mx-auto px-2 sm:px-4 pt-1 sm:pt-2">
       
       <!-- Video Container -->
-      <div id="playerContainer" class="player-container relative bg-black rounded-xl sm:rounded-2xl overflow-hidden aspect-video border border-neutral-900 shadow-2xl flex items-center justify-center">
+      <div id="playerContainer" class="relative w-full bg-black rounded-lg sm:rounded-xl overflow-hidden aspect-video shadow-inner flex items-center justify-center group border border-neutral-900">
+        <video id="videoPlayer" playsinline controls class="w-full h-full mode-0 bg-black"></video>
         
-        <video 
-          id="videoPlayer" 
-          playsinline 
-          autoplay 
-          class="w-full h-full mode-0 bg-black transition-all duration-200"
-        ></video>
+        <!-- Top Overlay Controls inside Video for Fullscreen & Aspect -->
+        <div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none z-30 opacity-90 transition group-hover:opacity-100">
+          <!-- Aspect Ratio Toggle Button -->
+          <button id="aspectBtn" onclick="toggleAspectRatio()" class="pointer-events-auto bg-black/75 hover:bg-black text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded-md backdrop-blur border border-white/10 flex items-center gap-1.5 shadow" title="تغيير مقاس الشاشة">
+            <svg class="w-3.5 h-3.5 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+            <span id="aspectLabel" class="font-mono font-medium">احتواء</span>
+          </button>
 
-        <!-- Aspect Mode HUD Toast -->
-        <div id="aspectToast" class="absolute top-3 right-3 bg-black/85 text-white text-[11px] sm:text-xs px-3 py-1.5 rounded-full border border-neutral-700 pointer-events-none opacity-0 transition-opacity duration-300 z-30 font-medium shadow-lg">
-          احتواء
-        </div>
-
-        <!-- Initial Notice -->
-        <div id="notice" class="absolute inset-0 flex flex-col items-center justify-center bg-black/95 text-neutral-300 text-xs sm:text-sm p-4 text-center z-20">
-          <div class="w-12 h-12 mb-3 rounded-full bg-[#0d0d0d] border border-neutral-800 flex items-center justify-center text-red-500">
-            <svg class="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          </div>
-          <span id="noticeText" class="font-medium text-neutral-200">اختر محتوى لبدء التشغيل</span>
-        </div>
-
-        <!-- Floating Controls Bar -->
-        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-2 sm:p-3 flex items-center justify-between gap-2 z-30">
-          
-          <!-- Play / Pause / Mute -->
-          <div class="flex items-center gap-1.5 sm:gap-2">
-            <button id="btnPlayPause" onclick="togglePlay()" title="تشغيل / إيقاف" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
-              <svg id="icoPlay" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-              <svg id="icoPause" class="w-3.5 h-3.5 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-            </button>
-
-            <button id="btnMute" onclick="toggleMute()" title="كتم / تشغيل الصوت" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
-              <svg id="icoVolOn" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-              <svg id="icoVolOff" class="w-3.5 h-3.5 hidden text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27l4.73 4.73H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
-            </button>
-          </div>
-
-          <!-- Track Controls + Aspect Mode + Fullscreen -->
-          <div class="flex items-center gap-1.5 sm:gap-2 relative">
-            
+          <!-- Audio & Subtitles Dropdown Buttons -->
+          <div class="flex items-center gap-1.5 pointer-events-auto">
             <!-- Audio Tracks Button -->
-            <button id="btnAudio" onclick="toggleAudioMenu()" title="الصوتيات" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path>
-              </svg>
-            </button>
-            <!-- Audio Menu Popup -->
-            <div id="audioMenu" class="hidden absolute bottom-11 right-12 sm:right-16 bg-[#0a0a0a] border border-neutral-800 rounded-xl p-2 shadow-2xl min-w-[150px] text-xs z-50 flex flex-col gap-1 max-h-48 overflow-y-auto">
-              <div class="text-neutral-500 px-2 py-1 border-b border-neutral-800 text-[10px] font-semibold" id="labelAudioHeader">المسارات الصوتية</div>
-              <div id="audioList" class="flex flex-col gap-0.5"></div>
+            <div class="relative">
+              <button id="audioBtn" onclick="toggleAudioMenu()" class="bg-black/75 hover:bg-black text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded-md backdrop-blur border border-white/10 flex items-center gap-1 shadow" title="المسارات الصوتية">
+                <svg class="w-3.5 h-3.5 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+                <span id="audioTrackCount" class="text-[10px] text-neutral-400"></span>
+              </button>
+              <div id="audioMenu" class="hidden absolute top-full mt-1 end-0 bg-neutral-900 border border-neutral-800 rounded-lg shadow-2xl p-1.5 min-w-[150px] z-50 text-xs">
+                <div class="font-bold text-[10px] text-neutral-400 px-2 py-1 mb-1 border-b border-neutral-800" id="labelAudioHeader">المسارات الصوتية</div>
+                <div id="audioTrackList" class="flex flex-col gap-1 max-h-40 overflow-y-auto"></div>
+              </div>
             </div>
 
-            <!-- Subtitle Tracks Button -->
-            <button id="btnSubs" onclick="toggleSubsMenu()" title="الترجمات" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
-              </svg>
-            </button>
-            <!-- Subtitle Menu Popup -->
-            <div id="subsMenu" class="hidden absolute bottom-11 right-20 sm:right-28 bg-[#0a0a0a] border border-neutral-800 rounded-xl p-2 shadow-2xl min-w-[150px] text-xs z-50 flex flex-col gap-1 max-h-48 overflow-y-auto">
-              <div class="text-neutral-500 px-2 py-1 border-b border-neutral-800 text-[10px] font-semibold" id="labelSubsHeader">الترجمات</div>
-              <div id="subsList" class="flex flex-col gap-0.5"></div>
+            <!-- Subtitles Button -->
+            <div class="relative">
+              <button id="subsBtn" onclick="toggleSubsMenu()" class="bg-black/75 hover:bg-black text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded-md backdrop-blur border border-white/10 flex items-center gap-1 shadow" title="الترجمات">
+                <svg class="w-3.5 h-3.5 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h18a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2zm4 4h2v2H7V9zm6 0h4v2h-4V9zm-6 4h4v2H7v-2zm6 0h2v2h-2v-2z"/></svg>
+                <span id="subsTrackCount" class="text-[10px] text-neutral-400"></span>
+              </button>
+              <div id="subsMenu" class="hidden absolute top-full mt-1 end-0 bg-neutral-900 border border-neutral-800 rounded-lg shadow-2xl p-1.5 min-w-[150px] z-50 text-xs">
+                <div class="font-bold text-[10px] text-neutral-400 px-2 py-1 mb-1 border-b border-neutral-800" id="labelSubsHeader">الترجمة</div>
+                <div id="subsTrackList" class="flex flex-col gap-1 max-h-40 overflow-y-auto"></div>
+              </div>
             </div>
 
-            <!-- 4-Cycle Aspect Ratio Button (Logo Only) -->
-            <button id="btnAspect" onclick="cycleAspectMode()" title="قياسات الفيديو (4 قياسات)" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
-              </svg>
+            <!-- External VLC / Player Button -->
+            <button id="extBtn" onclick="openExternalPlayer()" class="bg-black/75 hover:bg-black text-amber-400 text-[11px] sm:text-xs px-2 py-1.5 rounded-md backdrop-blur border border-white/10 flex items-center gap-1 shadow" title="فتح في مشغل خارجي / VLC">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
             </button>
-
-            <!-- Fullscreen Button -->
-            <button id="btnFullscreen" onclick="toggleFullscreen()" title="ملء الشاشة" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
-              <svg id="icoFsExpand" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M20 8V4m0 0h-4M4 16v4m0 0h4M20 16v4m0 0h-4"></path>
-              </svg>
-              <svg id="icoFsCompress" class="w-3.5 h-3.5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4v4H4m8 8v4m0-4h4M16 4v4h4M8 16H4v4"></path>
-              </svg>
-            </button>
-
           </div>
-
         </div>
 
+        <!-- Initial Placeholder Message -->
+        <div id="videoPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-black/90 pointer-events-none">
+          <div class="text-3xl sm:text-4xl mb-2">📺</div>
+          <p id="placeholderText" class="text-xs sm:text-sm text-neutral-400">اختر قناة أو فيلماً أو حلقة لبدء المشاهدة</p>
+        </div>
       </div>
 
-      <!-- Current Playing Details -->
-      <div class="bg-[#0a0a0a] border border-neutral-900 rounded-xl p-3 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0">
-          <div id="currentLogo" class="w-10 h-10 rounded-lg bg-black border border-neutral-800 flex items-center justify-center text-lg overflow-hidden shrink-0">
-            📺
-          </div>
+      <!-- Player Info Bar -->
+      <div class="py-2 flex items-center justify-between text-xs gap-2">
+        <div class="flex items-center gap-2 overflow-hidden min-w-0">
+          <div id="currentLogo" class="w-7 h-7 shrink-0 rounded bg-neutral-900 border border-neutral-800 flex items-center justify-center overflow-hidden text-xs">📺</div>
           <div class="truncate">
-            <h2 id="currentName" class="text-xs sm:text-sm font-bold text-white truncate">لم يتم اختيار محتوى</h2>
-            <p id="currentCat" class="text-[11px] text-neutral-400 truncate">اختر قناة أو فيلماً أو مسلسلاً</p>
+            <h1 id="currentName" class="font-semibold text-neutral-200 text-xs sm:text-sm truncate">AlameeereTv</h1>
+            <p id="currentCat" class="text-[10px] text-neutral-500 truncate">البث المباشر والأفلام والمسلسلات</p>
           </div>
         </div>
-
-        <span id="statusBadge" class="text-[10px] sm:text-xs bg-neutral-900 text-neutral-400 border border-neutral-800 px-2.5 py-1 rounded-full font-medium shrink-0">
-          جاهز
-        </span>
+        
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span id="statusBadge" class="text-[10px] sm:text-xs bg-neutral-900 text-neutral-400 border border-neutral-800 px-2 py-0.5 rounded-full font-medium">جاهز</span>
+          <!-- Install PWA Button (Visible if browser supports PWA prompt) -->
+          <button id="pwaInstallBtn" onclick="installPWA()" class="hidden text-[10px] sm:text-xs bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded-full font-bold shadow flex items-center gap-1">
+            <span>📲 تثبيت التطبيق</span>
+          </button>
+          <!-- Lang Toggle -->
+          <button id="langToggleBtn" onclick="toggleLanguage()" class="text-[10px] sm:text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 px-2.5 py-1 rounded-full transition border border-neutral-700 font-medium">English</button>
+        </div>
       </div>
 
-    </section>
+    </div>
+  </div>
 
-    <!-- Content List Section -->
-    <section class="bg-[#0a0a0a] border border-neutral-900 rounded-2xl p-3 sm:p-4 flex flex-col gap-3 min-h-[420px] lg:max-h-[calc(100vh-90px)]">
-      
-      <!-- Category Chips Bar -->
-      <div id="categoriesBar" class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-        <button class="cat-btn active shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#111] text-neutral-300">الكل</button>
+  <!-- Main Content Layout -->
+  <main class="max-w-6xl mx-auto px-2 sm:px-4 w-full flex-1 flex flex-col mt-2">
+    
+    <!-- Navigation Tabs: Live / Movies / Series -->
+    <div class="flex items-center border-b border-neutral-800 bg-[#0e0e0e] rounded-t-xl overflow-hidden shadow-sm">
+      <button id="tabLive" onclick="switchSection('live')" class="section-tab active flex-1 py-2.5 sm:py-3 text-xs sm:text-sm text-center transition flex items-center justify-center gap-1.5">
+        <span>📺</span>
+        <span id="labelTabLive">القنوات المباشرة</span>
+      </button>
+      <button id="tabMovies" onclick="switchSection('movie')" class="section-tab flex-1 py-2.5 sm:py-3 text-xs sm:text-sm text-center text-neutral-400 hover:text-white transition flex items-center justify-center gap-1.5">
+        <span>🎬</span>
+        <span id="labelTabMovies">الأفلام</span>
+      </button>
+      <button id="tabSeries" onclick="switchSection('series')" class="section-tab flex-1 py-2.5 sm:py-3 text-xs sm:text-sm text-center text-neutral-400 hover:text-white transition flex items-center justify-center gap-1.5">
+        <span>🍿</span>
+        <span id="labelTabSeries">المسلسلات</span>
+      </button>
+    </div>
+
+    <!-- Search Input Bar -->
+    <div class="bg-[#0e0e0e] p-2 sm:p-3 border-x border-b border-neutral-800 shadow-sm flex items-center gap-2">
+      <div class="relative flex-1">
+        <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="ابحث عن قناة أو فيلم أو مسلسل..." class="w-full bg-[#161616] border border-neutral-800 text-neutral-200 text-xs sm:text-sm rounded-lg px-3 py-2 pe-8 focus:outline-none focus:border-red-600 transition placeholder-neutral-500">
+        <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute end-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white text-xs px-1">✕</button>
       </div>
+      <span id="itemsCounter" class="text-[11px] text-neutral-500 font-mono shrink-0 px-2">0 عنصر</span>
+    </div>
 
-      <!-- Content Header Counter -->
-      <div class="flex justify-between items-center text-xs text-neutral-400 border-b border-neutral-900 pb-2">
-        <span id="contentCountLabel">المحتوى متاح (<span id="count" class="text-white font-bold">0</span>)</span>
-        <span id="activeSectionBadge" class="text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded-full">
-          سيرفر البروكسي
-        </span>
+    <!-- Horizontal Categories Scroll Bar -->
+    <div class="bg-[#0b0b0b] py-2 px-1 border-x border-b border-neutral-800 shadow-sm">
+      <div id="categoriesBar" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-1 text-xs">
+        <!-- Rendered dynamically -->
       </div>
+    </div>
 
-      <!-- Scrollable List of Channels / Movies / Series -->
-      <div id="contentList" class="flex-1 overflow-y-auto pr-0.5 max-h-[60vh] lg:max-h-none">
-        <div class="p-8 text-center text-neutral-400 text-xs">جارٍ جلب المحتوى من السيرفر...</div>
-      </div>
-
-    </section>
+    <!-- Content Items Grid / List -->
+    <div id="contentList" class="flex-1 py-4">
+      <!-- Items dynamically rendered here -->
+    </div>
 
   </main>
 
-  <!-- Series Episodes Modal -->
-  <div id="seriesModal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#0f0f0f] border border-neutral-800 rounded-2xl max-w-xl w-full p-4 flex flex-col gap-3 max-h-[85vh]">
-      <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
-        <h3 id="seriesModalTitle" class="font-bold text-sm sm:text-base truncate">حلقات المسلسل</h3>
-        <button onclick="closeSeriesModal()" class="text-neutral-400 hover:text-white text-lg font-bold px-2">✕</button>
+  <!-- Episode Selection Modal for Series -->
+  <div id="seriesModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-[#111] border border-neutral-800 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <!-- Modal Header -->
+      <div class="p-3 sm:p-4 border-b border-neutral-800 flex items-center justify-between">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <div id="modalPoster" class="w-10 h-14 rounded bg-neutral-900 overflow-hidden shrink-0"></div>
+          <div>
+            <h3 id="modalTitle" class="font-bold text-sm sm:text-base text-white truncate">اسم المسلسل</h3>
+            <p id="modalGenre" class="text-xs text-neutral-400">اختر الحلقة</p>
+          </div>
+        </div>
+        <button onclick="closeSeriesModal()" class="text-neutral-400 hover:text-white text-lg p-2 rounded-full">✕</button>
       </div>
-      <div id="seriesModalSeasons" class="flex items-center gap-1.5 overflow-x-auto pb-1"></div>
-      <div id="seriesModalEpisodes" class="flex-1 overflow-y-auto space-y-1.5 pr-1 max-h-[55vh]"></div>
+
+      <!-- Seasons Selector -->
+      <div id="modalSeasons" class="flex items-center gap-1.5 p-2 bg-[#161616] border-b border-neutral-800 overflow-x-auto">
+        <!-- Seasons buttons -->
+      </div>
+
+      <!-- Episodes List -->
+      <div id="modalEpisodes" class="flex-1 overflow-y-auto p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+        <!-- Episodes buttons -->
+      </div>
     </div>
   </div>
 
   <script>
+    /* --- Core Configuration & Upstream Proxy --- */
     const PROXY_URL = "https://b.m737217130.workers.dev";
     const AUTH_QUERY = "username=4116039046&password=6281134156";
-    const USER = "4116039046";
-    const PASS = "6281134156";
+    const TOKEN = "aHR0cDovLzE5NS4xMjguMjcuMjUzOjIwOTV8NDExNjAzOTA0Nnw2MjgxMTM0MTU2"; // Verified working upstream auth token
 
     let currentLang = "ar";
     let currentSection = "live";
-    let rawCategories = [];
-    let rawItems = [];
     let activeCategoryId = "all";
     let searchQuery = "";
+    
+    // In-memory caches to prevent redundant network calls
+    const categoriesCache = { live: null, movie: null, series: null };
+    const itemsCache = {}; // Key: `${section}_${catId}`
+    let currentLoadedItems = []; // Current list rendered
+    
+    let currentStreamUrl = "";
     let hlsInstance = null;
     let aspectIndex = 0;
     const aspectModes = ["mode-0", "mode-1", "mode-2", "mode-3"];
-    const aspectNamesAr = ["احتواء (Contain)", "تمديد (Stretch)", "تكبير (Cover)", "تكبير+ (16:9)"];
-    const aspectNamesEn = ["Fit (Contain)", "Stretch", "Zoom (Cover)", "Zoom+ (16:9)"];
+    const aspectLabels = {
+      ar: ["احتواء", "تمديد", "تكبير", "16:9"],
+      en: ["Contain", "Stretch", "Cover", "16:9"]
+    };
 
     const video = document.getElementById("videoPlayer");
-    const playerContainer = document.getElementById("playerContainer");
+    const placeholder = document.getElementById("videoPlaceholder");
 
     const i18n = {
       ar: {
         langBtn: "English",
         searchPlaceholder: "ابحث عن قناة أو فيلم أو مسلسل...",
-        tabLive: "القنوات",
+        tabLive: "القنوات المباشرة",
         tabMovies: "الأفلام",
         tabSeries: "المسلسلات",
         catAll: "الكل",
@@ -307,257 +251,315 @@
         subsHeader: "الترجمات",
         subsOff: "إيقاف الترجمة",
         season: "الموسم",
-        episode: "الحلقة"
+        episode: "الحلقة",
+        itemsUnit: "عنصر",
+        openInExt: "فتح في VLC أو مشغل خارجي",
+        copied: "تم نسخ رابط البث!"
       },
       en: {
         langBtn: "عربي",
         searchPlaceholder: "Search channel, movie or series...",
-        tabLive: "Channels",
+        tabLive: "Live Channels",
         tabMovies: "Movies",
         tabSeries: "Series",
         catAll: "All",
         loading: "Loading content from server...",
-        noResults: "No results found",
+        noResults: "No matching results",
         ready: "Ready",
         playing: "Playing",
-        error: "Playback Error",
-        chooseContent: "Select content to play",
-        noAudio: "No extra audio tracks",
+        error: "Playback Failed",
+        chooseContent: "Select content to start playback",
+        noAudio: "No additional audio tracks",
         noSubs: "No subtitles available",
         audioHeader: "Audio Tracks",
         subsHeader: "Subtitles",
         subsOff: "Subtitles Off",
         season: "Season",
-        episode: "Episode"
+        episode: "Episode",
+        itemsUnit: "items",
+        openInExt: "Open in VLC / External Player",
+        copied: "Stream link copied!"
       }
     };
 
-    function toggleLang() {
-      currentLang = currentLang === "ar" ? "en" : "ar";
-      document.documentElement.lang = currentLang;
-      document.documentElement.dir = currentLang === "ar" ? "rtl" : "ltr";
-      
-      const t = i18n[currentLang];
-      document.getElementById("langToggleBtn").textContent = t.langBtn;
-      document.getElementById("searchInput").placeholder = t.searchPlaceholder;
-      document.getElementById("labelTabLive").textContent = t.tabLive;
-      document.getElementById("labelTabMovies").textContent = t.tabMovies;
-      document.getElementById("labelTabSeries").textContent = t.tabSeries;
-      document.getElementById("labelAudioHeader").textContent = t.audioHeader;
-      document.getElementById("labelSubsHeader").textContent = t.subsHeader;
-      
-      renderCategories();
-      renderContent();
-    }
-
-    async function apiFetch(action) {
+    /* --- Helper: API Fetch with User-Agent & Error Handling --- */
+    async function apiFetch(action, extraParams = "") {
       try {
-        const res = await fetch(PROXY_URL + "/player_api.php?" + AUTH_QUERY + "&action=" + action);
-        if (!res.ok) throw new Error("API Error " + res.status);
-        return await res.json();
-      } catch (e) {
-        console.error("Fetch failed for action:", action, e);
+        const url = `${PROXY_URL}/player_api.php?${AUTH_QUERY}&action=${action}${extraParams}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        return Array.isArray(data) ? data : (data || []);
+      } catch (err) {
+        console.error("API Fetch Error:", action, extraParams, err);
         return [];
       }
     }
 
+    /* --- Switch Section: Live / Movies / Series --- */
     async function switchSection(sec) {
+      if (currentSection === sec && categoriesCache[sec]) return;
       currentSection = sec;
       activeCategoryId = "all";
       searchQuery = "";
       document.getElementById("searchInput").value = "";
+      document.getElementById("clearSearchBtn").classList.add("hidden");
 
+      // Update Tab Styles
       document.querySelectorAll(".section-tab").forEach(tab => tab.classList.remove("active"));
       if (sec === "live") document.getElementById("tabLive").classList.add("active");
       if (sec === "movie") document.getElementById("tabMovies").classList.add("active");
       if (sec === "series") document.getElementById("tabSeries").classList.add("active");
 
-      document.getElementById("contentList").innerHTML = "<div class='p-8 text-center text-neutral-400 text-xs'>" + i18n[currentLang].loading + "</div>";
+      document.getElementById("contentList").innerHTML = `
+        <div class="flex flex-col items-center justify-center p-12 text-neutral-400 gap-3">
+          <div class="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-xs">${i18n[currentLang].loading}</span>
+        </div>
+      `;
 
       let catAction = "get_live_categories";
-      let streamAction = "get_live_streams";
-      if (sec === "movie") { catAction = "get_vod_categories"; streamAction = "get_vod_streams"; }
-      if (sec === "series") { catAction = "get_series_categories"; streamAction = "get_series"; }
+      if (sec === "movie") catAction = "get_vod_categories";
+      if (sec === "series") catAction = "get_series_categories";
 
-      try {
-        const [cats, items] = await Promise.all([apiFetch(catAction), apiFetch(streamAction)]);
-        rawCategories = Array.isArray(cats) ? cats : [];
-        rawItems = Array.isArray(items) ? items : [];
-      } catch (err) {
-        console.error("Section switch failed:", err);
+      // Fetch Categories if not cached
+      if (!categoriesCache[sec]) {
+        categoriesCache[sec] = await apiFetch(catAction);
       }
 
-      renderCategories();
-      renderContent();
+      renderCategories(categoriesCache[sec]);
+      await loadCategoryContent("all");
     }
 
-    function renderCategories() {
+    /* --- Render Category Buttons Bar --- */
+    function renderCategories(cats) {
       const bar = document.getElementById("categoriesBar");
       bar.innerHTML = "";
       const t = i18n[currentLang];
 
+      // "All" button
       const allBtn = document.createElement("button");
-      allBtn.className = "cat-btn shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#111] text-neutral-300 transition " + (activeCategoryId === "all" ? "active" : "");
+      allBtn.className = `cat-btn shrink-0 text-xs px-3 py-1.5 rounded-full border border-neutral-800 bg-[#141414] text-neutral-300 transition hover:bg-neutral-800 ${activeCategoryId === "all" ? "active" : ""}`;
       allBtn.textContent = t.catAll;
-      allBtn.onclick = () => filterCategory("all");
+      allBtn.onclick = () => selectCategory("all");
       bar.appendChild(allBtn);
 
-      rawCategories.forEach(c => {
-        const id = String(c.category_id);
-        const name = c.category_name;
-        const btn = document.createElement("button");
-        btn.className = "cat-btn shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#111] text-neutral-300 transition " + (activeCategoryId === id ? "active" : "");
-        btn.textContent = name;
-        btn.onclick = () => filterCategory(id);
-        bar.appendChild(btn);
-      });
+      if (Array.isArray(cats)) {
+        cats.forEach(c => {
+          const cid = String(c.category_id);
+          const btn = document.createElement("button");
+          btn.className = `cat-btn shrink-0 text-xs px-3 py-1.5 rounded-full border border-neutral-800 bg-[#141414] text-neutral-300 transition hover:bg-neutral-800 ${activeCategoryId === cid ? "active" : ""}`;
+          btn.textContent = c.category_name;
+          btn.onclick = () => selectCategory(cid);
+          bar.appendChild(btn);
+        });
+      }
     }
 
-    function filterCategory(catId) {
+    /* --- Select Category & Fetch Items Dynamic From Worker --- */
+    async function selectCategory(catId) {
       activeCategoryId = String(catId);
-      renderCategories();
-      renderContent();
+      
+      // Update UI active button
+      document.querySelectorAll(".cat-btn").forEach(btn => btn.classList.remove("active"));
+      event?.target?.classList?.add("active");
+
+      await loadCategoryContent(catId);
     }
 
-    function handleSearch(val) {
-      searchQuery = val.trim().toLowerCase();
-      renderContent();
-    }
-
-    function renderContent() {
-      const container = document.getElementById("contentList");
-      container.innerHTML = "";
+    async function loadCategoryContent(catId) {
+      const cacheKey = `${currentSection}_${catId}`;
       const t = i18n[currentLang];
+      const listContainer = document.getElementById("contentList");
 
-      let filtered = rawItems.filter(item => {
-        const matchCat = activeCategoryId === "all" || String(item.category_id) === activeCategoryId;
-        const name = (item.name || item.title || "").toLowerCase();
-        const matchSearch = !searchQuery || name.includes(searchQuery);
-        return matchCat && matchSearch;
-      });
+      listContainer.innerHTML = `
+        <div class="flex flex-col items-center justify-center p-12 text-neutral-400 gap-3">
+          <div class="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-xs">${t.loading}</span>
+        </div>
+      `;
 
-      document.getElementById("count").textContent = filtered.length;
+      if (itemsCache[cacheKey]) {
+        currentLoadedItems = itemsCache[cacheKey];
+        renderContent(currentLoadedItems);
+        return;
+      }
 
-      if (!filtered.length) {
-        container.innerHTML = "<div class='p-8 text-center text-neutral-500 text-xs'>" + t.noResults + "</div>";
+      let action = "get_live_streams";
+      if (currentSection === "movie") action = "get_vod_streams";
+      if (currentSection === "series") action = "get_series";
+
+      const param = catId === "all" ? "" : `&category_id=${catId}`;
+      const data = await apiFetch(action, param);
+      
+      itemsCache[cacheKey] = data;
+      currentLoadedItems = data;
+      renderContent(currentLoadedItems);
+    }
+
+    /* --- Render Items: Channels / Movies / Series --- */
+    function renderContent(items) {
+      const listContainer = document.getElementById("contentList");
+      const t = i18n[currentLang];
+      listContainer.innerHTML = "";
+
+      let filtered = items;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        filtered = items.filter(item => {
+          const name = (item.name || item.title || "").toLowerCase();
+          return name.includes(q);
+        });
+      }
+
+      document.getElementById("itemsCounter").textContent = `${filtered.length} ${t.itemsUnit}`;
+
+      if (!filtered || filtered.length === 0) {
+        listContainer.innerHTML = `
+          <div class="p-12 text-center text-neutral-500 text-xs sm:text-sm">
+            <div class="text-2xl mb-1">🔍</div>
+            ${t.noResults}
+          </div>
+        `;
         return;
       }
 
       if (currentSection === "live") {
-        const listDiv = document.createElement("div");
-        listDiv.className = "space-y-1";
-
-        filtered.slice(0, 300).forEach(item => {
-          const streamId = item.stream_id;
-          const name = item.name || "قناة";
-          const logo = item.stream_icon || "";
+        // Channels List
+        const grid = document.createElement("div");
+        grid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2";
+        
+        filtered.forEach(ch => {
+          const streamId = ch.stream_id;
+          const name = ch.name || "Live Channel";
+          const logo = ch.stream_icon;
 
           const card = document.createElement("div");
-          card.className = "item-card flex items-center gap-2.5 p-2 rounded-xl bg-[#0d0d0d] hover:bg-neutral-900 border border-neutral-850 cursor-pointer transition";
-          
+          card.className = "bg-[#121212] hover:bg-[#1a1a1a] active:bg-[#222] border border-neutral-800/80 rounded-xl p-2.5 flex items-center gap-3 cursor-pointer transition shadow-sm group";
+          card.onclick = () => playStream("live", streamId, name, logo);
+
           const iconDiv = document.createElement("div");
-          iconDiv.className = "w-8 h-8 rounded-lg bg-black border border-neutral-800 flex items-center justify-center shrink-0 overflow-hidden";
+          iconDiv.className = "w-10 h-10 rounded-lg bg-black/60 border border-neutral-800 flex items-center justify-center overflow-hidden shrink-0";
           if (logo) {
             const img = document.createElement("img");
             img.src = logo;
-            img.className = "w-full h-full object-contain";
-            img.onerror = () => { iconDiv.textContent = "📺"; };
+            img.loading = "lazy";
+            img.className = "w-full h-full object-contain p-0.5";
+            img.onerror = () => { iconDiv.innerHTML = "📺"; };
             iconDiv.appendChild(img);
           } else {
-            iconDiv.textContent = "📺";
+            iconDiv.innerHTML = "📺";
           }
 
-          const span = document.createElement("span");
-          span.className = "text-xs sm:text-sm font-medium text-neutral-200 truncate flex-1";
-          span.textContent = name;
+          const infoDiv = document.createElement("div");
+          infoDiv.className = "flex-1 min-w-0";
+          const title = document.createElement("h4");
+          title.className = "font-medium text-xs sm:text-sm text-neutral-200 group-hover:text-red-400 transition truncate";
+          title.textContent = name;
+          const sub = document.createElement("p");
+          sub.className = "text-[10px] text-neutral-500 truncate mt-0.5";
+          sub.textContent = `ID: ${streamId}`;
 
+          infoDiv.appendChild(title);
+          infoDiv.appendChild(sub);
           card.appendChild(iconDiv);
-          card.appendChild(span);
+          card.appendChild(infoDiv);
 
-          card.onclick = () => playStream("live", streamId, name, logo);
-          listDiv.appendChild(card);
+          // Play icon
+          const playBadge = document.createElement("div");
+          playBadge.className = "text-neutral-600 group-hover:text-red-500 text-sm pe-1";
+          playBadge.innerHTML = "▶";
+          card.appendChild(playBadge);
+
+          grid.appendChild(card);
         });
 
-        container.appendChild(listDiv);
-      } else {
-        const gridDiv = document.createElement("div");
-        gridDiv.className = "grid grid-cols-2 sm:grid-cols-3 gap-2";
+        listContainer.appendChild(grid);
 
-        filtered.slice(0, 200).forEach(item => {
-          const id = item.stream_id || item.series_id;
+      } else {
+        // Movies or Series Poster Grid
+        const grid = document.createElement("div");
+        grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3";
+
+        filtered.forEach(item => {
+          const isMovie = currentSection === "movie";
+          const id = isMovie ? item.stream_id : item.series_id;
           const name = item.name || item.title || "";
-          const poster = item.stream_icon || item.cover || "";
+          const poster = item.stream_icon || item.cover;
           const ext = item.container_extension || "mp4";
-          const rating = item.rating ? "★ " + item.rating : "";
+          const rating = item.rating ? `★ ${parseFloat(item.rating).toFixed(1)}` : "";
 
           const card = document.createElement("div");
-          card.className = "item-card flex flex-col bg-[#0d0d0d] hover:bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden cursor-pointer transition";
+          card.className = "bg-[#121212] hover:bg-[#181818] border border-neutral-800/80 rounded-xl overflow-hidden cursor-pointer transition shadow-md group flex flex-col";
+          card.onclick = () => {
+            if (isMovie) {
+              playStream("movie", id, name, poster, ext);
+            } else {
+              openSeriesModal(id, name, poster, item.genre);
+            }
+          };
 
-          const posterBox = document.createElement("div");
-          posterBox.className = "aspect-[2/3] bg-black relative flex items-center justify-center overflow-hidden";
-
+          const imgWrapper = document.createElement("div");
+          imgWrapper.className = "relative aspect-[2/3] w-full bg-neutral-900 overflow-hidden";
+          
           if (poster) {
             const img = document.createElement("img");
             img.src = poster;
             img.loading = "lazy";
-            img.className = "w-full h-full object-cover";
-            img.onerror = () => { posterBox.textContent = currentSection === "movie" ? "🎬" : "🍿"; };
-            posterBox.appendChild(img);
+            img.className = "w-full h-full object-cover group-hover:scale-105 transition duration-300";
+            img.onerror = () => { imgWrapper.innerHTML = `<div class='flex items-center justify-center w-full h-full text-2xl'>${isMovie ? '🎬' : '🍿'}</div>`; };
+            imgWrapper.appendChild(img);
           } else {
-            posterBox.textContent = currentSection === "movie" ? "🎬" : "🍿";
+            imgWrapper.innerHTML = `<div class='flex items-center justify-center w-full h-full text-2xl'>${isMovie ? '🎬' : '🍿'}</div>`;
           }
 
           if (rating) {
             const badge = document.createElement("span");
-            badge.className = "absolute top-1 right-1 bg-black/80 text-amber-400 text-[10px] px-1.5 py-0.5 rounded font-bold";
+            badge.className = "absolute top-1.5 end-1.5 bg-black/80 text-amber-400 text-[10px] font-bold px-1.5 py-0.5 rounded backdrop-blur";
             badge.textContent = rating;
-            posterBox.appendChild(badge);
+            imgWrapper.appendChild(badge);
           }
 
-          const infoBox = document.createElement("div");
-          infoBox.className = "p-1.5";
-          const title = document.createElement("h4");
-          title.className = "text-xs font-semibold truncate text-neutral-200";
+          const labelDiv = document.createElement("div");
+          labelDiv.className = "p-2 flex-1 flex flex-col justify-between";
+          const title = document.createElement("p");
+          title.className = "text-xs font-medium text-neutral-200 line-clamp-2 group-hover:text-red-400 transition";
           title.textContent = name;
-          infoBox.appendChild(title);
+          labelDiv.appendChild(title);
 
-          card.appendChild(posterBox);
-          card.appendChild(infoBox);
-
-          if (currentSection === "movie") {
-            card.onclick = () => playStream("movie", id, name, poster, ext);
-          } else {
-            card.onclick = () => openSeriesDetails(id, name);
-          }
-
-          gridDiv.appendChild(card);
+          card.appendChild(imgWrapper);
+          card.appendChild(labelDiv);
+          grid.appendChild(card);
         });
 
-        container.appendChild(gridDiv);
+        listContainer.appendChild(grid);
       }
     }
 
-    function playStream(type, id, name, logo, ext) {
-      ext = ext || "mp4";
-      document.getElementById("notice").classList.add("hidden");
+    /* --- Playback Engine (HLS.js + HTML5) --- */
+    function playStream(type, id, name, logo, ext = "mp4") {
+      placeholder.classList.add("hidden");
       document.getElementById("currentName").textContent = name;
-      document.getElementById("currentCat").textContent = type === "live" ? i18n[currentLang].tabLive : (type === "movie" ? i18n[currentLang].tabMovies : i18n[currentLang].tabSeries);
-      
+      document.getElementById("currentCat").textContent = 
+        type === "live" ? i18n[currentLang].tabLive : 
+        (type === "movie" ? i18n[currentLang].tabMovies : i18n[currentLang].tabSeries);
+
+      // Logo icon
       const logoEl = document.getElementById("currentLogo");
       logoEl.innerHTML = "";
       if (logo) {
         const img = document.createElement("img");
         img.src = logo;
         img.className = "w-full h-full object-contain";
-        img.onerror = () => { logoEl.textContent = type === "live" ? "📺" : (type === "movie" ? "🎬" : "🍿"); };
+        img.onerror = () => { logoEl.textContent = type === "live" ? "📺" : "🎬"; };
         logoEl.appendChild(img);
       } else {
-        logoEl.textContent = type === "live" ? "📺" : (type === "movie" ? "🎬" : "🍿");
+        logoEl.textContent = type === "live" ? "📺" : "🎬";
       }
 
       const statusBadge = document.getElementById("statusBadge");
       statusBadge.textContent = i18n[currentLang].playing;
-      statusBadge.className = "text-[10px] sm:text-xs bg-emerald-950/60 text-emerald-400 border border-emerald-800 px-2.5 py-1 rounded-full font-medium shrink-0";
+      statusBadge.className = "text-[10px] sm:text-xs bg-emerald-950/70 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full font-medium shrink-0 animate-pulse";
 
       if (hlsInstance) {
         hlsInstance.destroy();
@@ -567,112 +569,280 @@
       closeAudioMenu();
       closeSubsMenu();
 
-      let streamUrl = "";
+      // Construct verified working stream URL using worker token
       if (type === "live") {
-        streamUrl = PROXY_URL + "/live/" + USER + "/" + PASS + "/" + id + ".m3u8";
+        currentStreamUrl = `${PROXY_URL}/s/${TOKEN}/live/${id}.m3u8`;
+        
         if (window.Hls && window.Hls.isSupported()) {
-          hlsInstance = new window.Hls({ enableWorker: true, lowLatencyMode: true });
-          hlsInstance.loadSource(streamUrl);
+          hlsInstance = new window.Hls({
+            enableWorker: true,
+            lowLatencyMode: true,
+            backBufferLength: 60
+          });
+          hlsInstance.loadSource(currentStreamUrl);
           hlsInstance.attachMedia(video);
+          
           hlsInstance.on(window.Hls.Events.MANIFEST_PARSED, () => {
-            video.play().catch(() => {});
+            video.play().catch(e => console.log("Autoplay notice:", e));
             refreshTrackOptions();
           });
+          
           hlsInstance.on(window.Hls.Events.AUDIO_TRACKS_UPDATED, refreshTrackOptions);
           hlsInstance.on(window.Hls.Events.SUBTITLE_TRACKS_UPDATED, refreshTrackOptions);
+
           hlsInstance.on(window.Hls.Events.ERROR, (event, data) => {
+            console.warn("HLS Event Error:", data);
             if (data.fatal) {
-              console.warn("HLS fatal error, falling back to TS...");
-              video.src = PROXY_URL + "/live/" + USER + "/" + PASS + "/" + id + ".ts";
-              video.play().catch(() => {});
+              if (data.type === window.Hls.ErrorTypes.NETWORK_ERROR) {
+                hlsInstance.startLoad();
+              } else if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR) {
+                hlsInstance.recoverMediaError();
+              } else {
+                // Fallback to TS stream directly
+                video.src = `${PROXY_URL}/s/${TOKEN}/live/${id}.ts`;
+                video.play().catch(() => {});
+              }
             }
           });
+
         } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-          video.src = streamUrl;
+          video.src = currentStreamUrl;
           video.play().catch(() => {});
         } else {
-          video.src = PROXY_URL + "/live/" + USER + "/" + PASS + "/" + id + ".ts";
+          video.src = `${PROXY_URL}/s/${TOKEN}/live/${id}.ts`;
           video.play().catch(() => {});
         }
+
       } else if (type === "movie") {
-        streamUrl = PROXY_URL + "/movie/" + USER + "/" + PASS + "/" + id + "." + ext;
-        video.src = streamUrl;
-        video.play().catch(() => {});
+        currentStreamUrl = `${PROXY_URL}/s/${TOKEN}/movie/${id}.${ext}`;
+        video.src = currentStreamUrl;
+        video.play().catch(e => console.log("Movie play note:", e));
+
       } else if (type === "series_ep") {
-        streamUrl = PROXY_URL + "/series/" + USER + "/" + PASS + "/" + id + "." + ext;
-        video.src = streamUrl;
-        video.play().catch(() => {});
+        currentStreamUrl = `${PROXY_URL}/s/${TOKEN}/series/${id}.${ext}`;
+        video.src = currentStreamUrl;
+        video.play().catch(e => console.log("Series play note:", e));
       }
 
       video.onloadedmetadata = refreshTrackOptions;
+      // Scroll to top smoothly so user sees player
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    async function openSeriesDetails(seriesId, seriesTitle) {
-      document.getElementById("seriesModal").classList.remove("hidden");
-      document.getElementById("seriesModalTitle").textContent = seriesTitle;
-      document.getElementById("seriesModalSeasons").innerHTML = "<span class='text-xs text-neutral-400'>" + i18n[currentLang].loading + "</span>";
-      document.getElementById("seriesModalEpisodes").innerHTML = "";
+    /* --- Aspect Ratio Toggle --- */
+    function toggleAspectRatio() {
+      aspectIndex = (aspectIndex + 1) % aspectModes.length;
+      video.className = `w-full h-full bg-black ${aspectModes[aspectIndex]}`;
+      const lbl = aspectLabels[currentLang][aspectIndex];
+      document.getElementById("aspectLabel").textContent = lbl;
+    }
 
-      const details = await apiFetch("get_series_info&series_id=" + seriesId);
-      const seasonsData = details.episodes || {};
-      const seasonKeys = Object.keys(seasonsData);
+    /* --- Audio & Subtitles Tracks Management --- */
+    function toggleAudioMenu() {
+      const menu = document.getElementById("audioMenu");
+      const subsMenu = document.getElementById("subsMenu");
+      subsMenu.classList.add("hidden");
+      menu.classList.toggle("hidden");
+    }
 
-      if (!seasonKeys.length) {
-        document.getElementById("seriesModalEpisodes").innerHTML = "<div class='text-center text-xs text-neutral-500 py-4'>" + i18n[currentLang].noResults + "</div>";
+    function closeAudioMenu() {
+      document.getElementById("audioMenu").classList.add("hidden");
+    }
+
+    function toggleSubsMenu() {
+      const menu = document.getElementById("subsMenu");
+      const audioMenu = document.getElementById("audioMenu");
+      audioMenu.classList.add("hidden");
+      menu.classList.toggle("hidden");
+    }
+
+    function closeSubsMenu() {
+      document.getElementById("subsMenu").classList.add("hidden");
+    }
+
+    function refreshTrackOptions() {
+      const audioList = document.getElementById("audioTrackList");
+      const subsList = document.getElementById("subsTrackList");
+      const t = i18n[currentLang];
+      audioList.innerHTML = "";
+      subsList.innerHTML = "";
+
+      let audioCount = 0;
+      let subsCount = 0;
+
+      if (hlsInstance) {
+        // HLS Audio Tracks
+        const audioTracks = hlsInstance.audioTracks || [];
+        audioCount = audioTracks.length;
+        if (audioCount > 0) {
+          audioTracks.forEach((tr, idx) => {
+            const btn = document.createElement("button");
+            btn.className = `w-full text-start px-2 py-1.5 rounded hover:bg-neutral-800 transition ${hlsInstance.audioTrack === idx ? "text-red-400 font-bold" : "text-neutral-300"}`;
+            btn.textContent = tr.name || tr.lang || `Track ${idx + 1}`;
+            btn.onclick = () => {
+              hlsInstance.audioTrack = idx;
+              closeAudioMenu();
+              refreshTrackOptions();
+            };
+            audioList.appendChild(btn);
+          });
+        }
+
+        // HLS Subtitles
+        const subTracks = hlsInstance.subtitleTracks || [];
+        subsCount = subTracks.length;
+        if (subsCount > 0) {
+          // Off option
+          const offBtn = document.createElement("button");
+          offBtn.className = `w-full text-start px-2 py-1.5 rounded hover:bg-neutral-800 transition ${hlsInstance.subtitleTrack === -1 ? "text-red-400 font-bold" : "text-neutral-400"}`;
+          offBtn.textContent = t.subsOff;
+          offBtn.onclick = () => {
+            hlsInstance.subtitleTrack = -1;
+            closeSubsMenu();
+            refreshTrackOptions();
+          };
+          subsList.appendChild(offBtn);
+
+          subTracks.forEach((tr, idx) => {
+            const btn = document.createElement("button");
+            btn.className = `w-full text-start px-2 py-1.5 rounded hover:bg-neutral-800 transition ${hlsInstance.subtitleTrack === idx ? "text-red-400 font-bold" : "text-neutral-300"}`;
+            btn.textContent = tr.name || tr.lang || `Sub ${idx + 1}`;
+            btn.onclick = () => {
+              hlsInstance.subtitleTrack = idx;
+              closeSubsMenu();
+              refreshTrackOptions();
+            };
+            subsList.appendChild(btn);
+          });
+        }
+      }
+
+      // HTML5 video textTracks fallback
+      if (video.textTracks && video.textTracks.length > 0) {
+        subsCount = video.textTracks.length;
+        const offBtn = document.createElement("button");
+        offBtn.className = "w-full text-start px-2 py-1.5 rounded hover:bg-neutral-800 text-neutral-400";
+        offBtn.textContent = t.subsOff;
+        offBtn.onclick = () => {
+          for (let i = 0; i < video.textTracks.length; i++) video.textTracks[i].mode = "disabled";
+          closeSubsMenu();
+        };
+        subsList.appendChild(offBtn);
+
+        for (let i = 0; i < video.textTracks.length; i++) {
+          const track = video.textTracks[i];
+          const btn = document.createElement("button");
+          btn.className = `w-full text-start px-2 py-1.5 rounded hover:bg-neutral-800 ${track.mode === "showing" ? "text-red-400 font-bold" : "text-neutral-300"}`;
+          btn.textContent = track.label || track.language || `Sub ${i + 1}`;
+          btn.onclick = () => {
+            for (let j = 0; j < video.textTracks.length; j++) video.textTracks[j].mode = j === i ? "showing" : "disabled";
+            closeSubsMenu();
+          };
+          subsList.appendChild(btn);
+        }
+      }
+
+      if (audioCount === 0) {
+        audioList.innerHTML = `<p class='text-neutral-500 text-[11px] p-2'>${t.noAudio}</p>`;
+      }
+      if (subsCount === 0) {
+        subsList.innerHTML = `<p class='text-neutral-500 text-[11px] p-2'>${t.noSubs}</p>`;
+      }
+
+      document.getElementById("audioTrackCount").textContent = audioCount > 1 ? audioCount : "";
+      document.getElementById("subsTrackCount").textContent = subsCount > 0 ? subsCount : "";
+    }
+
+    /* --- Open In External Player (VLC / MX Player) --- */
+    function openExternalPlayer() {
+      if (!currentStreamUrl) {
+        alert(i18n[currentLang].chooseContent);
+        return;
+      }
+      // Copy to clipboard
+      navigator.clipboard.writeText(currentStreamUrl).then(() => {
+        alert(`${i18n[currentLang].copied}\n\n${currentStreamUrl}`);
+      }).catch(() => {
+        prompt(i18n[currentLang].openInExt, currentStreamUrl);
+      });
+    }
+
+    /* --- Series Modal & Episodes Loading --- */
+    let currentSeriesInfo = null;
+
+    async function openSeriesModal(seriesId, name, poster, genre) {
+      const modal = document.getElementById("seriesModal");
+      const titleEl = document.getElementById("modalTitle");
+      const genreEl = document.getElementById("modalGenre");
+      const posterEl = document.getElementById("modalPoster");
+      const seasonsBar = document.getElementById("modalSeasons");
+      const episodesList = document.getElementById("modalEpisodes");
+
+      titleEl.textContent = name;
+      genreEl.textContent = genre || i18n[currentLang].tabSeries;
+      posterEl.innerHTML = poster ? `<img src="${poster}" class="w-full h-full object-cover">` : `<div class="p-2 text-center text-xs">🍿</div>`;
+      seasonsBar.innerHTML = `<span class="text-xs text-neutral-400 p-2">${i18n[currentLang].loading}</span>`;
+      episodesList.innerHTML = `<div class="col-span-full p-8 text-center text-neutral-400">${i18n[currentLang].loading}</div>`;
+      modal.classList.remove("hidden");
+
+      // Fetch series info with episodes
+      currentSeriesInfo = await apiFetch("get_series_info", `&series_id=${seriesId}`);
+      const episodesBySeason = currentSeriesInfo?.episodes || {};
+      const seasonKeys = Object.keys(episodesBySeason);
+
+      if (seasonKeys.length === 0) {
+        episodesList.innerHTML = `<div class="col-span-full p-8 text-center text-neutral-500">${i18n[currentLang].noResults}</div>`;
         return;
       }
 
-      const seasonsContainer = document.getElementById("seriesModalSeasons");
-      seasonsContainer.innerHTML = "";
-
-      seasonKeys.forEach((sKey, idx) => {
+      seasonsBar.innerHTML = "";
+      seasonKeys.forEach((sNum, idx) => {
         const btn = document.createElement("button");
-        btn.className = "shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#151515] hover:bg-neutral-800 text-neutral-300 font-medium transition " + (idx === 0 ? "border-red-600 text-white" : "");
-        btn.textContent = i18n[currentLang].season + " " + sKey;
-        btn.onclick = () => {
-          seasonsContainer.querySelectorAll("button").forEach(b => b.classList.remove("border-red-600", "text-white"));
-          btn.classList.add("border-red-600", "text-white");
-          renderEpisodes(seasonsData[sKey], sKey);
+        btn.className = `px-3 py-1 rounded-full text-xs font-medium border border-neutral-700 transition ${idx === 0 ? "bg-red-600 text-white border-red-600" : "bg-[#222] text-neutral-300 hover:bg-neutral-800"}`;
+        btn.textContent = `${i18n[currentLang].season} ${sNum}`;
+        btn.onclick = (e) => {
+          document.querySelectorAll("#modalSeasons button").forEach(b => {
+            b.className = "px-3 py-1 rounded-full text-xs font-medium border border-neutral-700 bg-[#222] text-neutral-300 hover:bg-neutral-800";
+          });
+          e.target.className = "px-3 py-1 rounded-full text-xs font-medium border border-red-600 bg-red-600 text-white";
+          renderSeasonEpisodes(sNum);
         };
-        seasonsContainer.appendChild(btn);
+        seasonsBar.appendChild(btn);
       });
 
-      renderEpisodes(seasonsData[seasonKeys[0]], seasonKeys[0]);
+      renderSeasonEpisodes(seasonKeys[0]);
     }
 
-    function renderEpisodes(episodes, sKey) {
-      const container = document.getElementById("seriesModalEpisodes");
-      container.innerHTML = "";
-      if (!Array.isArray(episodes) || !episodes.length) {
-        container.innerHTML = "<div class='text-center text-xs text-neutral-500 py-4'>" + i18n[currentLang].noResults + "</div>";
+    function renderSeasonEpisodes(seasonNum) {
+      const episodesList = document.getElementById("modalEpisodes");
+      episodesList.innerHTML = "";
+      const eps = currentSeriesInfo?.episodes?.[seasonNum] || [];
+
+      if (eps.length === 0) {
+        episodesList.innerHTML = `<div class="col-span-full p-8 text-center text-neutral-500">${i18n[currentLang].noResults}</div>`;
         return;
       }
 
-      episodes.forEach(ep => {
+      eps.forEach(ep => {
         const epId = ep.id;
-        const epTitle = ep.title || (i18n[currentLang].episode + " " + (ep.episode_num || ""));
+        const title = ep.title || `${i18n[currentLang].episode} ${ep.episode_num || ""}`;
         const ext = ep.container_extension || "mp4";
 
-        const div = document.createElement("div");
-        div.className = "flex items-center justify-between p-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 cursor-pointer transition";
-
-        const span = document.createElement("span");
-        span.className = "text-xs sm:text-sm text-neutral-200 truncate flex-1";
-        span.textContent = epTitle;
-
-        const icon = document.createElement("span");
-        icon.className = "text-xs text-red-500 font-bold ml-2";
-        icon.textContent = "▶";
-
-        div.appendChild(span);
-        div.appendChild(icon);
-
-        div.onclick = () => {
-          playStream("series_ep", epId, epTitle, "", ext);
+        const btn = document.createElement("button");
+        btn.className = "bg-[#181818] hover:bg-neutral-800 border border-neutral-800 rounded-xl p-2.5 text-start flex items-center justify-between transition group";
+        btn.onclick = () => {
           closeSeriesModal();
+          playStream("series_ep", epId, `${document.getElementById("modalTitle").textContent} - ${title}`, "", ext);
         };
 
-        container.appendChild(div);
+        btn.innerHTML = `
+          <div class="truncate pe-2">
+            <span class="text-neutral-200 font-medium group-hover:text-red-400 block truncate">${title}</span>
+            <span class="text-[10px] text-neutral-500">ID: ${epId}</span>
+          </div>
+          <span class="text-neutral-500 group-hover:text-red-500 text-sm shrink-0">▶</span>
+        `;
+        episodesList.appendChild(btn);
       });
     }
 
@@ -680,240 +850,108 @@
       document.getElementById("seriesModal").classList.add("hidden");
     }
 
-    function cycleAspectMode() {
-      aspectIndex = (aspectIndex + 1) % 4;
-      video.className = "w-full h-full bg-black transition-all duration-200 " + aspectModes[aspectIndex];
-      
-      const toast = document.getElementById("aspectToast");
-      toast.textContent = currentLang === "ar" ? aspectNamesAr[aspectIndex] : aspectNamesEn[aspectIndex];
-      toast.classList.remove("opacity-0");
-      clearTimeout(window.aspectToastTimeout);
-      window.aspectToastTimeout = setTimeout(() => toast.classList.add("opacity-0"), 1800);
-    }
-
-    function toggleAudioMenu() {
-      const menu = document.getElementById("audioMenu");
-      closeSubsMenu();
-      if (!menu.classList.contains("hidden")) {
-        menu.classList.add("hidden");
+    /* --- Search Engine --- */
+    function handleSearch(val) {
+      searchQuery = val;
+      const clearBtn = document.getElementById("clearSearchBtn");
+      if (val.trim()) {
+        clearBtn.classList.remove("hidden");
       } else {
-        refreshTrackOptions();
-        menu.classList.remove("hidden");
+        clearBtn.classList.add("hidden");
       }
-    }
-    function closeAudioMenu() {
-      document.getElementById("audioMenu").classList.add("hidden");
+      renderContent(currentLoadedItems);
     }
 
-    function toggleSubsMenu() {
-      const menu = document.getElementById("subsMenu");
-      closeAudioMenu();
-      if (!menu.classList.contains("hidden")) {
-        menu.classList.add("hidden");
-      } else {
-        refreshTrackOptions();
-        menu.classList.remove("hidden");
-      }
-    }
-    function closeSubsMenu() {
-      document.getElementById("subsMenu").classList.add("hidden");
+    function clearSearch() {
+      document.getElementById("searchInput").value = "";
+      searchQuery = "";
+      document.getElementById("clearSearchBtn").classList.add("hidden");
+      renderContent(currentLoadedItems);
     }
 
-    function refreshTrackOptions() {
-      const aList = document.getElementById("audioList");
-      const sList = document.getElementById("subsList");
-      aList.innerHTML = "";
-      sList.innerHTML = "";
+    /* --- Language Toggle --- */
+    function toggleLanguage() {
+      currentLang = currentLang === "ar" ? "en" : "ar";
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = currentLang === "ar" ? "rtl" : "ltr";
+
       const t = i18n[currentLang];
+      document.getElementById("langToggleBtn").textContent = t.langBtn;
+      document.getElementById("searchInput").placeholder = t.searchPlaceholder;
+      document.getElementById("labelTabLive").textContent = t.tabLive;
+      document.getElementById("labelTabMovies").textContent = t.tabMovies;
+      document.getElementById("labelTabSeries").textContent = t.tabSeries;
+      document.getElementById("placeholderText").textContent = t.chooseContent;
+      document.getElementById("labelAudioHeader").textContent = t.audioHeader;
+      document.getElementById("labelSubsHeader").textContent = t.subsHeader;
+      document.getElementById("aspectLabel").textContent = aspectLabels[currentLang][aspectIndex];
 
-      let audioTracks = [];
-      let subTracks = [];
-
-      if (hlsInstance) {
-        audioTracks = hlsInstance.audioTracks || [];
-        subTracks = hlsInstance.subtitleTracks || [];
-      } else if (video.audioTracks) {
-        for (let i = 0; i < video.audioTracks.length; i++) {
-          const at = video.audioTracks[i];
-          audioTracks.push({ name: at.label || at.language || ("Audio " + (i + 1)), id: i, selected: at.enabled });
-        }
-      }
-
-      if (!audioTracks.length) {
-        aList.innerHTML = "<span class='text-[11px] text-neutral-500 px-2 py-1'>" + t.noAudio + "</span>";
-      } else {
-        audioTracks.forEach((track, idx) => {
-          const isSelected = hlsInstance ? (idx === hlsInstance.audioTrack) : track.selected;
-          const label = track.name || track.lang || ("Track " + (idx + 1));
-          
-          const btn = document.createElement("button");
-          btn.className = "text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium";
-          
-          const labelSpan = document.createElement("span");
-          labelSpan.textContent = label;
-          btn.appendChild(labelSpan);
-
-          if (isSelected) {
-            const check = document.createElement("span");
-            check.className = "text-red-500 font-bold";
-            check.textContent = "✓";
-            btn.appendChild(check);
-          }
-
-          btn.onclick = () => selectAudioTrack(idx);
-          aList.appendChild(btn);
-        });
-      }
-
-      if (hlsInstance && subTracks.length) {
-        const offBtn = document.createElement("button");
-        offBtn.className = "text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium";
-        const offSpan = document.createElement("span");
-        offSpan.textContent = t.subsOff;
-        offBtn.appendChild(offSpan);
-
-        if (hlsInstance.subtitleTrack === -1 || !hlsInstance.subtitleDisplay) {
-          const check = document.createElement("span");
-          check.className = "text-red-500 font-bold";
-          check.textContent = "✓";
-          offBtn.appendChild(check);
-        }
-        offBtn.onclick = () => selectSubtitleTrack(-1);
-        sList.appendChild(offBtn);
-
-        subTracks.forEach((track, idx) => {
-          const isSelected = hlsInstance.subtitleDisplay && idx === hlsInstance.subtitleTrack;
-          const label = track.name || track.lang || ("Sub " + (idx + 1));
-          
-          const btn = document.createElement("button");
-          btn.className = "text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium";
-          const labelSpan = document.createElement("span");
-          labelSpan.textContent = label;
-          btn.appendChild(labelSpan);
-
-          if (isSelected) {
-            const check = document.createElement("span");
-            check.className = "text-red-500 font-bold";
-            check.textContent = "✓";
-            btn.appendChild(check);
-          }
-
-          btn.onclick = () => selectSubtitleTrack(idx);
-          sList.appendChild(btn);
-        });
-      } else if (video.textTracks && video.textTracks.length) {
-        const offBtn = document.createElement("button");
-        offBtn.className = "text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium";
-        offBtn.textContent = t.subsOff;
-        offBtn.onclick = () => selectNativeSubtitle(-1);
-        sList.appendChild(offBtn);
-
-        for (let i = 0; i < video.textTracks.length; i++) {
-          const tr = video.textTracks[i];
-          const isSelected = tr.mode === "showing";
-          const label = tr.label || tr.language || ("Sub " + (i + 1));
-
-          const btn = document.createElement("button");
-          btn.className = "text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium";
-          const labelSpan = document.createElement("span");
-          labelSpan.textContent = label;
-          btn.appendChild(labelSpan);
-
-          if (isSelected) {
-            const check = document.createElement("span");
-            check.className = "text-red-500 font-bold";
-            check.textContent = "✓";
-            btn.appendChild(check);
-          }
-
-          btn.onclick = () => selectNativeSubtitle(i);
-          sList.appendChild(btn);
-        }
-      } else {
-        sList.innerHTML = "<span class='text-[11px] text-neutral-500 px-2 py-1'>" + t.noSubs + "</span>";
-      }
+      renderCategories(categoriesCache[currentSection] || []);
+      renderContent(currentLoadedItems);
     }
 
-    function selectAudioTrack(idx) {
-      if (hlsInstance) {
-        hlsInstance.audioTrack = idx;
-      } else if (video.audioTracks) {
-        for (let i = 0; i < video.audioTracks.length; i++) {
-          video.audioTracks[i].enabled = (i === idx);
-        }
-      }
-      refreshTrackOptions();
-      closeAudioMenu();
-    }
-
-    function selectSubtitleTrack(idx) {
-      if (hlsInstance) {
-        hlsInstance.subtitleTrack = idx;
-        hlsInstance.subtitleDisplay = (idx >= 0);
-      }
-      refreshTrackOptions();
-      closeSubsMenu();
-    }
-
-    function selectNativeSubtitle(idx) {
-      for (let i = 0; i < video.textTracks.length; i++) {
-        video.textTracks[i].mode = (i === idx) ? "showing" : "disabled";
-      }
-      refreshTrackOptions();
-      closeSubsMenu();
-    }
-
-    function togglePlay() {
-      if (video.paused) {
-        video.play();
-        document.getElementById("icoPlay").classList.add("hidden");
-        document.getElementById("icoPause").classList.remove("hidden");
-      } else {
-        video.pause();
-        document.getElementById("icoPlay").classList.remove("hidden");
-        document.getElementById("icoPause").classList.add("hidden");
-      }
-    }
-
-    function toggleMute() {
-      video.muted = !video.muted;
-      if (video.muted) {
-        document.getElementById("icoVolOn").classList.add("hidden");
-        document.getElementById("icoVolOff").classList.remove("hidden");
-      } else {
-        document.getElementById("icoVolOn").classList.remove("hidden");
-        document.getElementById("icoVolOff").classList.add("hidden");
-      }
-    }
-
-    function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        if (playerContainer.requestFullscreen) playerContainer.requestFullscreen();
-        else if (playerContainer.webkitRequestFullscreen) playerContainer.webkitRequestFullscreen();
-        else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
-      } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-      }
-    }
-
-    document.addEventListener("fullscreenchange", () => {
-      const isFs = !!document.fullscreenElement;
-      document.getElementById("icoFsExpand").classList.toggle("hidden", isFs);
-      document.getElementById("icoFsCompress").classList.toggle("hidden", !isFs);
+    /* --- PWA Manifest & Service Worker Registration --- */
+    let deferredPrompt = null;
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById("pwaInstallBtn").classList.remove("hidden");
     });
 
-    document.addEventListener("click", (e) => {
-      if (!e.target.closest("#btnAudio") && !e.target.closest("#audioMenu")) closeAudioMenu();
-      if (!e.target.closest("#btnSubs") && !e.target.closest("#subsMenu")) closeSubsMenu();
-    });
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === "accepted") {
+            document.getElementById("pwaInstallBtn").classList.add("hidden");
+          }
+          deferredPrompt = null;
+        });
+      }
+    }
 
-    // Start immediately
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", () => switchSection("live"));
-    } else {
+    // Auto-inject Manifest link tag
+    (function setupPWA() {
+      const manifest = {
+        name: "AlameeereTv Stream",
+        short_name: "AlameeereTv",
+        start_url: "./",
+        display: "standalone",
+        background_color: "#070707",
+        theme_color: "#e50914",
+        icons: [
+          {
+            src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23e50914'/><text x='50%' y='65%' font-size='50' font-weight='bold' fill='white' text-anchor='middle'>A</text></svg>",
+            sizes: "192x192 512x512",
+            type: "image/svg+xml"
+          }
+        ]
+      };
+      const stringManifest = JSON.stringify(manifest);
+      const blob = new Blob([stringManifest], {type: 'application/json'});
+      const manifestURL = URL.createObjectURL(blob);
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = manifestURL;
+      document.head.appendChild(link);
+
+      // Register minimal Service Worker
+      if ('serviceWorker' in navigator) {
+        const swScript = `
+          self.addEventListener('install', e => self.skipWaiting());
+          self.addEventListener('activate', e => clients.claim());
+          self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+        `;
+        const swBlob = new Blob([swScript], {type: 'text/javascript'});
+        const swUrl = URL.createObjectURL(swBlob);
+        navigator.serviceWorker.register(swUrl).catch(e => console.log('SW registration:', e));
+      }
+    })();
+
+    /* --- Initialize App on Load --- */
+    window.addEventListener("DOMContentLoaded", () => {
       switchSection("live");
-    }
+    });
   </script>
 </body>
 </html>
