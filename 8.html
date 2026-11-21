@@ -2,323 +2,235 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#09090d">
-<title>AlameeereTv | عالم المشاهدة</title>
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#09090e">
+<title>AlameeereTv | مشاهدة بلا حدود</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
 <style>
-:root {
-  --bg:#09090d;
-  --panel:#15151d;
-  --panel2:#20202a;
-  --red:#e50935;
-  --text:#fff;
-  --muted:#a5a5b1;
+:root{
+ --bg:#09090e;
+ --panel:#15151d;
+ --panel2:#20202b;
+ --red:#e50935;
+ --white:#fff;
+ --muted:#9999a8;
 }
 *{box-sizing:border-box}
 body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Tahoma,Arial,sans-serif;
-  padding-bottom:75px;
+ margin:0;background:var(--bg);color:white;
+ font-family:Tahoma,Arial,sans-serif;
+ padding-bottom:75px
 }
 button,input{font-family:inherit}
 button{cursor:pointer}
 header{
-  height:68px;
-  background:rgba(12,12,17,.97);
-  border-bottom:1px solid #262630;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 5%;
-  position:sticky;
-  top:0;
-  z-index:100;
-  backdrop-filter:blur(15px);
+ position:sticky;top:0;z-index:100;
+ height:65px;background:#101016;
+ border-bottom:1px solid #292933;
+ display:flex;align-items:center;
+ justify-content:space-between;padding:0 5%;
 }
-.logo{
-  font-size:25px;
-  font-weight:900;
-  white-space:nowrap;
-}
+.logo{font-size:25px;font-weight:900}
 .logo span{color:var(--red)}
-.header-actions{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
+.header-actions{display:flex;gap:9px}
 .icon-btn{
-  background:var(--panel2);
-  color:white;
-  border:0;
-  border-radius:9px;
-  padding:10px 13px;
+ background:#24242d;border:0;color:white;
+ padding:10px 13px;border-radius:8px;font-size:17px
 }
-.player-section{
-  position:sticky;
-  top:68px;
-  z-index:90;
-  background:#09090d;
-  padding:10px 5%;
+nav.desktop{
+ display:flex;gap:22px;align-items:center
 }
-.player-box{
-  background:#000;
-  border:1px solid #292933;
-  border-radius:12px;
-  overflow:hidden;
+nav.desktop button{
+ border:0;background:none;color:#bbb;font-size:13px
+}
+nav.desktop button.active,
+nav.desktop button:hover{color:white}
+.player-sticky{
+ position:sticky;top:65px;z-index:90;
+ background:#09090e;padding:9px 5% 10px;
+}
+.player{
+ border:1px solid #292933;border-radius:12px;
+ overflow:hidden;background:#000;
 }
 .player-screen{
-  aspect-ratio:16/9;
-  width:100%;
-  position:relative;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:
-    radial-gradient(ellipse,#29202b,#050507 75%);
+ position:relative;aspect-ratio:16/9;
+ display:flex;justify-content:center;
+ align-items:center;background:#050507;
 }
-.player-screen video{
-  width:100%;
-  height:100%;
-  position:absolute;
-  inset:0;
-  object-fit:contain;
+video{
+ position:absolute;inset:0;
+ width:100%;height:100%;object-fit:contain;
+ background:#000;
 }
 .player-placeholder{
-  text-align:center;
-  z-index:2;
-  pointer-events:none;
+ position:absolute;z-index:2;
+ text-align:center;pointer-events:none;
 }
 .player-placeholder .play{
-  font-size:55px;
-  color:var(--red);
+ color:var(--red);font-size:48px
 }
-.player-placeholder h2{
-  font-size:22px;
-  margin:8px;
-}
-.player-placeholder p{
-  color:var(--muted);
-  font-size:12px;
-}
+.player-placeholder h2{margin:5px;font-size:22px}
+.player-placeholder p{color:#888;font-size:12px}
 .player-info{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px;
-  background:#15151d;
-  font-size:13px;
+ background:#15151d;padding:11px 13px;
+ display:flex;justify-content:space-between;
+ align-items:center;font-size:12px
 }
-.live-indicator{
-  color:#ff4055;
-}
-.container{
-  padding:15px 5%;
-}
+.player-label{color:#f04460}
+.container{padding:15px 5%}
 .hero{
-  min-height:180px;
-  border-radius:16px;
-  padding:25px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  background:
-    linear-gradient(90deg,rgba(0,0,0,.94),rgba(0,0,0,.35)),
-    linear-gradient(135deg,#4c1022,#181522,#09090d);
-  margin-bottom:25px;
+ min-height:210px;border-radius:14px;
+ padding:25px;display:flex;flex-direction:column;
+ justify-content:center;align-items:flex-start;
+ background:
+ linear-gradient(90deg,#09090e 0%,#09090e99 60%,transparent),
+ linear-gradient(135deg,#60142c,#242034,#09090e);
+ margin-bottom:20px;
 }
-.hero h1{
-  font-size:27px;
-  margin:0 0 10px;
+.hero h1{font-size:27px;margin:0 0 8px}
+.hero p{color:#ccc;font-size:13px;line-height:1.8}
+.red-btn{
+ border:0;background:var(--red);color:white;
+ border-radius:7px;padding:12px 19px;font-weight:bold
 }
-.hero p{
-  color:#c5c5cc;
-  font-size:13px;
-}
-.primary-btn{
-  background:var(--red);
-  border:0;
-  color:white;
-  padding:12px 20px;
-  border-radius:7px;
-  font-weight:bold;
-  width:max-content;
-}
+.red-btn:hover{background:#b9082b}
 .tabs{
-  display:flex;
-  gap:9px;
-  overflow-x:auto;
-  padding:10px 0 18px;
-  scrollbar-width:none;
+ display:flex;gap:8px;overflow-x:auto;
+ padding:10px 0 18px;scrollbar-width:none
 }
 .tabs button{
-  border:1px solid #30303a;
-  background:var(--panel);
-  color:white;
-  padding:11px 19px;
-  border-radius:8px;
-  white-space:nowrap;
+ flex-shrink:0;background:#191922;color:#ddd;
+ border:1px solid #30303a;border-radius:8px;
+ padding:11px 17px;font-size:12px
 }
-.tabs button.active{
-  background:var(--red);
-  border-color:var(--red);
-}
+.tabs button.active{background:var(--red);border-color:var(--red);color:white}
+.section{margin-bottom:28px}
 .section-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin:22px 0 15px;
+ display:flex;align-items:center;
+ justify-content:space-between;margin-bottom:15px
 }
 .section-head h2{
-  font-size:19px;
-  border-right:4px solid var(--red);
-  padding-right:11px;
-  margin:0;
+ font-size:18px;margin:0;
+ border-right:4px solid var(--red);padding-right:11px
 }
-.section-head span{
-  color:var(--muted);
-  font-size:12px;
-}
+.section-head span{font-size:11px;color:var(--muted)}
 .grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
-  gap:14px;
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(145px,1fr));
+ gap:13px
 }
-.item{
-  min-width:0;
-  background:var(--panel);
-  border-radius:10px;
-  overflow:hidden;
-  cursor:pointer;
-  transition:.2s;
-  border:1px solid #252530;
-  position:relative;
+.card{
+ min-width:0;background:var(--panel);
+ border:1px solid #292933;border-radius:9px;
+ overflow:hidden;position:relative;
+ transition:.2s;cursor:pointer
 }
-.item:hover{
-  transform:translateY(-4px);
-  border-color:var(--red);
-}
+.card:hover{transform:translateY(-4px);border-color:var(--red)}
 .poster{
-  width:100%;
-  aspect-ratio:2/3;
-  object-fit:cover;
-  background:#252530;
-  display:block;
-}
-.item-details{
-  padding:10px;
-}
-.item-title{
-  font-size:13px;
-  font-weight:bold;
-  overflow:hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
-}
-.item-subtitle{
-  color:var(--muted);
-  font-size:11px;
-  margin-top:7px;
+ display:block;width:100%;aspect-ratio:2/3;
+ object-fit:cover;background:#24242e
 }
 .channel-poster{
-  aspect-ratio:1/1;
-  object-fit:contain;
-  padding:22px;
-  background:#1a1a24;
+ aspect-ratio:1/1;object-fit:contain;padding:20px
+}
+.card-info{padding:9px}
+.card-title{
+ font-size:12px;font-weight:bold;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.card-sub{
+ font-size:10px;color:var(--muted);margin-top:7px
 }
 .fav{
-  position:absolute;
-  top:8px;
-  left:8px;
-  background:#09090dcc;
-  color:white;
-  border:0;
-  border-radius:50%;
-  width:31px;
-  height:31px;
-  font-size:17px;
+ position:absolute;top:7px;left:7px;
+ width:30px;height:30px;border:0;
+ border-radius:50%;background:#09090dcc;
+ color:white;font-size:17px
 }
-.search-box{
-  display:none;
-  padding:10px 5%;
+.fav.selected{color:#ff3156}
+.category-list{
+ display:flex;gap:8px;overflow-x:auto;
+ padding:5px 0 15px;scrollbar-width:none
 }
-.search-box.show{display:block}
-.search-box input{
-  width:100%;
-  padding:14px;
-  background:var(--panel);
-  color:white;
-  border:1px solid #343440;
-  border-radius:9px;
-  outline:none;
+.category-list button{
+ background:#20202b;color:#ddd;
+ border:1px solid #343440;border-radius:7px;
+ padding:9px 13px;white-space:nowrap;font-size:11px
 }
-.search-box input:focus{
-  border-color:var(--red);
+.category-list button.active{
+ background:var(--red);border-color:var(--red)
 }
-.loading{
-  color:var(--muted);
-  text-align:center;
-  padding:35px 10px;
-  grid-column:1/-1;
+.search-wrap{display:none;margin:10px 0 20px}
+.search-wrap.show{display:block}
+.search-wrap input{
+ width:100%;padding:14px;border-radius:8px;
+ background:#1b1b25;border:1px solid #383844;
+ color:white;outline:none
+}
+.search-wrap input:focus{border-color:var(--red)}
+.status{
+ text-align:center;padding:30px 10px;
+ color:var(--muted);font-size:13px
 }
 .error{
-  background:#38131d;
-  color:#ffb3bd;
-  padding:15px;
-  border-radius:9px;
-  font-size:13px;
-  grid-column:1/-1;
+ color:#ff9ba9;background:#35121d;
+ border-radius:8px;padding:14px;font-size:12px
 }
-.empty{
-  text-align:center;
-  color:var(--muted);
-  padding:40px 10px;
-  grid-column:1/-1;
+.modal{
+ display:none;position:fixed;inset:0;
+ background:#000c;z-index:200;
+ align-items:center;justify-content:center;padding:15px
+}
+.modal.show{display:flex}
+.modal-box{
+ width:min(600px,100%);max-height:85vh;
+ overflow:auto;background:#171720;
+ border:1px solid #333;border-radius:13px;padding:18px
+}
+.modal-head{
+ display:flex;justify-content:space-between;align-items:center
+}
+.close{
+ background:#292934;color:white;border:0;
+ border-radius:7px;padding:8px 12px
+}
+.season-btn{
+ background:#252530;color:white;border:0;
+ padding:10px;border-radius:7px;margin:4px
+}
+.episode{
+ display:flex;justify-content:space-between;
+ align-items:center;padding:12px;
+ background:#24242d;border-radius:7px;
+ margin:7px 0;font-size:12px;gap:10px
 }
 footer{
-  text-align:center;
-  color:#777;
-  border-top:1px solid #22222a;
-  padding:25px;
-  margin-top:40px;
-  font-size:12px;
+ text-align:center;color:#777;
+ border-top:1px solid #252530;
+ padding:25px;font-size:12px;margin-top:40px
 }
 .bottom-nav{
-  display:none;
+ display:none;position:fixed;bottom:0;z-index:120;
+ width:100%;background:#15151e;
+ border-top:1px solid #333;
+ justify-content:space-around;padding:11px 2px
 }
-@media(max-width:600px){
-  header{padding:0 4%}
-  .logo{font-size:21px}
-  .player-section{padding:7px 3%}
-  .container{padding:12px 4%}
-  .grid{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:9px;
-  }
-  .item-details{padding:7px}
-  .item-title{font-size:11px}
-  .hero{min-height:155px;padding:18px}
-  .hero h1{font-size:23px}
-  .bottom-nav{
-    position:fixed;
-    bottom:0;
-    width:100%;
-    display:flex;
-    justify-content:space-around;
-    background:#15151d;
-    border-top:1px solid #333;
-    padding:10px 3px;
-    z-index:120;
-  }
-  .bottom-nav button{
-    background:none;
-    border:0;
-    color:#aaa;
-    font-size:11px;
-  }
-  .bottom-nav button.active{color:#ed2945}
+.bottom-nav button{
+ background:none;border:0;color:#aaa;font-size:11px
+}
+.bottom-nav button.active{color:var(--red)}
+@media(max-width:650px){
+ header{padding:0 4%}
+ nav.desktop{display:none}
+ .player-sticky{padding:7px 3%}
+ .container{padding:12px 4%}
+ .hero{min-height:160px;padding:18px}
+ .hero h1{font-size:22px}
+ .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+ .card-info{padding:7px}
+ .card-title{font-size:10px}
+ .bottom-nav{display:flex}
 }
 </style>
 </head>
@@ -326,429 +238,619 @@ footer{
 <header>
 Alameeere
 Tv
-    <button class="icon-btn" onclick="toggleSearch()">⌕</button>
-    <button class="icon-btn" onclick="showFavorites()">♥</button>
+ <nav class="desktop">
+  <button class="active" onclick="go('home',this)">الرئيسية</button>
+  <button onclick="go('live',this)">القنوات</button>
+  <button onclick="go('movies',this)">الأفلام</button>
+  <button onclick="go('series',this)">المسلسلات</button>
+ </nav>
+  <button class="icon-btn" onclick="toggleSearch()">⌕</button>
+  <button class="icon-btn" onclick="showFav()">♥</button>
 </header>
 <!-- المشغل الثابت -->
-<section class="player-section">
+<section class="player-sticky" id="playerSection">
 ▶
-        <h2>AlameeereTv</h2>
-اختر القناة أو الفيلم لبدء المشاهدة
-      <video id="video"
-        controls
-        playsinline
-        webkit-playsinline
-        preload="metadata">
-      </video>
+    <h2>AlameeereTv</h2>
+اختر ما تريد مشاهدته
+   <video id="video" controls playsinline
+    webkit-playsinline preload="metadata"></video>
 المشغل الرئيسي
 ● ALAMEEERE TV
 </section>
-  <input id="searchInput"
-    type="search"
-    placeholder="ابحث عن قناة أو فيلم أو مسلسل..."
-    oninput="searchContent(this.value)">
 <main class="container">
-  <section class="hero">
-    <h1>مرحباً بك في AlameeereTv</h1>
-عالم القنوات والأفلام والمسلسلات في مكان واحد.
-    <button class="primary-btn" onclick="showSection('live')">
-      استكشف القنوات ▶
-    </button>
-  </section>
-    <button class="active" onclick="showSection('home',this)">الرئيسية</button>
-    <button onclick="showSection('live',this)">القنوات المباشرة</button>
-    <button onclick="showSection('movies',this)">الأفلام</button>
-    <button onclick="showSection('series',this)">المسلسلات</button>
-    <button onclick="showFavorites(this)">المفضلة ♥</button>
-  <section id="contentArea">
-        <h2>القنوات المباشرة</h2>
-0 قناة
+  <h1>عالم المشاهدة بين يديك</h1>
+القنوات المباشرة والأفلام والمسلسلات
+  في منصة واحدة.
+  <button class="red-btn" onclick="go('live')">ابدأ المشاهدة ▶</button>
+  <input id="searchInput" placeholder="ابحث عن فيلم أو قناة أو مسلسل..."
+   oninput="search(this.value)">
+  <button class="active" onclick="go('home',this)">الرئيسية</button>
+  <button onclick="go('live',this)">القنوات المباشرة</button>
+  <button onclick="go('movies',this)">الأفلام</button>
+  <button onclick="go('series',this)">المسلسلات</button>
+ <section class="section" id="liveSection">
+   <h2>القنوات المباشرة</h2>
+جاري التحميل
 جاري تحميل القنوات...
-        <h2>الأفلام</h2>
-0 فيلم
+ </section>
+ <section class="section" id="moviesSection">
+   <h2>أحدث الأفلام</h2>
+جاري التحميل
 جاري تحميل الأفلام...
-        <h2>المسلسلات</h2>
-0 مسلسل
+ </section>
+ <section class="section" id="seriesSection">
+   <h2>المسلسلات</h2>
+جاري التحميل
 جاري تحميل المسلسلات...
-  </section>
+ </section>
+ <section class="section" id="favoritesSection" style="display:none">
+<h2>قائمتي ♥</h2>
+ </section>
+ <section class="section" id="searchSection" style="display:none">
+<h2>نتائج البحث</h2>
+ </section>
 </main>
+   <h3 id="seriesName">تفاصيل المسلسل</h3>
+   <button class="close" onclick="closeModal()">إغلاق ✕</button>
+جاري تحميل الحلقات...
 <footer>
 Alameeere
 Tv
 جميع الحقوق محفوظة © 2026
 </footer>
-<nav class="bottom-nav">
-  <button onclick="showSection('home')">⌂
+ <button class="active" onclick="go('home')">⌂
 الرئيسية</button>
-  <button onclick="showSection('live')">▣
+ <button onclick="go('live')">▣
 القنوات</button>
-  <button onclick="showSection('movies')">🎬
+ <button onclick="go('movies')">🎬
 الأفلام</button>
-  <button onclick="showSection('series')">▤
+ <button onclick="go('series')">▤
 المسلسلات</button>
-  <button onclick="showFavorites()">♥
-المفضلة</button>
-</nav>
+ <button onclick="showFav()">♥
+قائمتي</button>
 <script>
-/* =====================================
-   إعدادات AlameeereTv
-===================================== */
-const CONFIG = {
-  API_BASE: "https://b.m737217130.workers.dev",
-  // مسار Xtream API القياسي.
-  // يجب أن يكون هذا المسار مدعوماً من الـ Worker.
-  API_PATH: "/player_api.php",
-  // لا تضع بيانات الدخول في هذا الملف.
-  // يفترض أن الـ Worker يتولى المصادقة داخلياً.
+/* ===================================
+   إعدادات السيرفر
+=================================== */
+const API = "https://b.m737217130.workers.dev";
+const DATA = {
+ live: [],
+ movies: [],
+ series: [],
+ liveCategories: [],
+ movieCategories: [],
+ seriesCategories: []
 };
-/* =====================================
-   تخزين المحتوى
-===================================== */
-let liveChannels = [];
-let movies = [];
-let series = [];
-let favorites = JSON.parse(
+let favorites = [];
+try {
+ favorites = JSON.parse(
   localStorage.getItem("alameeere_favorites") || "[]"
-);
-let currentSection = "home";
-let hlsInstance = null;
-const video = document.getElementById("video");
-/* =====================================
-   طلبات السيرفر
-===================================== */
-async function apiRequest(params = {}) {
-  const url = new URL(
-    CONFIG.API_PATH,
-    CONFIG.API_BASE
+ );
+} catch(e) {
+ favorites = [];
+}
+let hls = null;
+let currentCategory = {
+ live: "all",
+ movie: "all",
+ series: "all"
+};
+/* ===================================
+   الاتصال بالـ Worker
+=================================== */
+async function request(path,params={}) {
+ const url = new URL(path,API);
+ Object.entries(params).forEach(([k,v])=>{
+  if(v !== undefined && v !== null && v !== "")
+   url.searchParams.set(k,v);
+ });
+ const response = await fetch(url.toString());
+ if(!response.ok)
+  throw new Error("HTTP "+response.status);
+ return await response.json();
+}
+async function api(action,extra={}) {
+ return request("/api",{
+  action,
+  ...extra
+ });
+}
+/* ===================================
+   تحميل التصنيفات والمحتوى
+=================================== */
+async function initialize() {
+ const jobs = [
+  ["liveCategories","get_live_categories","liveCategories"],
+  ["movieCategories","get_vod_categories","movieCategories"],
+  ["seriesCategories","get_series_categories","seriesCategories"],
+  ["live","get_live_streams","liveGrid"],
+  ["movies","get_vod_streams","movieGrid"],
+  ["series","get_series","seriesGrid"]
+ ];
+ await Promise.all(jobs.map(async ([key,action,grid])=>{
+  try {
+   const result = await api(action);
+   if(!Array.isArray(result))
+    throw new Error("استجابة غير صحيحة");
+   DATA[key] = result;
+   if(key.endsWith("Categories")) {
+    const type = key.replace("Categories","");
+    renderCategories(type,result);
+   } else {
+    renderItems(key,result);
+   }
+  } catch(error) {
+   console.error(action,error);
+   if(!key.endsWith("Categories")) {
+    document.getElementById(grid).innerHTML =
+     '
+تعذر تحميل المحتوى. تحقق من اتصال السيرفر.
+';
+   }
+  }
+ }));
+ updateCounts();
+}
+/* ===================================
+   الصور
+=================================== */
+function imageUrl(url) {
+ if(!url) return "";
+ // تمرير الصور عبر مسار الصور الخاص بالـ Worker
+ try {
+  const bytes = new TextEncoder().encode(url);
+  let binary = "";
+  bytes.forEach(b=>binary+=String.fromCharCode(b));
+  const encoded = btoa(binary)
+   .replace(/+/g,"-")
+   .replace(/\//g,"_")
+   .replace(/=/g,"");
+  return API+"/i/"+encoded;
+ } catch(e) {
+  return url;
+ }
+}
+function getImage(item,type) {
+ if(type==="live")
+  return item.stream_icon || item.icon || "";
+ if(type==="movies")
+  return item.stream_icon || item.movie_image || "";
+ return item.cover || item.cover_big || item.stream_icon || "";
+}
+/* ===================================
+   عرض البطاقات
+=================================== */
+function renderItems(type,items) {
+ const gridId = {
+  live:"liveGrid",
+  movies:"movieGrid",
+  series:"seriesGrid"
+ }[type];
+ const grid = document.getElementById(gridId);
+ if(!items.length) {
+  grid.innerHTML='
+لا يوجد محتوى في هذا التصنيف
+';
+  return;
+ }
+ grid.innerHTML="";
+ items.forEach(item=>{
+  const id=String(
+   item.stream_id ?? item.series_id ?? item.id ?? ""
   );
-  Object.entries(params).forEach(([key,value]) => {
-    url.searchParams.set(key,value);
-  });
-  const response = await fetch(url.toString(), {
-    method:"GET",
-    headers:{
-      "Accept":"application/json"
-    }
-  });
-  if(!response.ok){
-    throw new Error("فشل الاتصال بالسيرفر: " + response.status);
-  }
-  const data = await response.json();
-  if(!Array.isArray(data) && typeof data !== "object"){
-    throw new Error("استجابة غير متوقعة من السيرفر");
-  }
-  return data;
+  const name=item.name || item.title || "بدون عنوان";
+  const image=getImage(item,type);
+  const favorite=favorites.some(x=>x.id===id && x.type===type);
+  const card=document.createElement("div");
+  card.className="card";
+  const poster=document.createElement("img");
+  poster.className="poster"+(type==="live"?" channel-poster":"");
+  poster.loading="lazy";
+  poster.alt=name;
+  poster.src=imageUrl(image) ||
+   "https://placehold.co/300x450/20202b/ffffff?text=AlameeereTv";
+  poster.onerror=()=>{
+   poster.src="https://placehold.co/300x450/20202b/ffffff?text=AlameeereTv";
+  };
+  const fav=document.createElement("button");
+  fav.className="fav"+(favorite?" selected":"");
+  fav.textContent=favorite?"♥":"♡";
+  fav.onclick=e=>{
+   e.stopPropagation();
+   toggleFav(item,type);
+   fav.classList.toggle("selected");
+   fav.textContent=fav.classList.contains("selected")?"♥":"♡";
+  };
+  const info=document.createElement("div");
+  info.className="card-info";
+  const title=document.createElement("div");
+  title.className="card-title";
+  title.textContent=name;
+  const sub=document.createElement("div");
+  sub.className="card-sub";
+  sub.textContent=type==="live"?"● قناة مباشرة":
+   item.category_name || (type==="movies"?"فيلم":"مسلسل");
+  info.append(title,sub);
+  card.append(poster,fav,info);
+  card.onclick=()=>{
+   if(type==="series") openSeries(item);
+   else play(item,type);
+  };
+  grid.appendChild(card);
+ });
 }
-/* =====================================
-   تحميل البيانات
-===================================== */
-async function loadAll(){
-  try{
-    const results = await Promise.allSettled([
-      apiRequest({action:"get_live_streams"}),
-      apiRequest({action:"get_vod_streams"}),
-      apiRequest({action:"get_series"})
-    ]);
-    const names = ["القنوات","الأفلام","المسلسلات"];
-    results.forEach((result,index)=>{
-      if(result.status === "fulfilled"){
-        const data = result.value;
-        if(index === 0 && Array.isArray(data)){
-          liveChannels = data;
-          renderItems(liveChannels,"liveGrid","live");
-        }
-        if(index === 1 && Array.isArray(data)){
-          movies = data;
-          renderItems(movies,"moviesGrid","movie");
-        }
-        if(index === 2 && Array.isArray(data)){
-          series = data;
-          renderItems(series,"seriesGrid","series");
-        }
-      }else{
-        const grid = [
-          "liveGrid",
-          "moviesGrid",
-          "seriesGrid"
-        ][index];
-        document.getElementById(grid).innerHTML =
-          '
-تعذر تحميل '+names[index]+
-          '. تحقق من مسار API المدعوم في Worker.
+/* ===================================
+   التصنيفات
+=================================== */
+function renderCategories(type,categories) {
+ const elementId={
+  live:"liveCategories",
+  movie:"movieCategories",
+  series:"seriesCategories"
+ }[type];
+ const el=document.getElementById(elementId);
+ el.innerHTML="";
+ const all=document.createElement("button");
+ all.textContent="الكل";
+ all.className="active";
+ all.onclick=()=>selectCategory(type,"all",all);
+ el.appendChild(all);
+ categories.forEach(cat=>{
+  const btn=document.createElement("button");
+  btn.textContent=cat.category_name || cat.name || "تصنيف";
+  btn.onclick=()=>selectCategory(
+   type,
+   cat.category_id,
+   btn
+  );
+  el.appendChild(btn);
+ });
+}
+async function selectCategory(type,id,button) {
+ const section=type==="live"?"live":
+  type==="movie"?"movies":"series";
+ const action={
+  live:"get_live_streams",
+  movie:"get_vod_streams",
+  series:"get_series"
+ }[type];
+ const gridId={
+  live:"liveGrid",
+  movie:"movieGrid",
+  series:"seriesGrid"
+ }[type];
+ document.getElementById(gridId).innerHTML=
+  '
+جاري تحميل التصنيف...
 ';
-        console.error(result.reason);
-      }
-    });
-    updateCounts();
-  }catch(error){
-    console.error(error);
-  }
-}
-/* =====================================
-   عرض المحتوى
-===================================== */
-function renderItems(items,gridId,type){
-  const grid = document.getElementById(gridId);
-  if(!items || !items.length){
-    grid.innerHTML =
-      '
-لا يوجد محتوى متاح حالياً
+ button.parentElement.querySelectorAll("button")
+  .forEach(b=>b.classList.remove("active"));
+ button.classList.add("active");
+ currentCategory[section==="movies"?"movie":section]=String(id);
+ try {
+  const params={};
+  if(id!=="all") params.category_id=id;
+  const data=await api(action,params);
+  if(!Array.isArray(data))
+   throw new Error("بيانات غير صحيحة");
+  DATA[section]=data;
+  renderItems(section,data);
+  updateCounts();
+ } catch(error) {
+  console.error(error);
+  document.getElementById(gridId).innerHTML=
+   '
+تعذر تحميل هذا التصنيف.
 ';
-    return;
-  }
-  grid.innerHTML = "";
-  items.forEach(item=>{
-    const id = String(
-      item.stream_id ??
-      item.series_id ??
-      item.id ??
-      ""
-    );
-    const name = item.name || item.title || "بدون اسم";
-    const image =
-      item.stream_icon ||
-      item.cover ||
-      item.movie_image ||
-      item.cover_big ||
-      "";
-    const category = item.category_name || "";
-    const isFavorite = favorites.some(x=>x.id===id);
-    const card = document.createElement("article");
-    card.className = "item";
-    const poster = document.createElement("img");
-    poster.className = type === "live"
-      ? "poster channel-poster"
-      : "poster";
-    poster.loading = "lazy";
-    poster.alt = name;
-    poster.src = image || "https://placehold.co/300x450/20202a/ffffff?text=AlameeereTv";
-    poster.onerror = ()=>{
-      poster.src = "https://placehold.co/300x450/20202a/ffffff?text=AlameeereTv";
-    };
-    const fav = document.createElement("button");
-    fav.className = "fav";
-    fav.textContent = isFavorite ? "♥" : "♡";
-    fav.onclick = (e)=>{
-      e.stopPropagation();
-      toggleFavorite(item,type);
-      fav.textContent = favorites.some(x=>x.id===id) ? "♥" : "♡";
-    };
-    const details = document.createElement("div");
-    details.className = "item-details";
-    const title = document.createElement("div");
-    title.className = "item-title";
-    title.textContent = name;
-    const subtitle = document.createElement("div");
-    subtitle.className = "item-subtitle";
-    subtitle.textContent =
-      type === "live" ? "● قناة مباشرة" : category;
-    details.append(title,subtitle);
-    card.append(poster,fav,details);
-    card.onclick = ()=>{
-      playItem(item,type);
-    };
-    grid.appendChild(card);
-  });
+ }
 }
-/* =====================================
-   تشغيل المحتوى
-===================================== */
-function playItem(item,type){
-  const id = item.stream_id || item.series_id || item.id;
-  const name = item.name || item.title || "المحتوى";
-  const streamUrl =
-    item.stream_url ||
-    item.direct_source ||
-    item.url ||
-    "";
-  if(!streamUrl){
-    alert(
-      "تم اختيار: "+name+
-      "\nلكن السيرفر لم يرجع رابط تشغيل مباشر.\n"+
-      "يجب توصيل مسار البث الخاص بالـ Worker."
-    );
-    return;
+/* ===================================
+   إنشاء رابط التشغيل
+=================================== */
+async function getStreamUrl(item,type) {
+ const id=item.stream_id || item.id;
+ const kind={
+  live:"live",
+  movies:"movie",
+  series:"series"
+ }[type];
+ if(!id) throw new Error("معرف المحتوى غير موجود");
+ let ext="m3u8";
+ if(type==="movies" || type==="series") {
+  ext=item.container_extension || "mkv";
+ }
+ const result=await request("/api/stream-url",{
+  kind,
+  id,
+  ext
+ });
+ if(!result.url)
+  throw new Error("لم يرجع السيرفر رابط تشغيل");
+ return result.url;
+}
+/* ===================================
+   مشغل الفيديو
+=================================== */
+async function play(item,type) {
+ const name=item.name || item.title || "المشاهدة";
+ document.getElementById("playingTitle").textContent=name;
+ document.getElementById("placeholder").style.display="block";
+ document.getElementById("placeholder").innerHTML=
+  '
+◌
+جاري تجهيز البث...
+';
+ try {
+  const stream=await getStreamUrl(item,type);
+  if(hls) {
+   hls.destroy();
+   hls=null;
   }
-  document.getElementById("playingTitle").textContent = name;
-  document.getElementById("placeholder").style.display = "none";
-  if(hlsInstance){
-    hlsInstance.destroy();
-    hlsInstance = null;
-  }
+  const video=document.getElementById("video");
   video.pause();
   video.removeAttribute("src");
   video.load();
-  if(
-    streamUrl.includes(".m3u8") &&
-    Hls.isSupported()
-  ){
-    hlsInstance = new Hls();
-    hlsInstance.loadSource(streamUrl);
-    hlsInstance.attachMedia(video);
-    hlsInstance.on(Hls.Events.MANIFEST_PARSED,()=>{
-      video.play().catch(()=>{});
-    });
-  }else{
-    video.src = streamUrl;
+  document.getElementById("placeholder").style.display="none";
+  if(stream.includes(".m3u8") && Hls.isSupported()) {
+   hls=new Hls({
+    enableWorker:true,
+    maxBufferLength:30
+   });
+   hls.loadSource(stream);
+   hls.attachMedia(video);
+   hls.on(Hls.Events.MANIFEST_PARSED,()=>{
     video.play().catch(()=>{});
+   });
+   hls.on(Hls.Events.ERROR,(event,data)=>{
+    if(data.fatal) {
+     console.error("HLS Error:",data);
+     document.getElementById("placeholder").style.display="block";
+     document.getElementById("placeholder").innerHTML=
+      '
+تعذر تشغيل البث. حاول مرة أخرى.
+';
+    }
+   });
+  } else {
+   video.src=stream;
+   video.play().catch(()=>{
+    document.getElementById("placeholder").style.display="block";
+    document.getElementById("placeholder").innerHTML=
+     '
+اضغط تشغيل لبدء المشاهدة
+';
+   });
   }
-  document.getElementById("playerScreen")
-    .scrollIntoView({
-      behavior:"smooth",
-      block:"start"
-    });
+  document.getElementById("playerSection")
+   .scrollIntoView({behavior:"smooth",block:"start"});
+ } catch(error) {
+  console.error(error);
+  document.getElementById("placeholder").style.display="block";
+  document.getElementById("placeholder").innerHTML=
+   '
+تعذر الحصول على رابط البث
+';
+ }
 }
-/* =====================================
-   المفضلة
-===================================== */
-function toggleFavorite(item,type){
-  const id = String(
-    item.stream_id ??
-    item.series_id ??
-    item.id
-  );
-  const exists = favorites.some(x=>x.id===id);
-  if(exists){
-    favorites = favorites.filter(x=>x.id!==id);
-  }else{
-    favorites.push({
-      id,
-      type,
-      item
-    });
-  }
-  localStorage.setItem(
-    "alameeere_favorites",
-    JSON.stringify(favorites)
-  );
-}
-function showFavorites(button){
-  currentSection = "favorites";
-  hideSections();
-  const area = document.getElementById("contentArea");
-  area.innerHTML = `
-      <h2>المفضلة ♥</h2>
-  `;
-  const list = favorites.map(x=>x.item);
-  renderItems(
-    list,
-    "favoritesGrid",
-    "live"
-  );
-}
-/* =====================================
-   التنقل بين الأقسام
-===================================== */
-function hideSections(){
-  document.getElementById("liveSection").style.display = "none";
-  document.getElementById("moviesSection").style.display = "none";
-  document.getElementById("seriesSection").style.display = "none";
-}
-function showSection(section,button){
-  const area = document.getElementById("contentArea");
-  if(!document.getElementById("liveSection")){
-    location.reload();
-    return;
-  }
-  hideSections();
-  currentSection = section;
-  if(section === "home"){
-    document.getElementById("liveSection").style.display = "block";
-    document.getElementById("moviesSection").style.display = "block";
-    document.getElementById("seriesSection").style.display = "block";
-  }
-  if(section === "live"){
-    document.getElementById("liveSection").style.display = "block";
-  }
-  if(section === "movies"){
-    document.getElementById("moviesSection").style.display = "block";
-  }
-  if(section === "series"){
-    document.getElementById("seriesSection").style.display = "block";
-  }
-  if(button){
-    document.querySelectorAll(".tabs button").forEach(btn=>{
-      btn.classList.remove("active");
-    });
-    button.classList.add("active");
-  }
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
+/* ===================================
+   المسلسلات والحلقات
+=================================== */
+async function openSeries(item) {
+ const id=item.series_id || item.id;
+ document.getElementById("seriesName").textContent=
+  item.name || "المسلسل";
+ document.getElementById("seriesDetails").innerHTML=
+  '
+جاري تحميل المواسم والحلقات...
+';
+ document.getElementById("seriesModal").classList.add("show");
+ try {
+  const result=await api("get_series_info",{
+   series_id:id
   });
+  const episodes=result.episodes || {};
+  const details=result.info || {};
+  const container=document.getElementById("seriesDetails");
+  container.innerHTML="";
+  if(result.info?.plot) {
+   const plot=document.createElement("p");
+   plot.style.color="#aaa";
+   plot.textContent=details.plot;
+   container.appendChild(plot);
+  }
+  const seasons=Object.keys(episodes);
+  if(!seasons.length) {
+   container.textContent="لم يتم العثور على حلقات.";
+   return;
+  }
+  seasons.forEach((season,index)=>{
+   const btn=document.createElement("button");
+   btn.className="season-btn";
+   btn.textContent="الموسم "+season;
+   const list=document.createElement("div");
+   list.style.display=index===0?"block":"none";
+   btn.onclick=()=>{
+    list.style.display=list.style.display==="none"?"block":"none";
+   };
+   const items=Array.isArray(episodes[season])
+    ?episodes[season]:[];
+   items.forEach(ep=>{
+    const row=document.createElement("div");
+    row.className="episode";
+    const title=document.createElement("span");
+    title.textContent=ep.title || ep.name || "حلقة";
+    const playBtn=document.createElement("button");
+    playBtn.className="red-btn";
+    playBtn.textContent="▶ تشغيل";
+    playBtn.style.padding="8px 12px";
+    playBtn.onclick=()=>{
+     closeModal();
+     play(ep,"series");
+    };
+    row.append(title,playBtn);
+    list.appendChild(row);
+   });
+   container.append(btn,list);
+  });
+ } catch(error) {
+  console.error(error);
+  document.getElementById("seriesDetails").textContent=
+   "تعذر جلب تفاصيل المسلسل.";
+ }
 }
-/* =====================================
+function closeModal() {
+ document.getElementById("seriesModal").classList.remove("show");
+}
+/* ===================================
+   المفضلة
+=================================== */
+function toggleFav(item,type) {
+ const id=String(item.stream_id ?? item.series_id ?? item.id);
+ const index=favorites.findIndex(x=>x.id===id && x.type===type);
+ if(index>=0) favorites.splice(index,1);
+ else favorites.push({id,type,item});
+ localStorage.setItem(
+  "alameeere_favorites",
+  JSON.stringify(favorites)
+ );
+}
+function showFav() {
+ hideSections();
+ document.getElementById("favoritesSection").style.display="block";
+ const grid=document.getElementById("favoritesGrid");
+ grid.innerHTML="";
+ if(!favorites.length) {
+  grid.innerHTML='
+قائمتك فارغة حالياً
+';
+  return;
+ }
+ favorites.forEach(f=>{
+  const item=f.item;
+  const name=item.name || item.title || "";
+  const card=document.createElement("div");
+  card.className="card";
+  const img=document.createElement("img");
+  img.className="poster";
+  img.src=imageUrl(getImage(item,f.type));
+  const info=document.createElement("div");
+  info.className="card-info";
+  const title=document.createElement("div");
+  title.className="card-title";
+  title.textContent=name;
+  info.append(title);
+  card.append(img,info);
+  card.onclick=()=>{
+   if(f.type==="series") openSeries(item);
+   else play(item,f.type);
+  };
+  grid.append(card);
+ });
+}
+/* ===================================
    البحث
-===================================== */
-function toggleSearch(){
-  document.getElementById("searchBox")
-    .classList.toggle("show");
+=================================== */
+function toggleSearch() {
+ const box=document.getElementById("searchWrap");
+ box.classList.toggle("show");
+ if(box.classList.contains("show"))
   document.getElementById("searchInput").focus();
 }
-function searchContent(query){
-  const q = query.trim().toLowerCase();
-  if(!q){
-    showSection("home");
-    return;
-  }
-  hideSections();
-  const all = [
-    ...liveChannels.map(x=>({...x,_type:"live"})),
-    ...movies.map(x=>({...x,_type:"movie"})),
-    ...series.map(x=>({...x,_type:"series"}))
-  ];
-  const filtered = all.filter(item=>
-    (item.name || item.title || "")
-      .toLowerCase()
-      .includes(q)
-  );
-  document.getElementById("contentArea").innerHTML = `
-      <h2>نتائج البحث</h2>
-${filtered.length} نتيجة
-  `;
-  const grid = document.getElementById("searchResults");
-  if(!filtered.length){
-    grid.innerHTML = '
+function search(value) {
+ const q=value.trim().toLowerCase();
+ hideSections();
+ document.getElementById("searchSection").style.display="block";
+ const all=[
+  ...DATA.live.map(x=>({...x,_type:"live"})),
+  ...DATA.movies.map(x=>({...x,_type:"movies"})),
+  ...DATA.series.map(x=>({...x,_type:"series"}))
+ ];
+ const results=all.filter(item=>
+  (item.name || item.title || "").toLowerCase().includes(q)
+ );
+ const grid=document.getElementById("searchGrid");
+ grid.innerHTML="";
+ if(!q) {
+  grid.innerHTML='
+اكتب اسم المحتوى للبحث
+';
+  return;
+ }
+ if(!results.length) {
+  grid.innerHTML='
 لا توجد نتائج
 ';
-    return;
-  }
-  filtered.forEach(item=>{
-    const type = item._type;
-    const copy = {...item};
-    delete copy._type;
-    const temp = document.createElement("div");
-    temp.className = "item";
-    const img = document.createElement("img");
-    img.className = "poster";
-    img.src = item.stream_icon || item.cover || item.movie_image ||
-      "https://placehold.co/300x450/20202a/ffffff?text=AlameeereTv";
-    const details = document.createElement("div");
-    details.className = "item-details";
-    const title = document.createElement("div");
-    title.className = "item-title";
-    title.textContent = item.name || item.title || "";
-    details.append(title);
-    temp.append(img,details);
-    temp.onclick = ()=>playItem(copy,type);
-    grid.append(temp);
+  return;
+ }
+ results.forEach(item=>{
+  const type=item._type;
+  const card=document.createElement("div");
+  card.className="card";
+  const img=document.createElement("img");
+  img.className="poster";
+  img.src=imageUrl(getImage(item,type));
+  const info=document.createElement("div");
+  info.className="card-info";
+  const title=document.createElement("div");
+  title.className="card-title";
+  title.textContent=item.name || item.title;
+  info.append(title);
+  card.append(img,info);
+  card.onclick=()=>{
+   if(type==="series") openSeries(item);
+   else play(item,type);
+  };
+  grid.append(card);
+ });
+}
+/* ===================================
+   التنقل
+=================================== */
+function hideSections() {
+ [
+  "liveSection",
+  "moviesSection",
+  "seriesSection",
+  "favoritesSection",
+  "searchSection"
+ ].forEach(id=>{
+  document.getElementById(id).style.display="none";
+ });
+}
+function go(section,button) {
+ hideSections();
+ if(section==="home") {
+  ["liveSection","moviesSection","seriesSection"].forEach(id=>{
+   document.getElementById(id).style.display="block";
   });
+ }
+ if(section==="live")
+  document.getElementById("liveSection").style.display="block";
+ if(section==="movies")
+  document.getElementById("moviesSection").style.display="block";
+ if(section==="series")
+  document.getElementById("seriesSection").style.display="block";
+ document.querySelectorAll(".tabs button").forEach(b=>{
+  b.classList.remove("active");
+ });
+ if(button) button.classList.add("active");
+ window.scrollTo({top:0,behavior:"smooth"});
 }
-/* =====================================
+/* ===================================
    العدادات
-===================================== */
-function updateCounts(){
-  document.getElementById("liveCount").textContent =
-    liveChannels.length + " قناة";
-  document.getElementById("moviesCount").textContent =
-    movies.length + " فيلم";
-  document.getElementById("seriesCount").textContent =
-    series.length + " مسلسل";
+=================================== */
+function updateCounts() {
+ document.getElementById("liveCount").textContent=
+  DATA.live.length+" قناة";
+ document.getElementById("movieCount").textContent=
+  DATA.movies.length+" فيلم";
+ document.getElementById("seriesCount").textContent=
+  DATA.series.length+" مسلسل";
 }
-/* =====================================
-   بدء الموقع
-===================================== */
-loadAll();
+/* ===================================
+   تشغيل الموقع
+=================================== */
+initialize();
 </script>
 </body>
 </html>
