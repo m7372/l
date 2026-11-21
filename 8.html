@@ -2,9 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#080808">
-<meta name="description" content="AlameeereTv - منصة القنوات والأفلام والمسلسلات">
+<meta name="description" content="AlameeereTv - القنوات والأفلام والمسلسلات">
 <title>AlameeereTv</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,16 +18,17 @@
  --muted:#aaa;
 }
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
 body{
  margin:0;
  background:var(--bg);
- color:#fff;
+ color:white;
  font-family:Cairo,sans-serif;
 }
-button,input{font-family:inherit}
+button,input{font:inherit}
 button{cursor:pointer}
 header{
- min-height:65px;
+ min-height:66px;
  position:sticky;
  top:0;
  z-index:30;
@@ -36,18 +37,19 @@ header{
  justify-content:space-between;
  padding:0 4%;
  background:#090909f5;
- border-bottom:1px solid #222;
+ border-bottom:1px solid #252525;
 }
 .logo{
  font-size:23px;
  font-weight:900;
  direction:ltr;
+ white-space:nowrap;
 }
 .logo span{color:var(--red)}
 nav{
  display:flex;
  align-items:center;
- gap:12px;
+ gap:8px;
 }
 nav button{
  background:none;
@@ -55,9 +57,13 @@ nav button{
  color:#ccc;
  font-size:14px;
  padding:9px;
+ border-radius:7px;
 }
 nav button.active,
-nav button:hover{color:var(--red)}
+nav button:hover{
+ color:white;
+ background:#291012;
+}
 main{
  max-width:1450px;
  margin:auto;
@@ -77,8 +83,8 @@ video{
 }
 .player-info{
  display:flex;
- align-items:center;
  justify-content:space-between;
+ align-items:center;
  padding:10px 3px;
 }
 .live{color:#ff3030;font-size:13px}
@@ -157,8 +163,7 @@ video{
  position:relative;
  transition:transform .2s,border-color .2s;
 }
-.item:hover,
-.item:focus{
+.item:hover,.item:focus{
  transform:translateY(-3px);
  border-color:var(--red);
  outline:none;
@@ -182,8 +187,8 @@ video{
  color:white;
  border:0;
  border-radius:50%;
- width:34px;
- height:34px;
+ width:36px;
+ height:36px;
  font-size:19px;
 }
 .empty{
@@ -213,7 +218,7 @@ input:focus-visible,
 @media(max-width:600px){
  header{padding:0 3%;min-height:60px}
  .logo{font-size:18px}
- nav{gap:3px}
+ nav{gap:2px}
  nav button{font-size:11px;padding:7px 4px}
  main{padding:12px 3%}
  .hero{min-height:150px;padding:18px}
@@ -222,27 +227,29 @@ input:focus-visible,
  .item-name{font-size:11px;padding:7px}
  .section-head h2{font-size:16px}
 }
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{
+  scroll-behavior:auto!important;
+  transition:none!important;
+ }
+}
 </style>
 </head>
 <body>
 <header>
-Alameeere
-Tv
- <nav>
-  <button class="active" data-section="live"
-   onclick="loadSection('live')">الرئيسية</button>
-  <button data-section="live"
-   onclick="loadSection('live')">القنوات</button>
-  <button data-section="movie"
-   onclick="loadSection('movie')">الأفلام</button>
-  <button data-section="series"
-   onclick="loadSection('series')">المسلسلات</button>
+ALAMEEERE
+TV
+ <nav id="navigation">
+  <button class="active" data-section="live">الرئيسية</button>
+  <button data-section="live">القنوات</button>
+  <button data-section="movie">الأفلام</button>
+  <button data-section="series">المسلسلات</button>
+  <button data-section="favorites">♥ المفضلة</button>
  </nav>
 </header>
 <main>
 <section class="player-box">
- <video id="player" controls playsinline
-  preload="none"></video>
+ <video id="player" controls playsinline preload="none"></video>
   <strong id="playingTitle">AlameeereTv
 ● LIVE
 </section>
@@ -253,9 +260,11 @@ Tv
   تنزيل تطبيق AlameeereTv
  </button>
 </section>
-<input id="search" class="search"
+<input
+ id="search"
+ class="search"
  placeholder="ابحث عن قناة أو فيلم أو مسلسل..."
- autocomplete="off">
+ autocomplete="off"
  <h2 id="sectionTitle">القنوات المباشرة</h2>
 0 عنصر
 <section id="items" class="grid">
@@ -270,24 +279,32 @@ Tv
 "use strict";
 /* إعداد السيرفر الأصلي */
 const API = "https://b.m737217130.workers.dev";
+/* حالة التطبيق */
 let section = "live";
 let items = [];
 let categories = [];
 let selectedCategory = "all";
-let favorites = new Set();
+let favorites = new Map();
+let hls = null;
+let installPrompt = null;
+let requestNumber = 0;
+let favoritesRequest = false;
 const player = document.getElementById("player");
 const itemsBox = document.getElementById("items");
 const categoriesBox = document.getElementById("categories");
 const searchInput = document.getElementById("search");
-let hls = null;
-let installPrompt = null;
-let requestNumber = 0;
+const titles = {
+ live:"القنوات المباشرة",
+ movie:"الأفلام",
+ series:"المسلسلات",
+ favorites:"المفضلة"
+};
 const blocked = [
  "xxx","porn","adult","erotic","sex",
  "إباحي","اباحي","جنس","للكبار",
  "إباحية","اباحية"
 ];
-/* منع المحتوى غير المناسب */
+/* فلترة المحتوى */
 function isAllowed(item){
  const text = (
   (item.name || "") + " " +
@@ -303,16 +320,39 @@ async function api(path){
  }
  return response.json();
 }
-/* تحميل الأقسام */
+/* حفظ المفضلة */
+function saveFavorites(){
+ try{
+  localStorage.setItem(
+   "alameeere_favorites",
+   JSON.stringify([...favorites.entries()])
+  );
+ }catch(error){
+  console.warn("تعذر حفظ المفضلة",error);
+ }
+}
+/* تحميل المفضلة */
+function loadFavorites(){
+ try{
+  const saved = JSON.parse(
+   localStorage.getItem("alameeere_favorites") || "[]"
+  );
+  favorites = new Map(
+   saved.filter(entry =>
+    Array.isArray(entry) &&
+    entry.length === 2
+   )
+  );
+ }catch(error){
+  favorites = new Map();
+ }
+}
+/* تغيير القسم */
 async function loadSection(type){
  section = type;
  selectedCategory = "all";
+ searchInput.value = "";
  const currentRequest = ++requestNumber;
- const titles = {
-  live:"القنوات المباشرة",
-  movie:"الأفلام",
-  series:"المسلسلات"
- };
  document.getElementById("sectionTitle").textContent =
   titles[type] || "المحتوى";
  document.querySelectorAll("nav button").forEach(button=>{
@@ -326,6 +366,11 @@ async function loadSection(type){
   '
 جاري تحميل المحتوى...
 ';
+ if(type === "favorites"){
+  await loadFavoriteItems(currentRequest);
+  return;
+ }
+ favoritesRequest = false;
  try{
   const data = await api(
    "/api/catalog?type=" + encodeURIComponent(type)
@@ -335,26 +380,68 @@ async function loadSection(type){
    ? data.items.filter(isAllowed)
    : [];
   categories = Array.isArray(data.categories)
-   ? data.categories.filter(cat => {
-      return !blocked.some(word =>
+   ? data.categories.filter(cat =>
+      !blocked.some(word =>
        String(cat.name || "").toLowerCase().includes(word)
-      );
-     })
+      )
+     )
    : [];
   renderCategories();
   renderItems();
  }catch(error){
   if(currentRequest !== requestNumber) return;
-  itemsBox.innerHTML =
-   '
-تعذر الاتصال بالسيرفر. حاول مرة أخرى.
-';
+  showError("تعذر الاتصال بالسيرفر. حاول مرة أخرى.");
   console.error(error);
  }
+}
+/* تحميل محتويات المفضلة من الأقسام */
+async function loadFavoriteItems(currentRequest){
+ favoritesRequest = true;
+ try{
+  const types = ["live","movie","series"];
+  const results = await Promise.all(
+   types.map(type =>
+    api("/api/catalog?type=" + type)
+   )
+  );
+  if(currentRequest !== requestNumber) return;
+  const allItems = [];
+  results.forEach((data,index)=>{
+   if(Array.isArray(data.items)){
+    data.items.forEach(item=>{
+     if(isAllowed(item)){
+      allItems.push({
+       ...item,
+       type:types[index]
+      });
+     }
+    });
+   }
+  });
+  items = allItems.filter(item =>
+   favorites.has(String(item.id))
+  );
+  categories = [];
+  renderCategories();
+  renderItems();
+ }catch(error){
+  if(currentRequest !== requestNumber) return;
+  showError("تعذر تحميل المفضلة.");
+  console.error(error);
+ }
+}
+/* رسائل الخطأ */
+function showError(message){
+ itemsBox.innerHTML = "";
+ const div = document.createElement("div");
+ div.className = "empty";
+ div.textContent = message;
+ itemsBox.appendChild(div);
 }
 /* التصنيفات */
 function renderCategories(){
  categoriesBox.innerHTML = "";
+ if(section === "favorites") return;
  addCategory("all","الكل");
  categories.forEach(cat=>{
   addCategory(String(cat.id),cat.name);
@@ -363,7 +450,7 @@ function renderCategories(){
 function addCategory(id,name){
  const button = document.createElement("button");
  button.className =
-  "cat" + (selectedCategory === id ? " selected":"");
+  "cat" + (selectedCategory === id ? " selected" : "");
  button.textContent = name;
  button.onclick = ()=>{
   selectedCategory = id;
@@ -387,10 +474,10 @@ function renderItems(){
   filtered.length + " عنصر";
  itemsBox.innerHTML = "";
  if(!filtered.length){
-  itemsBox.innerHTML =
-   '
-لا توجد نتائج حالياً
-';
+  const empty = document.createElement("div");
+  empty.className = "empty";
+  empty.textContent = "لا توجد نتائج حالياً";
+  itemsBox.appendChild(empty);
   return;
  }
  const fragment = document.createDocumentFragment();
@@ -419,9 +506,7 @@ function renderItems(){
   fav.setAttribute("aria-label","إضافة للمفضلة");
   fav.onclick = event=>{
    event.stopPropagation();
-   toggleFavorite(item.id);
-   fav.textContent =
-    favorites.has(String(item.id)) ? "♥" : "♡";
+   toggleFavorite(item);
   };
   card.append(img,name,fav);
   card.onclick = ()=>playItem(item);
@@ -436,127 +521,201 @@ function renderItems(){
  itemsBox.appendChild(fragment);
 }
 /* المفضلة */
-function toggleFavorite(id){
- const key = String(id);
+function toggleFavorite(item){
+ const key = String(item.id);
  if(favorites.has(key)){
   favorites.delete(key);
  }else{
-  favorites.add(key);
+  favorites.set(key,{
+   ...item,
+   type:item.type || section
+  });
  }
- try{
-  localStorage.setItem(
-   "alameeere_favorites",
-   JSON.stringify([...favorites])
-  );
- }catch(error){
-  console.warn("تعذر حفظ المفضلة",error);
+ saveFavorites();
+ if(section === "favorites"){
+  loadSection("favorites");
+ }else{
+  renderItems();
  }
 }
 /* اختيار المحتوى */
 function playItem(item){
  document.getElementById("playingTitle").textContent =
   item.name || "AlameeereTv";
- playStream(item.id);
+ const streamType = item.type || section;
+ playStream(item.id,streamType);
+ document.querySelector(".player-box").scrollIntoView({
+  behavior:"smooth",
+  block:"start"
+ });
+}
+/* إيقاف المشغل */
+function stopPlayer(){
+ player.pause();
+ if(hls){
+  hls.destroy();
+  hls = null;
+ }
+ player.removeAttribute("src");
+ player.load();
 }
 /* تشغيل HLS */
-async function playStream(id){
+async function playStream(id,type){
  try{
+  stopPlayer();
   const data = await api(
    "/api/stream?type=" +
-   encodeURIComponent(section) +
+   encodeURIComponent(type) +
    "&id=" + encodeURIComponent(id)
   );
   if(!data.url){
    throw new Error("Stream URL missing");
   }
-  if(hls){
-   hls.destroy();
-   hls = null;
-  }
-  player.pause();
-  player.removeAttribute("src");
-  player.load();
   if(typeof Hls !== "undefined" && Hls.isSupported()){
    hls = new Hls({
     enableWorker:true,
     lowLatencyMode:true,
     backBufferLength:30
    });
-   hls.loadSource(data.url);
-   hls.attachMedia(player);
-   hls.on(Hls.Events.MANIFEST_PARSED,()=>{
-    player.play().catch(()=>{});
-   });
-   hls.on(Hls.Events.ERROR,(event,data)=>{
-    if(data.fatal){
-     console.error("HLS error:",data);
+   hls.on(Hls.Events.ERROR,(event,error)=>{
+    if(!error.fatal) return;
+    console.error("HLS error:",error);
+    if(error.type === Hls.ErrorTypes.NETWORK_ERROR){
+     hls.startLoad();
+    }else if(error.type === Hls.ErrorTypes.MEDIA_ERROR){
+     hls.recoverMediaError();
+    }else{
+     stopPlayer();
+     showPlayerError();
     }
    });
+   hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+    player.play().catch(error=>{
+     console.warn("Play requires user interaction",error);
+    });
+   });
+   hls.loadSource(data.url);
+   hls.attachMedia(player);
   }else if(
    player.canPlayType("application/vnd.apple.mpegurl")
   ){
    player.src = data.url;
-   player.play().catch(()=>{});
+   player.play().catch(error=>{
+    console.warn(error);
+   });
   }else{
    throw new Error("HLS not supported");
   }
  }catch(error){
-  alert("تعذر تشغيل المحتوى. تحقق من السيرفر.");
   console.error(error);
+  showPlayerError();
  }
 }
+function showPlayerError(){
+ document.getElementById("playingTitle").textContent =
+  "تعذر تشغيل المحتوى";
+}
+/* البحث */
+searchInput.addEventListener("input",renderItems);
+/* أزرار التنقل */
+document.getElementById("navigation").addEventListener(
+ "click",
+ event=>{
+  const button = event.target.closest("button[data-section]");
+  if(button){
+   loadSection(button.dataset.section);
+  }
+ }
+);
 /* التحكم بالريموت */
 document.addEventListener("keydown",event=>{
- if(
-  ["INPUT","TEXTAREA"].includes(
-   document.activeElement.tagName
-  )
- ) return;
+ const key = event.key;
+ const active = document.activeElement;
+ if(active === searchInput) return;
  const cards = [...document.querySelectorAll(".item")];
- const current = cards.indexOf(document.activeElement);
- if(event.key === "ArrowRight" ||
-    event.key === "ArrowLeft"){
-  if(cards.length && current >= 0){
+ const navButtons = [
+  ...document.querySelectorAll("nav button")
+ ];
+ const currentCard = cards.indexOf(active);
+ const currentNav = navButtons.indexOf(active);
+ if(key === "ArrowRight" || key === "ArrowLeft"){
+  if(currentCard >= 0){
    event.preventDefault();
-   const direction =
-    event.key === "ArrowLeft" ? 1 : -1;
-   cards[
-    Math.max(0,Math.min(cards.length-1,current+direction))
+   const step = key === "ArrowLeft" ? 1 : -1;
+   const next = Math.max(
+    0,
+    Math.min(cards.length-1,currentCard+step)
+   );
+   cards[next].focus();
+  }else if(currentNav >= 0){
+   event.preventDefault();
+   const step = key === "ArrowLeft" ? 1 : -1;
+   navButtons[
+    Math.max(0,Math.min(navButtons.length-1,currentNav+step))
    ].focus();
   }
  }
- if(event.key === "ArrowDown" && cards.length){
-  event.preventDefault();
-  cards[Math.min(cards.length-1,Math.max(0,current+1))].focus();
+ if(key === "ArrowDown"){
+  if(currentNav >= 0){
+   event.preventDefault();
+   if(cards.length){
+    cards[0].focus();
+   }else{
+    searchInput.focus();
+   }
+  }else if(currentCard >= 0){
+   event.preventDefault();
+   const next = Math.min(
+    cards.length-1,
+    currentCard + getGridColumns()
+   );
+   cards[next].focus();
+  }
  }
- if(event.key === "ArrowUp" && cards.length){
-  event.preventDefault();
-  cards[Math.max(0,current-1)].focus();
+ if(key === "ArrowUp"){
+  if(currentCard >= 0){
+   event.preventDefault();
+   const next = currentCard - getGridColumns();
+   if(next < 0){
+    navButtons[0].focus();
+   }else{
+    cards[next].focus();
+   }
+  }
  }
- if(event.key === "Escape" || event.key === "Backspace"){
-  if(document.activeElement === player){
-   player.pause();
+ if(key === "Escape" || key === "Backspace"){
+  if(active !== player){
+   event.preventDefault();
+   if(section !== "live"){
+    loadSection("live");
+   }else{
+    searchInput.blur();
+    player.focus();
+   }
   }
  }
 });
-/* البحث */
-searchInput.addEventListener("input",renderItems);
-/* تحميل المفضلة */
-try{
- favorites = new Set(
-  JSON.parse(
-   localStorage.getItem("alameeere_favorites") || "[]"
+/* عدد أعمدة الشبكة */
+function getGridColumns(){
+ const grid = document.querySelector(".grid");
+ if(!grid) return 1;
+ const style = getComputedStyle(grid);
+ return Math.max(
+  1,
+  Math.round(
+   grid.clientWidth /
+   (parseFloat(style.gridTemplateColumns.split(" ")[0]) || 145)
   )
  );
-}catch(error){
- favorites = new Set();
 }
+/* تحميل المفضلة عند البداية */
+loadFavorites();
 /* تثبيت التطبيق عند دعم المتصفح */
 window.addEventListener("beforeinstallprompt",event=>{
  event.preventDefault();
  installPrompt = event;
- const button = document.getElementById("installBtn");
- button.style.display = "block";
+ document.getElementById("installBtn").style.display =
+  "block";
 });
 document.getElementById("installBtn").onclick = async ()=>{
  if(!installPrompt){
@@ -565,10 +724,12 @@ document.getElementById("installBtn").onclick = async ()=>{
  }
  await installPrompt.prompt();
  installPrompt = null;
- document.getElementById("installBtn").style.display = "none";
+ document.getElementById("installBtn").style.display =
+  "none";
 };
 window.addEventListener("appinstalled",()=>{
- document.getElementById("installBtn").style.display = "none";
+ document.getElementById("installBtn").style.display =
+  "none";
 });
 /* بدء التطبيق */
 loadSection("live");
