@@ -84,8 +84,15 @@
 
     /* Floating control bar animation */
     .controls-overlay {
-      transition: opacity 0.25s ease-in-out;
+      transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
     }
+    #playerContainer.controls-hidden #topOverlayControls {
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+    }
+    #playerContainer.controls-hidden { cursor: none; }
+    #customSubOverlay { z-index: 25; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col pb-16">
@@ -165,29 +172,77 @@
         </div>
 
         <!-- Subtitles Selection Modal (Inside PlayerContainer so it appears in Fullscreen!) -->
-        <div id="subsModal" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 pointer-events-auto">
-          <div class="bg-[#121212] border border-neutral-700 rounded-2xl w-full max-w-sm p-4 shadow-2xl flex flex-col gap-3">
+        <div id="subsModal" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4 pointer-events-auto">
+          <div class="bg-[#121212] border border-neutral-700 rounded-2xl w-full max-w-sm max-h-[90%] p-4 shadow-2xl flex flex-col gap-3 overflow-y-auto text-xs">
             <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
               <div class="flex items-center gap-2">
                 <span class="text-lg">💬</span>
-                <h3 class="font-bold text-sm text-white" id="labelSubsModalTitle">خيارات الترجمة</h3>
+                <h3 class="font-bold text-sm text-white" id="labelSubsModalTitle">خيارات ومزامنة الترجمة</h3>
               </div>
               <button onclick="closeSubsModal()" class="text-neutral-400 hover:text-white text-base px-2 py-1 rounded-lg">✕</button>
             </div>
             
-            <div id="subsOptionsList" class="flex flex-col gap-1.5 max-h-56 overflow-y-auto">
+            <!-- Stream Subtitle Tracks -->
+            <div class="text-[11px] text-neutral-400 font-medium">المسارات المتوفرة في البث:</div>
+            <div id="subsOptionsList" class="flex flex-col gap-1.5 max-h-32 overflow-y-auto">
               <!-- Rendered dynamically -->
             </div>
 
-            <!-- Custom Subtitle File Loader -->
-            <div class="border-t border-neutral-800 pt-2 flex flex-col gap-2">
-              <label class="text-[11px] text-neutral-400 flex items-center justify-between cursor-pointer bg-neutral-900 hover:bg-neutral-800 p-2 rounded-lg border border-neutral-800 transition">
-                <span>📁 إضافة ملف ترجمة من جهازك (.vtt/.srt)</span>
-                <input type="file" id="localSubInput" accept=".vtt,.srt" onchange="loadLocalSubtitle(this)" class="hidden">
-              </label>
-              <button onclick="closeSubsModal()" class="self-end bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs px-3 py-1 rounded-lg">إغلاق</button>
+            <!-- Custom Subtitle File Upload Section -->
+            <div class="border-t border-neutral-800 pt-2.5 flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-neutral-200 text-[11px]">📁 ملف ترجمة من جهازك:</span>
+                <span id="loadedSubBadge" class="text-[10px] text-amber-400 font-mono truncate max-w-[140px]">لا يوجد ملف</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <label class="flex-1 text-[11px] text-neutral-200 flex items-center justify-center gap-1.5 cursor-pointer bg-neutral-900 hover:bg-neutral-800 p-2 rounded-lg border border-neutral-700 transition active:scale-95 shadow">
+                  <span>📂 اختيار ملف (.srt / .vtt)</span>
+                  <input type="file" id="localSubInput" accept=".vtt,.srt" onchange="loadLocalSubtitle(this)" class="hidden">
+                </label>
+                <button id="clearSubBtn" onclick="clearCustomSubtitle()" class="hidden text-[11px] bg-red-950/70 hover:bg-red-900 text-red-300 border border-red-800 px-2.5 py-2 rounded-lg transition" title="إلغاء الترجمة المرفوعة">
+                  🗑️ إلغاء
+                </button>
+              </div>
             </div>
+
+            <!-- Subtitle Delay / Advance (تقديم وتأخير الترجمة) -->
+            <div class="border-t border-neutral-800 pt-2.5 flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <span class="font-semibold text-neutral-200 text-[11px]">⏱️ مزامنة توقيت الترجمة:</span>
+                <span id="subOffsetDisplay" class="text-[11px] font-mono font-bold text-amber-400 bg-black/60 px-2 py-0.5 rounded border border-neutral-800">0.0 ثانية (مطابق)</span>
+              </div>
+              
+              <div class="grid grid-cols-5 gap-1.5 text-center font-mono">
+                <button onclick="adjustSubOffset(-1.0)" class="bg-[#1e1e1e] hover:bg-neutral-800 text-neutral-200 py-1.5 rounded-lg border border-neutral-700 active:scale-95" title="تأخير ثانية كاملة">-1.0s</button>
+                <button onclick="adjustSubOffset(-0.5)" class="bg-[#1e1e1e] hover:bg-neutral-800 text-neutral-200 py-1.5 rounded-lg border border-neutral-700 active:scale-95" title="تأخير نصف ثانية">-0.5s</button>
+                <button onclick="resetSubOffset()" class="bg-neutral-800 hover:bg-neutral-700 text-white py-1.5 rounded-lg border border-neutral-600 font-bold active:scale-95" title="إعادة ضبط">0.0s</button>
+                <button onclick="adjustSubOffset(0.5)" class="bg-[#1e1e1e] hover:bg-neutral-800 text-neutral-200 py-1.5 rounded-lg border border-neutral-700 active:scale-95" title="تقديم نصف ثانية">+0.5s</button>
+                <button onclick="adjustSubOffset(1.0)" class="bg-[#1e1e1e] hover:bg-neutral-800 text-neutral-200 py-1.5 rounded-lg border border-neutral-700 active:scale-95" title="تقديم ثانية كاملة">+1.0s</button>
+              </div>
+
+              <div class="flex items-center justify-between text-[10px] text-neutral-500 px-1">
+                <span>◀ تأخير (- تظهر متأخرة)</span>
+                <span>تقديم (+ تظهر أسرع) ▶</span>
+              </div>
+            </div>
+
+            <!-- Subtitle Font Size -->
+            <div class="border-t border-neutral-800 pt-2 flex items-center justify-between text-[11px] text-neutral-400">
+              <span>حجم الخط:</span>
+              <div class="flex items-center gap-1">
+                <button onclick="setSubFontSize(sm)" id="btnSubSm" class="sub-size-btn px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 hover:bg-neutral-700">صغير</button>
+                <button onclick="setSubFontSize(md)" id="btnSubMd" class="sub-size-btn px-2 py-0.5 rounded bg-red-600 text-white font-bold">متوسط</button>
+                <button onclick="setSubFontSize(lg)" id="btnSubLg" class="sub-size-btn px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 hover:bg-neutral-700">كبير</button>
+              </div>
+              <button onclick="closeSubsModal()" class="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs px-3 py-1 rounded-lg">إغلاق</button>
+            </div>
+
           </div>
+        </div>
+
+        <!-- Custom Subtitles Display Overlay in Video -->
+        <div id="customSubOverlay" class="absolute bottom-6 sm:bottom-10 left-3 right-3 flex justify-center text-center pointer-events-none z-20">
+          <span id="customSubText" class="hidden inline-block bg-black/85 text-white font-bold text-sm sm:text-base md:text-lg px-3.5 py-1.5 rounded-lg shadow-2xl border border-black/50 max-w-[92%] leading-snug tracking-wide select-none" style="text-shadow: 0 2px 4px rgba(0,0,0,0.95); font-family: system-ui, -apple-system, sans-serif;"></span>
         </div>
 
         <!-- Initial Placeholder Message -->
@@ -311,6 +366,11 @@
     let hlsInstance = null;
     let selectedAudioTrackIdx = 0;
     let selectedSubTrackIdx = -1;
+    let customSubtitleCues = [];
+    let customSubtitleUrl = null;
+    let subtitleOffsetSeconds = 0;
+    let subtitleFontSize = "md";
+    let controlsIdleTimer = null;
 
     let aspectIndex = 0;
     const aspectModes = ["mode-0", "mode-1", "mode-2", "mode-3"];
@@ -652,6 +712,8 @@
         hlsInstance.destroy();
         hlsInstance = null;
       }
+      clearCustomSubtitle();
+      playerContainer.classList.remove("controls-hidden");
 
       closeAudioModal();
       closeSubsModal();
@@ -759,6 +821,22 @@
 
     document.addEventListener("fullscreenchange", onFullscreenChange);
     document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+
+    // Keep the player chrome out of the way during playback; any tap/move brings it back.
+    function showPlayerControls() {
+      playerContainer.classList.remove("controls-hidden");
+      clearTimeout(controlsIdleTimer);
+      if (!video.paused && !video.ended && document.getElementById("audioModal").classList.contains("hidden") && document.getElementById("subsModal").classList.contains("hidden")) {
+        controlsIdleTimer = setTimeout(() => playerContainer.classList.add("controls-hidden"), 2800);
+      }
+    }
+    ["pointermove", "pointerdown", "touchstart", "mousemove"].forEach(evt => playerContainer.addEventListener(evt, showPlayerControls, { passive: true }));
+    video.addEventListener("play", showPlayerControls);
+    video.addEventListener("pause", () => { clearTimeout(controlsIdleTimer); playerContainer.classList.remove("controls-hidden"); });
+    video.addEventListener("ended", () => { clearTimeout(controlsIdleTimer); playerContainer.classList.remove("controls-hidden"); });
+
+    video.addEventListener("timeupdate", updateCustomSubtitleDisplay);
+    video.addEventListener("seeked", updateCustomSubtitleDisplay);
 
     /* --- Audio Modal: Populates Real Options & Never Blank --- */
     function openAudioModal() {
@@ -973,34 +1051,191 @@
 
     function closeSubsModal() {
       document.getElementById("subsModal").classList.add("hidden");
+      showPlayerControls();
     }
 
-    // Load Local Subtitle File (.vtt / .srt)
+    // Parse both SRT and WebVTT into timed cues for a portable custom overlay.
+    function parseSubtitleText(raw) {
+      let text = String(raw || "").replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n").trim();
+      text = text.replace(/^WEBVTT[^\n]*\n+/i, "");
+      const toSeconds = value => {
+        const parts = value.trim().replace(",", ".").split(":").map(Number);
+        if (parts.some(Number.isNaN)) return NaN;
+        return parts.length === 3 ? parts[0] * 3600 + parts[1] * 60 + parts[2] : parts[0] * 60 + parts[1];
+      };
+      const cues = [];
+      for (const block of text.split(/\n\s*\n/)) {
+        const lines = block.split("\n");
+        const timeIndex = lines.findIndex(line => line.includes("-->"));
+        if (timeIndex < 0) continue;
+        const times = lines[timeIndex].split("-->");
+        const start = toSeconds(times[0]);
+        const end = toSeconds((times[1] || "").trim().split(/\s+/)[0]);
+        const cueText = lines.slice(timeIndex + 1).join("\n").trim();
+        if (Number.isFinite(start) && Number.isFinite(end) && end > start && cueText) cues.push({ start, end, text: cueText });
+      }
+      return cues.sort((a, b) => a.start - b.start);
+    }
+
+    function setSubFontSize(size) {
+      subtitleFontSize = size;
+      const text = document.getElementById("customSubText");
+      if (text) {
+        text.classList.remove("text-sm", "text-base", "text-lg", "md:text-lg");
+        text.classList.add(size === "sm" ? "text-sm" : size === "lg" ? "text-lg" : "text-base");
+      }
+      document.querySelectorAll(".sub-size-btn").forEach(btn => btn.className = "sub-size-btn px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 hover:bg-neutral-700");
+      const active = document.getElementById(size === "sm" ? "btnSubSm" : size === "lg" ? "btnSubLg" : "btnSubMd");
+      if (active) active.className = "sub-size-btn px-2 py-0.5 rounded bg-red-600 text-white font-bold";
+    }
+
+    function updateCustomSubtitleDisplay() {
+      const span = document.getElementById("customSubText");
+      if (!span) return;
+      if (!customSubtitleCues.length) {
+        span.textContent = "";
+        span.classList.add("hidden");
+        return;
+      }
+      // Positive offset advances subtitles; negative offset delays them.
+      const subtitleTime = Math.max(0, video.currentTime + subtitleOffsetSeconds);
+      const cue = customSubtitleCues.find(item => subtitleTime >= item.start && subtitleTime < item.end);
+      if (!cue) {
+        span.textContent = "";
+        span.classList.add("hidden");
+        return;
+      }
+      // Text is inserted as text, never interpreted as HTML.
+      span.textContent = cue.text;
+      span.style.whiteSpace = "pre-line";
+      span.classList.remove("hidden");
+    }
+
+    function updateSubOffsetDisplay() {
+      const display = document.getElementById("subOffsetDisplay");
+      if (!display) return;
+      const amount = Math.abs(subtitleOffsetSeconds).toFixed(1);
+      display.textContent = subtitleOffsetSeconds > 0 ? `+${amount} ثانية (تقديم)` : subtitleOffsetSeconds < 0 ? `-${amount} ثانية (تأخير)` : "0.0 ثانية (مطابق)";
+      updateCustomSubtitleDisplay();
+    }
+
+    function adjustSubOffset(change) {
+      subtitleOffsetSeconds = Math.max(-30, Math.min(30, Math.round((subtitleOffsetSeconds + change) * 10) / 10));
+      updateSubOffsetDisplay();
+    }
+
+    function resetSubOffset() {
+      subtitleOffsetSeconds = 0;
+      updateSubOffsetDisplay();
+    }
+
+    function clearCustomSubtitle() {
+      customSubtitleCues = [];
+      updateCustomSubtitleDisplay();
+      if (customSubtitleUrl) {
+        URL.revokeObjectURL(customSubtitleUrl);
+        customSubtitleUrl = null;
+      }
+      const badge = document.getElementById("loadedSubBadge");
+      if (badge) badge.textContent = "لا يوجد ملف";
+      document.getElementById("clearSubBtn")?.classList.add("hidden");
+      const input = document.getElementById("localSubInput");
+      if (input) input.value = "";
+      updateSubOffsetDisplay();
+    }
+
+    function openSubsModal() {
+      const modal = document.getElementById("subsModal");
+      const list = document.getElementById("subsOptionsList");
+      const t = i18n[currentLang];
+      list.innerHTML = "";
+      const offBtn = document.createElement("button");
+      offBtn.className = "w-full text-start p-2.5 rounded-xl border bg-[#1c1c1c] border-neutral-800 text-neutral-300 hover:bg-neutral-800 text-xs";
+      offBtn.textContent = `🚫 ${t.subsOff}`;
+      offBtn.onclick = () => {
+        if (hlsInstance) hlsInstance.subtitleTrack = -1;
+        if (video.textTracks) for (let j = 0; j < video.textTracks.length; j++) video.textTracks[j].mode = "disabled";
+        selectedSubTrackIdx = -1;
+        closeSubsModal();
+      };
+      list.appendChild(offBtn);
+
+      let hasTrack = false;
+      if (hlsInstance?.subtitleTracks?.length) {
+        hlsInstance.subtitleTracks.forEach((tr, i) => {
+          hasTrack = true;
+          const btn = document.createElement("button");
+          btn.className = "w-full text-start p-2.5 rounded-xl border bg-[#1c1c1c] border-neutral-800 text-neutral-300 hover:bg-neutral-800 text-xs";
+          btn.textContent = `💬 ${tr.name || tr.lang || `Subtitle ${i + 1}`}`;
+          btn.onclick = () => {
+            hlsInstance.subtitleTrack = i;
+            selectedSubTrackIdx = i;
+            clearCustomSubtitle();
+            closeSubsModal();
+          };
+          list.appendChild(btn);
+        });
+      }
+      if (video.textTracks?.length) {
+        for (let i = 0; i < video.textTracks.length; i++) {
+          const track = video.textTracks[i];
+          if (track.kind === "metadata") continue;
+          hasTrack = true;
+          const btn = document.createElement("button");
+          btn.className = "w-full text-start p-2.5 rounded-xl border bg-[#1c1c1c] border-neutral-800 text-neutral-300 hover:bg-neutral-800 text-xs";
+          btn.textContent = `💬 ${track.label || track.language || `Subtitle ${i + 1}`}`;
+          btn.onclick = () => {
+            if (hlsInstance) hlsInstance.subtitleTrack = -1;
+            for (let j = 0; j < video.textTracks.length; j++) video.textTracks[j].mode = j === i ? "showing" : "disabled";
+            selectedSubTrackIdx = i;
+            clearCustomSubtitle();
+            closeSubsModal();
+          };
+          list.appendChild(btn);
+        }
+      }
+      if (!hasTrack) {
+        const note = document.createElement("div");
+        note.className = "bg-neutral-900/80 border border-neutral-800 p-2.5 rounded-xl text-[11px] text-neutral-400";
+        note.textContent = "لا توجد ترجمة مدمجة في هذا البث. يمكنك اختيار ملف SRT أو VTT من جهازك.";
+        list.appendChild(note);
+      }
+      updateSubOffsetDisplay();
+      modal.classList.remove("hidden");
+      playerContainer.classList.remove("controls-hidden");
+      clearTimeout(controlsIdleTimer);
+    }
+
+    // Load Local Subtitle File (.vtt / .srt) and render it with adjustable timing.
     function loadLocalSubtitle(input) {
       if (!input.files || input.files.length === 0) return;
       const file = input.files[0];
       const reader = new FileReader();
-      reader.onload = function(e) {
-        const vttContent = e.target.result;
-        const vttBlob = new Blob([vttContent], { type: 'text/vtt' });
-        const trackUrl = URL.createObjectURL(vttBlob);
-
-        const track = document.createElement("track");
-        track.kind = "subtitles";
-        track.label = file.name;
-        track.srclang = "ar";
-        track.src = trackUrl;
-        track.default = true;
-        video.appendChild(track);
-        track.mode = "showing";
-
-        alert("تم تحميل ملف الترجمة بنجاح: " + file.name);
+      reader.onload = function(event) {
+        const cues = parseSubtitleText(event.target.result);
+        if (!cues.length) {
+          alert("تعذر قراءة ملف الترجمة. استخدم ملف SRT أو VTT صالحاً.");
+          input.value = "";
+          return;
+        }
+        customSubtitleCues = cues;
+        subtitleOffsetSeconds = 0;
+        selectedSubTrackIdx = -2;
+        if (hlsInstance) hlsInstance.subtitleTrack = -1;
+        if (video.textTracks) for (let i = 0; i < video.textTracks.length; i++) video.textTracks[i].mode = "disabled";
+        const badge = document.getElementById("loadedSubBadge");
+        if (badge) badge.textContent = file.name;
+        document.getElementById("clearSubBtn")?.classList.remove("hidden");
+        setSubFontSize(subtitleFontSize);
+        updateSubOffsetDisplay();
+        updateCustomSubtitleDisplay();
         closeSubsModal();
       };
+      reader.onerror = () => alert("تعذر فتح ملف الترجمة.");
       reader.readAsText(file);
     }
 
-    /* --- Open In External Player (VLC / MX Player) --- */
+        /* --- Open In External Player (VLC / MX Player) --- */
     function openExternalPlayer() {
       if (!currentStreamUrl) {
         alert(i18n[currentLang].chooseContent);
