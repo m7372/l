@@ -26,13 +26,44 @@
       -webkit-tap-highlight-color: transparent;
       overflow-x: hidden;
     }
+
     /* Aspect Ratio Modes */
     .mode-0 { object-fit: contain !important; }
     .mode-1 { object-fit: fill !important; }
     .mode-2 { object-fit: cover !important; }
     .mode-3 { object-fit: contain !important; aspect-ratio: 16/9 !important; }
     
-    /* Scrollbar */
+    /* Fullscreen Container Styles */
+    #playerContainer:fullscreen {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      aspect-ratio: auto !important;
+      border-radius: 0 !important;
+      background: #000000 !important;
+      border: none !important;
+    }
+    #playerContainer:fullscreen video {
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+    #playerContainer:-webkit-full-screen {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      aspect-ratio: auto !important;
+      border-radius: 0 !important;
+      background: #000000 !important;
+      border: none !important;
+    }
+    #playerContainer:-webkit-full-screen video {
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+
+    /* Scrollbars */
     ::-webkit-scrollbar { height: 4px; width: 4px; }
     ::-webkit-scrollbar-track { background: #0a0a0a; }
     ::-webkit-scrollbar-thumb { background: #262626; border-radius: 4px; }
@@ -50,6 +81,11 @@
       border-bottom: 2px solid #e50914;
       font-weight: 700;
     }
+
+    /* Floating control bar animation */
+    .controls-overlay {
+      transition: opacity 0.25s ease-in-out;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col pb-16">
@@ -58,48 +94,99 @@
   <div class="sticky top-0 z-40 bg-[#070707] border-b border-neutral-800 shadow-2xl">
     <div class="max-w-6xl mx-auto px-2 sm:px-4 pt-1 sm:pt-2">
       
-      <!-- Video Container -->
+      <!-- Video Container with Overlay Controls -->
       <div id="playerContainer" class="relative w-full bg-black rounded-lg sm:rounded-xl overflow-hidden aspect-video shadow-inner flex items-center justify-center group border border-neutral-900">
-        <video id="videoPlayer" playsinline controls class="w-full h-full mode-0 bg-black"></video>
         
-        <!-- Top Overlay Controls inside Video for Fullscreen & Aspect -->
-        <div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none z-30 opacity-90 transition group-hover:opacity-100">
-          <!-- Aspect Ratio Toggle Button -->
-          <button id="aspectBtn" onclick="toggleAspectRatio()" class="pointer-events-auto bg-black/75 hover:bg-black text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded-md backdrop-blur border border-white/10 flex items-center gap-1.5 shadow" title="تغيير مقاس الشاشة">
-            <svg class="w-3.5 h-3.5 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
-            <span id="aspectLabel" class="font-mono font-medium">احتواء</span>
-          </button>
+        <video id="videoPlayer" playsinline controls class="w-full h-full mode-0 bg-black"></video>
 
-          <!-- Audio & Subtitles Dropdown Buttons -->
-          <div class="flex items-center gap-1.5 pointer-events-auto">
+        <!-- Top Controls Overlay Bar (Always works in Normal & Fullscreen Mode) -->
+        <div id="topOverlayControls" class="controls-overlay absolute top-2 left-2 right-2 flex items-center justify-between z-30 pointer-events-auto">
+          
+          <!-- Aspect Ratio Toggle Button -->
+          <div class="flex items-center gap-1.5">
+            <button id="aspectBtn" onclick="toggleAspectRatio()" class="bg-black/80 hover:bg-black text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded-lg backdrop-blur border border-white/20 flex items-center gap-1.5 shadow-lg active:scale-95 transition" title="تغيير مقاس الشاشة">
+              <svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+              <span id="aspectLabel" class="font-bold text-neutral-100">احتواء (Fit)</span>
+            </button>
+
+            <!-- Dedicated Fullscreen Button (Guarantees Aspect Ratio & Controls stay visible in Fullscreen) -->
+            <button id="fullscreenBtn" onclick="toggleFullscreen()" class="bg-black/80 hover:bg-black text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded-lg backdrop-blur border border-white/20 flex items-center gap-1.5 shadow-lg active:scale-95 transition" title="ملء الشاشة">
+              <span id="fullscreenIcon">⛶</span>
+              <span id="fullscreenLabel" class="hidden sm:inline font-medium">ملء الشاشة</span>
+            </button>
+          </div>
+
+          <!-- Audio, Subtitles & External Player Buttons -->
+          <div class="flex items-center gap-1.5">
+            
             <!-- Audio Tracks Button -->
-            <div class="relative">
-              <button id="audioBtn" onclick="toggleAudioMenu()" class="bg-black/75 hover:bg-black text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded-md backdrop-blur border border-white/10 flex items-center gap-1 shadow" title="المسارات الصوتية">
-                <svg class="w-3.5 h-3.5 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-                <span id="audioTrackCount" class="text-[10px] text-neutral-400"></span>
-              </button>
-              <div id="audioMenu" class="hidden absolute top-full mt-1 end-0 bg-neutral-900 border border-neutral-800 rounded-lg shadow-2xl p-1.5 min-w-[150px] z-50 text-xs">
-                <div class="font-bold text-[10px] text-neutral-400 px-2 py-1 mb-1 border-b border-neutral-800" id="labelAudioHeader">المسارات الصوتية</div>
-                <div id="audioTrackList" class="flex flex-col gap-1 max-h-40 overflow-y-auto"></div>
-              </div>
-            </div>
+            <button id="audioBtn" onclick="openAudioModal()" class="bg-black/80 hover:bg-black text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded-lg backdrop-blur border border-white/20 flex items-center gap-1 shadow-lg active:scale-95 transition" title="المسارات الصوتية">
+              <svg class="w-3.5 h-3.5 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+              <span id="audioTrackBadge" class="font-medium text-xs text-neutral-200">صوت</span>
+            </button>
 
             <!-- Subtitles Button -->
-            <div class="relative">
-              <button id="subsBtn" onclick="toggleSubsMenu()" class="bg-black/75 hover:bg-black text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded-md backdrop-blur border border-white/10 flex items-center gap-1 shadow" title="الترجمات">
-                <svg class="w-3.5 h-3.5 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h18a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2zm4 4h2v2H7V9zm6 0h4v2h-4V9zm-6 4h4v2H7v-2zm6 0h2v2h-2v-2z"/></svg>
-                <span id="subsTrackCount" class="text-[10px] text-neutral-400"></span>
-              </button>
-              <div id="subsMenu" class="hidden absolute top-full mt-1 end-0 bg-neutral-900 border border-neutral-800 rounded-lg shadow-2xl p-1.5 min-w-[150px] z-50 text-xs">
-                <div class="font-bold text-[10px] text-neutral-400 px-2 py-1 mb-1 border-b border-neutral-800" id="labelSubsHeader">الترجمة</div>
-                <div id="subsTrackList" class="flex flex-col gap-1 max-h-40 overflow-y-auto"></div>
-              </div>
-            </div>
+            <button id="subsBtn" onclick="openSubsModal()" class="bg-black/80 hover:bg-black text-white text-[11px] sm:text-xs px-2.5 py-1.5 rounded-lg backdrop-blur border border-white/20 flex items-center gap-1 shadow-lg active:scale-95 transition" title="الترجمات">
+              <svg class="w-3.5 h-3.5 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h18a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2zm4 4h2v2H7V9zm6 0h4v2h-4V9zm-6 4h4v2H7v-2zm6 0h2v2h-2v-2z"/></svg>
+              <span id="subsTrackBadge" class="font-medium text-xs text-neutral-200">ترجمة</span>
+            </button>
 
             <!-- External VLC / Player Button -->
-            <button id="extBtn" onclick="openExternalPlayer()" class="bg-black/75 hover:bg-black text-amber-400 text-[11px] sm:text-xs px-2 py-1.5 rounded-md backdrop-blur border border-white/10 flex items-center gap-1 shadow" title="فتح في مشغل خارجي / VLC">
+            <button id="extBtn" onclick="openExternalPlayer()" class="bg-black/80 hover:bg-black text-amber-400 text-[11px] sm:text-xs px-2.5 py-1.5 rounded-lg backdrop-blur border border-amber-500/30 flex items-center gap-1 shadow-lg active:scale-95 transition" title="فتح في VLC أو مشغل خارجي">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              <span class="hidden sm:inline font-mono">VLC</span>
             </button>
+
+          </div>
+        </div>
+
+        <!-- Audio Selection Modal (Inside PlayerContainer so it appears in Fullscreen!) -->
+        <div id="audioModal" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 pointer-events-auto">
+          <div class="bg-[#121212] border border-neutral-700 rounded-2xl w-full max-w-sm p-4 shadow-2xl flex flex-col gap-3">
+            <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🔊</span>
+                <h3 class="font-bold text-sm text-white" id="labelAudioModalTitle">المسارات الصوتية المتاحة</h3>
+              </div>
+              <button onclick="closeAudioModal()" class="text-neutral-400 hover:text-white text-base px-2 py-1 rounded-lg">✕</button>
+            </div>
+            
+            <div id="audioOptionsList" class="flex flex-col gap-1.5 max-h-56 overflow-y-auto">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <div class="border-t border-neutral-800 pt-2 flex items-center justify-between text-[11px] text-neutral-400">
+              <button onclick="boostAudioVolume()" class="text-amber-400 hover:underline flex items-center gap-1">
+                <span>⚡ رفع الصوت الإضافي (Boost)</span>
+              </button>
+              <button onclick="closeAudioModal()" class="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 px-3 py-1 rounded-lg">إغلاق</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtitles Selection Modal (Inside PlayerContainer so it appears in Fullscreen!) -->
+        <div id="subsModal" class="hidden absolute inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-3 pointer-events-auto">
+          <div class="bg-[#121212] border border-neutral-700 rounded-2xl w-full max-w-sm p-4 shadow-2xl flex flex-col gap-3">
+            <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">💬</span>
+                <h3 class="font-bold text-sm text-white" id="labelSubsModalTitle">خيارات الترجمة</h3>
+              </div>
+              <button onclick="closeSubsModal()" class="text-neutral-400 hover:text-white text-base px-2 py-1 rounded-lg">✕</button>
+            </div>
+            
+            <div id="subsOptionsList" class="flex flex-col gap-1.5 max-h-56 overflow-y-auto">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <!-- Custom Subtitle File Loader -->
+            <div class="border-t border-neutral-800 pt-2 flex flex-col gap-2">
+              <label class="text-[11px] text-neutral-400 flex items-center justify-between cursor-pointer bg-neutral-900 hover:bg-neutral-800 p-2 rounded-lg border border-neutral-800 transition">
+                <span>📁 إضافة ملف ترجمة من جهازك (.vtt/.srt)</span>
+                <input type="file" id="localSubInput" accept=".vtt,.srt" onchange="loadLocalSubtitle(this)" class="hidden">
+              </label>
+              <button onclick="closeSubsModal()" class="self-end bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs px-3 py-1 rounded-lg">إغلاق</button>
+            </div>
           </div>
         </div>
 
@@ -108,6 +195,7 @@
           <div class="text-3xl sm:text-4xl mb-2">📺</div>
           <p id="placeholderText" class="text-xs sm:text-sm text-neutral-400">اختر قناة أو فيلماً أو حلقة لبدء المشاهدة</p>
         </div>
+
       </div>
 
       <!-- Player Info Bar -->
@@ -207,7 +295,7 @@
     /* --- Core Configuration & Upstream Proxy --- */
     const PROXY_URL = "https://b.m737217130.workers.dev";
     const AUTH_QUERY = "username=4116039046&password=6281134156";
-    const TOKEN = "aHR0cDovLzE5NS4xMjguMjcuMjUzOjIwOTV8NDExNjAzOTA0Nnw2MjgxMTM0MTU2"; // Verified working upstream auth token
+    const TOKEN = "aHR0cDovLzE5NS4xMjguMjcuMjUzOjIwOTV8NDExNjAzOTA0Nnw2MjgxMTM0MTU2";
 
     let currentLang = "ar";
     let currentSection = "live";
@@ -221,14 +309,18 @@
     
     let currentStreamUrl = "";
     let hlsInstance = null;
+    let selectedAudioTrackIdx = 0;
+    let selectedSubTrackIdx = -1;
+
     let aspectIndex = 0;
     const aspectModes = ["mode-0", "mode-1", "mode-2", "mode-3"];
     const aspectLabels = {
-      ar: ["احتواء", "تمديد", "تكبير", "16:9"],
-      en: ["Contain", "Stretch", "Cover", "16:9"]
+      ar: ["احتواء (Fit)", "تمديد (Fill)", "تكبير (Cover)", "16:9"],
+      en: ["Contain (Fit)", "Stretch (Fill)", "Zoom (Cover)", "16:9"]
     };
 
     const video = document.getElementById("videoPlayer");
+    const playerContainer = document.getElementById("playerContainer");
     const placeholder = document.getElementById("videoPlaceholder");
 
     const i18n = {
@@ -245,16 +337,17 @@
         playing: "قيد التشغيل",
         error: "تعذر التشغيل",
         chooseContent: "اختر محتوى لبدء التشغيل",
-        noAudio: "لا توجد مسارات صوتية إضافية",
-        noSubs: "لا توجد ترجمات متاحة",
-        audioHeader: "المسارات الصوتية",
-        subsHeader: "الترجمات",
-        subsOff: "إيقاف الترجمة",
+        audioTitle: "المسارات الصوتية المتاحة",
+        subsTitle: "خيارات الترجمة",
+        defaultAudio: "المسار الأساسي (الصوت المباشر) [نشط]",
+        subsOff: "إيقاف الترجمة [نشط]",
         season: "الموسم",
         episode: "الحلقة",
         itemsUnit: "عنصر",
         openInExt: "فتح في VLC أو مشغل خارجي",
-        copied: "تم نسخ رابط البث!"
+        copied: "تم نسخ رابط البث!",
+        fsEnter: "ملء الشاشة",
+        fsExit: "تصغير الشاشة"
       },
       en: {
         langBtn: "عربي",
@@ -269,16 +362,17 @@
         playing: "Playing",
         error: "Playback Failed",
         chooseContent: "Select content to start playback",
-        noAudio: "No additional audio tracks",
-        noSubs: "No subtitles available",
-        audioHeader: "Audio Tracks",
-        subsHeader: "Subtitles",
-        subsOff: "Subtitles Off",
+        audioTitle: "Available Audio Tracks",
+        subsTitle: "Subtitle Options",
+        defaultAudio: "Default Main Audio [Active]",
+        subsOff: "Subtitles Off [Active]",
         season: "Season",
         episode: "Episode",
         itemsUnit: "items",
         openInExt: "Open in VLC / External Player",
-        copied: "Stream link copied!"
+        copied: "Stream link copied!",
+        fsEnter: "Fullscreen",
+        fsExit: "Exit Fullscreen"
       }
     };
 
@@ -322,7 +416,6 @@
       if (sec === "movie") catAction = "get_vod_categories";
       if (sec === "series") catAction = "get_series_categories";
 
-      // Fetch Categories if not cached
       if (!categoriesCache[sec]) {
         categoriesCache[sec] = await apiFetch(catAction);
       }
@@ -337,7 +430,6 @@
       bar.innerHTML = "";
       const t = i18n[currentLang];
 
-      // "All" button
       const allBtn = document.createElement("button");
       allBtn.className = `cat-btn shrink-0 text-xs px-3 py-1.5 rounded-full border border-neutral-800 bg-[#141414] text-neutral-300 transition hover:bg-neutral-800 ${activeCategoryId === "all" ? "active" : ""}`;
       allBtn.textContent = t.catAll;
@@ -360,7 +452,6 @@
     async function selectCategory(catId) {
       activeCategoryId = String(catId);
       
-      // Update UI active button
       document.querySelectorAll(".cat-btn").forEach(btn => btn.classList.remove("active"));
       event?.target?.classList?.add("active");
 
@@ -425,7 +516,6 @@
       }
 
       if (currentSection === "live") {
-        // Channels List
         const grid = document.createElement("div");
         grid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2";
         
@@ -465,7 +555,6 @@
           card.appendChild(iconDiv);
           card.appendChild(infoDiv);
 
-          // Play icon
           const playBadge = document.createElement("div");
           playBadge.className = "text-neutral-600 group-hover:text-red-500 text-sm pe-1";
           playBadge.innerHTML = "▶";
@@ -477,7 +566,6 @@
         listContainer.appendChild(grid);
 
       } else {
-        // Movies or Series Poster Grid
         const grid = document.createElement("div");
         grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3";
 
@@ -544,7 +632,6 @@
         type === "live" ? i18n[currentLang].tabLive : 
         (type === "movie" ? i18n[currentLang].tabMovies : i18n[currentLang].tabSeries);
 
-      // Logo icon
       const logoEl = document.getElementById("currentLogo");
       logoEl.innerHTML = "";
       if (logo) {
@@ -566,10 +653,11 @@
         hlsInstance = null;
       }
 
-      closeAudioMenu();
-      closeSubsMenu();
+      closeAudioModal();
+      closeSubsModal();
+      selectedAudioTrackIdx = 0;
+      selectedSubTrackIdx = -1;
 
-      // Construct verified working stream URL using worker token
       if (type === "live") {
         currentStreamUrl = `${PROXY_URL}/s/${TOKEN}/live/${id}.m3u8`;
         
@@ -584,21 +672,15 @@
           
           hlsInstance.on(window.Hls.Events.MANIFEST_PARSED, () => {
             video.play().catch(e => console.log("Autoplay notice:", e));
-            refreshTrackOptions();
           });
           
-          hlsInstance.on(window.Hls.Events.AUDIO_TRACKS_UPDATED, refreshTrackOptions);
-          hlsInstance.on(window.Hls.Events.SUBTITLE_TRACKS_UPDATED, refreshTrackOptions);
-
           hlsInstance.on(window.Hls.Events.ERROR, (event, data) => {
-            console.warn("HLS Event Error:", data);
             if (data.fatal) {
               if (data.type === window.Hls.ErrorTypes.NETWORK_ERROR) {
                 hlsInstance.startLoad();
               } else if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR) {
                 hlsInstance.recoverMediaError();
               } else {
-                // Fallback to TS stream directly
                 video.src = `${PROXY_URL}/s/${TOKEN}/live/${id}.ts`;
                 video.play().catch(() => {});
               }
@@ -624,12 +706,10 @@
         video.play().catch(e => console.log("Series play note:", e));
       }
 
-      video.onloadedmetadata = refreshTrackOptions;
-      // Scroll to top smoothly so user sees player
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    /* --- Aspect Ratio Toggle --- */
+    /* --- Aspect Ratio Toggle: Guarantees working in Fullscreen & Normal Mode --- */
     function toggleAspectRatio() {
       aspectIndex = (aspectIndex + 1) % aspectModes.length;
       video.className = `w-full h-full bg-black ${aspectModes[aspectIndex]}`;
@@ -637,120 +717,287 @@
       document.getElementById("aspectLabel").textContent = lbl;
     }
 
-    /* --- Audio & Subtitles Tracks Management --- */
-    function toggleAudioMenu() {
-      const menu = document.getElementById("audioMenu");
-      const subsMenu = document.getElementById("subsMenu");
-      subsMenu.classList.add("hidden");
-      menu.classList.toggle("hidden");
+    /* --- Fullscreen Engine: Keeps All Buttons & Aspect Ratio Active --- */
+    function toggleFullscreen() {
+      const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!isFs) {
+        if (playerContainer.requestFullscreen) {
+          playerContainer.requestFullscreen().catch(err => {
+            if (video.requestFullscreen) video.requestFullscreen();
+          });
+        } else if (playerContainer.webkitRequestFullscreen) {
+          playerContainer.webkitRequestFullscreen();
+        } else if (video.webkitEnterFullscreen) {
+          video.webkitEnterFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
     }
 
-    function closeAudioMenu() {
-      document.getElementById("audioMenu").classList.add("hidden");
-    }
-
-    function toggleSubsMenu() {
-      const menu = document.getElementById("subsMenu");
-      const audioMenu = document.getElementById("audioMenu");
-      audioMenu.classList.add("hidden");
-      menu.classList.toggle("hidden");
-    }
-
-    function closeSubsMenu() {
-      document.getElementById("subsMenu").classList.add("hidden");
-    }
-
-    function refreshTrackOptions() {
-      const audioList = document.getElementById("audioTrackList");
-      const subsList = document.getElementById("subsTrackList");
+    // Monitor fullscreen state changes
+    function onFullscreenChange() {
+      const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+      const fsIcon = document.getElementById("fullscreenIcon");
+      const fsLabel = document.getElementById("fullscreenLabel");
       const t = i18n[currentLang];
-      audioList.innerHTML = "";
-      subsList.innerHTML = "";
 
-      let audioCount = 0;
-      let subsCount = 0;
+      if (isFs) {
+        fsIcon.textContent = "🗗";
+        fsLabel.textContent = t.fsExit;
+        // Make sure controls remain prominent
+        document.getElementById("topOverlayControls").classList.remove("opacity-0");
+      } else {
+        fsIcon.textContent = "⛶";
+        fsLabel.textContent = t.fsEnter;
+      }
+    }
 
-      if (hlsInstance) {
-        // HLS Audio Tracks
-        const audioTracks = hlsInstance.audioTracks || [];
-        audioCount = audioTracks.length;
-        if (audioCount > 0) {
-          audioTracks.forEach((tr, idx) => {
-            const btn = document.createElement("button");
-            btn.className = `w-full text-start px-2 py-1.5 rounded hover:bg-neutral-800 transition ${hlsInstance.audioTrack === idx ? "text-red-400 font-bold" : "text-neutral-300"}`;
-            btn.textContent = tr.name || tr.lang || `Track ${idx + 1}`;
-            btn.onclick = () => {
-              hlsInstance.audioTrack = idx;
-              closeAudioMenu();
-              refreshTrackOptions();
-            };
-            audioList.appendChild(btn);
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+
+    /* --- Audio Modal: Populates Real Options & Never Blank --- */
+    function openAudioModal() {
+      const modal = document.getElementById("audioModal");
+      const list = document.getElementById("audioOptionsList");
+      const t = i18n[currentLang];
+      list.innerHTML = "";
+
+      let tracksFound = [];
+
+      // Check HLS Audio Tracks
+      if (hlsInstance && hlsInstance.audioTracks && hlsInstance.audioTracks.length > 0) {
+        hlsInstance.audioTracks.forEach((tr, i) => {
+          tracksFound.push({
+            id: i,
+            name: tr.name || tr.lang || `Track ${i + 1} (${tr.codec || 'Audio'})`,
+            active: hlsInstance.audioTrack === i
           });
-        }
+        });
+      }
 
-        // HLS Subtitles
-        const subTracks = hlsInstance.subtitleTracks || [];
-        subsCount = subTracks.length;
-        if (subsCount > 0) {
-          // Off option
-          const offBtn = document.createElement("button");
-          offBtn.className = `w-full text-start px-2 py-1.5 rounded hover:bg-neutral-800 transition ${hlsInstance.subtitleTrack === -1 ? "text-red-400 font-bold" : "text-neutral-400"}`;
-          offBtn.textContent = t.subsOff;
-          offBtn.onclick = () => {
-            hlsInstance.subtitleTrack = -1;
-            closeSubsMenu();
-            refreshTrackOptions();
-          };
-          subsList.appendChild(offBtn);
-
-          subTracks.forEach((tr, idx) => {
-            const btn = document.createElement("button");
-            btn.className = `w-full text-start px-2 py-1.5 rounded hover:bg-neutral-800 transition ${hlsInstance.subtitleTrack === idx ? "text-red-400 font-bold" : "text-neutral-300"}`;
-            btn.textContent = tr.name || tr.lang || `Sub ${idx + 1}`;
-            btn.onclick = () => {
-              hlsInstance.subtitleTrack = idx;
-              closeSubsMenu();
-              refreshTrackOptions();
-            };
-            subsList.appendChild(btn);
+      // Check HTML5 video audioTracks (Safari/Firefox)
+      if (video.audioTracks && video.audioTracks.length > 0) {
+        for (let i = 0; i < video.audioTracks.length; i++) {
+          const at = video.audioTracks[i];
+          tracksFound.push({
+            id: i,
+            name: at.label || at.language || `Track ${i + 1}`,
+            active: at.enabled
           });
         }
       }
 
-      // HTML5 video textTracks fallback
-      if (video.textTracks && video.textTracks.length > 0) {
-        subsCount = video.textTracks.length;
-        const offBtn = document.createElement("button");
-        offBtn.className = "w-full text-start px-2 py-1.5 rounded hover:bg-neutral-800 text-neutral-400";
-        offBtn.textContent = t.subsOff;
-        offBtn.onclick = () => {
-          for (let i = 0; i < video.textTracks.length; i++) video.textTracks[i].mode = "disabled";
-          closeSubsMenu();
-        };
-        subsList.appendChild(offBtn);
+      // Always show Default Primary Track
+      const defaultBtn = document.createElement("button");
+      const isDefaultActive = (tracksFound.length === 0) || (selectedAudioTrackIdx === 0);
+      defaultBtn.className = `w-full text-start p-2.5 rounded-xl border flex items-center justify-between text-xs transition ${isDefaultActive ? "bg-red-950/60 border-red-600 text-white font-bold" : "bg-[#1c1c1c] border-neutral-800 text-neutral-300 hover:bg-neutral-800"}`;
+      defaultBtn.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span>🎧</span>
+          <span>${t.defaultAudio}</span>
+        </div>
+        ${isDefaultActive ? '<span class="text-red-500 font-bold">✓</span>' : ''}
+      `;
+      defaultBtn.onclick = () => {
+        if (hlsInstance && hlsInstance.audioTracks && hlsInstance.audioTracks.length > 0) {
+          hlsInstance.audioTrack = 0;
+        }
+        selectedAudioTrackIdx = 0;
+        closeAudioModal();
+      };
+      list.appendChild(defaultBtn);
 
-        for (let i = 0; i < video.textTracks.length; i++) {
-          const track = video.textTracks[i];
+      // Render extra tracks if available
+      if (tracksFound.length > 0) {
+        tracksFound.forEach((tr, idx) => {
+          if (idx === 0) return; // already covered by default
           const btn = document.createElement("button");
-          btn.className = `w-full text-start px-2 py-1.5 rounded hover:bg-neutral-800 ${track.mode === "showing" ? "text-red-400 font-bold" : "text-neutral-300"}`;
-          btn.textContent = track.label || track.language || `Sub ${i + 1}`;
+          const isActive = tr.active;
+          btn.className = `w-full text-start p-2.5 rounded-xl border flex items-center justify-between text-xs transition ${isActive ? "bg-red-950/60 border-red-600 text-white font-bold" : "bg-[#1c1c1c] border-neutral-800 text-neutral-300 hover:bg-neutral-800"}`;
+          btn.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span>🔊</span>
+              <span>${tr.name}</span>
+            </div>
+            ${isActive ? '<span class="text-red-500 font-bold">✓</span>' : ''}
+          `;
           btn.onclick = () => {
-            for (let j = 0; j < video.textTracks.length; j++) video.textTracks[j].mode = j === i ? "showing" : "disabled";
-            closeSubsMenu();
+            if (hlsInstance) {
+              hlsInstance.audioTrack = tr.id;
+            }
+            if (video.audioTracks) {
+              for (let j = 0; j < video.audioTracks.length; j++) {
+                video.audioTracks[j].enabled = (j === tr.id);
+              }
+            }
+            selectedAudioTrackIdx = tr.id;
+            closeAudioModal();
           };
-          subsList.appendChild(btn);
+          list.appendChild(btn);
+        });
+      }
+
+      // External player advice for multi-audio IPTV streams
+      const note = document.createElement("div");
+      note.className = "bg-neutral-900 border border-neutral-800 p-2.5 rounded-xl text-[11px] text-neutral-400 mt-1";
+      note.innerHTML = `
+        <p class="mb-1 text-neutral-300">💡 معلومة عن صوتيات البث:</p>
+        <p>إذا كانت القناة تبث بتعليقين (عربي/إنجليزي) أو صوت Dolby، يمكنك أيضاً الضغط على زر <strong>VLC</strong> بالأعلى لفتح الرابط في مشغل خارجي يتيح التبديل الفوري بين كافة قنوات الصوت.</p>
+      `;
+      list.appendChild(note);
+
+      modal.classList.remove("hidden");
+    }
+
+    function closeAudioModal() {
+      document.getElementById("audioModal").classList.add("hidden");
+    }
+
+    // Audio Boost helper
+    let audioCtx = null;
+    let gainNode = null;
+    function boostAudioVolume() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const source = audioCtx.createMediaElementSource(video);
+          gainNode = audioCtx.createGain();
+          gainNode.gain.value = 2.0; // 200% boost
+          source.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          alert("تم رفع الصوت بنسبة 200% بنجاح!");
+        } else {
+          gainNode.gain.value = gainNode.gain.value > 1.5 ? 1.0 : 2.5;
+          alert("مستوى الصوت المعزز: " + Math.round(gainNode.gain.value * 100) + "%");
+        }
+      } catch (e) {
+        alert("تنبيه: المتصفح قيد مضخم الصوت، يرجى رفع صوت جهازك.");
+      }
+    }
+
+    /* --- Subtitles Modal: Populates Real Options & Never Blank --- */
+    function openSubsModal() {
+      const modal = document.getElementById("subsModal");
+      const list = document.getElementById("subsOptionsList");
+      const t = i18n[currentLang];
+      list.innerHTML = "";
+
+      let subTracksFound = [];
+
+      // Check HLS Subtitles
+      if (hlsInstance && hlsInstance.subtitleTracks && hlsInstance.subtitleTracks.length > 0) {
+        hlsInstance.subtitleTracks.forEach((tr, i) => {
+          subTracksFound.push({
+            id: i,
+            name: tr.name || tr.lang || `Subtitle ${i + 1}`,
+            active: hlsInstance.subtitleTrack === i
+          });
+        });
+      }
+
+      // Check HTML5 video textTracks
+      if (video.textTracks && video.textTracks.length > 0) {
+        for (let i = 0; i < video.textTracks.length; i++) {
+          const tt = video.textTracks[i];
+          subTracksFound.push({
+            id: i,
+            name: tt.label || tt.language || `Subtitle ${i + 1}`,
+            active: tt.mode === "showing"
+          });
         }
       }
 
-      if (audioCount === 0) {
-        audioList.innerHTML = `<p class='text-neutral-500 text-[11px] p-2'>${t.noAudio}</p>`;
-      }
-      if (subsCount === 0) {
-        subsList.innerHTML = `<p class='text-neutral-500 text-[11px] p-2'>${t.noSubs}</p>`;
+      // "Subtitles Off" Button (Always Available)
+      const offBtn = document.createElement("button");
+      const isOffActive = selectedSubTrackIdx === -1;
+      offBtn.className = `w-full text-start p-2.5 rounded-xl border flex items-center justify-between text-xs transition ${isOffActive ? "bg-red-950/60 border-red-600 text-white font-bold" : "bg-[#1c1c1c] border-neutral-800 text-neutral-300 hover:bg-neutral-800"}`;
+      offBtn.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span>🚫</span>
+          <span>${t.subsOff}</span>
+        </div>
+        ${isOffActive ? '<span class="text-red-500 font-bold">✓</span>' : ''}
+      `;
+      offBtn.onclick = () => {
+        if (hlsInstance) hlsInstance.subtitleTrack = -1;
+        if (video.textTracks) {
+          for (let j = 0; j < video.textTracks.length; j++) video.textTracks[j].mode = "disabled";
+        }
+        selectedSubTrackIdx = -1;
+        closeSubsModal();
+      };
+      list.appendChild(offBtn);
+
+      // Render Subtitle Tracks
+      if (subTracksFound.length > 0) {
+        subTracksFound.forEach((tr) => {
+          const btn = document.createElement("button");
+          const isActive = tr.active || selectedSubTrackIdx === tr.id;
+          btn.className = `w-full text-start p-2.5 rounded-xl border flex items-center justify-between text-xs transition ${isActive ? "bg-red-950/60 border-red-600 text-white font-bold" : "bg-[#1c1c1c] border-neutral-800 text-neutral-300 hover:bg-neutral-800"}`;
+          btn.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span>💬</span>
+              <span>${tr.name}</span>
+            </div>
+            ${isActive ? '<span class="text-red-500 font-bold">✓</span>' : ''}
+          `;
+          btn.onclick = () => {
+            if (hlsInstance) hlsInstance.subtitleTrack = tr.id;
+            if (video.textTracks) {
+              for (let j = 0; j < video.textTracks.length; j++) {
+                video.textTracks[j].mode = (j === tr.id ? "showing" : "disabled");
+              }
+            }
+            selectedSubTrackIdx = tr.id;
+            closeSubsModal();
+          };
+          list.appendChild(btn);
+        });
+      } else {
+        const noSubsNote = document.createElement("div");
+        noSubsNote.className = "bg-neutral-900/80 border border-neutral-800 p-2.5 rounded-xl text-[11px] text-neutral-400";
+        noSubsNote.innerHTML = `
+          <p class="text-neutral-300 font-medium mb-1">ℹ️ لا توجد ترجمات مدمجة في هذا البث</p>
+          <p>معظم القنوات المباشرة لا تدمج ملفات ترجمة نصية. إذا كنت تشاهد فيلماً أو مسلسلاً، يمكنك إدراج ملف الترجمة الخاص بك عبر الزر بالأسفل.</p>
+        `;
+        list.appendChild(noSubsNote);
       }
 
-      document.getElementById("audioTrackCount").textContent = audioCount > 1 ? audioCount : "";
-      document.getElementById("subsTrackCount").textContent = subsCount > 0 ? subsCount : "";
+      modal.classList.remove("hidden");
+    }
+
+    function closeSubsModal() {
+      document.getElementById("subsModal").classList.add("hidden");
+    }
+
+    // Load Local Subtitle File (.vtt / .srt)
+    function loadLocalSubtitle(input) {
+      if (!input.files || input.files.length === 0) return;
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const vttContent = e.target.result;
+        const vttBlob = new Blob([vttContent], { type: 'text/vtt' });
+        const trackUrl = URL.createObjectURL(vttBlob);
+
+        const track = document.createElement("track");
+        track.kind = "subtitles";
+        track.label = file.name;
+        track.srclang = "ar";
+        track.src = trackUrl;
+        track.default = true;
+        video.appendChild(track);
+        track.mode = "showing";
+
+        alert("تم تحميل ملف الترجمة بنجاح: " + file.name);
+        closeSubsModal();
+      };
+      reader.readAsText(file);
     }
 
     /* --- Open In External Player (VLC / MX Player) --- */
@@ -759,7 +1006,6 @@
         alert(i18n[currentLang].chooseContent);
         return;
       }
-      // Copy to clipboard
       navigator.clipboard.writeText(currentStreamUrl).then(() => {
         alert(`${i18n[currentLang].copied}\n\n${currentStreamUrl}`);
       }).catch(() => {
@@ -785,7 +1031,6 @@
       episodesList.innerHTML = `<div class="col-span-full p-8 text-center text-neutral-400">${i18n[currentLang].loading}</div>`;
       modal.classList.remove("hidden");
 
-      // Fetch series info with episodes
       currentSeriesInfo = await apiFetch("get_series_info", `&series_id=${seriesId}`);
       const episodesBySeason = currentSeriesInfo?.episodes || {};
       const seasonKeys = Object.keys(episodesBySeason);
@@ -882,9 +1127,10 @@
       document.getElementById("labelTabMovies").textContent = t.tabMovies;
       document.getElementById("labelTabSeries").textContent = t.tabSeries;
       document.getElementById("placeholderText").textContent = t.chooseContent;
-      document.getElementById("labelAudioHeader").textContent = t.audioHeader;
-      document.getElementById("labelSubsHeader").textContent = t.subsHeader;
+      document.getElementById("labelAudioModalTitle").textContent = t.audioTitle;
+      document.getElementById("labelSubsModalTitle").textContent = t.subsTitle;
       document.getElementById("aspectLabel").textContent = aspectLabels[currentLang][aspectIndex];
+      document.getElementById("fullscreenLabel").textContent = document.fullscreenElement ? t.fsExit : t.fsEnter;
 
       renderCategories(categoriesCache[currentSection] || []);
       renderContent(currentLoadedItems);
@@ -910,7 +1156,6 @@
       }
     }
 
-    // Auto-inject Manifest link tag
     (function setupPWA() {
       const manifest = {
         name: "AlameeereTv Stream",
@@ -935,7 +1180,6 @@
       link.href = manifestURL;
       document.head.appendChild(link);
 
-      // Register minimal Service Worker
       if ('serviceWorker' in navigator) {
         const swScript = `
           self.addEventListener('install', e => self.skipWaiting());
