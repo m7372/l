@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>AlameeereTv - المشغل المتكامل</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
+  <style>
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: #000000 !important;
+      color: #ffffff;
+      padding-top: var(--sat);
+      padding-bottom: var(--sab);
+      padding-left: var(--sal);
+      padding-right: var(--sar);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #000000; }
+    ::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #333333; }
+
+    /* Video Aspect Modes */
+    video.mode-0 { object-fit: contain !important; aspect-ratio: auto !important; }
+    video.mode-1 { object-fit: fill !important; aspect-ratio: auto !important; }
+    video.mode-2 { object-fit: cover !important; aspect-ratio: auto !important; }
+    video.mode-3 { object-fit: fill !important; aspect-ratio: 16/9 !important; }
+
+    .brand-glow {
+      background: linear-gradient(90deg, #ffffff 0%, #e50914 50%, #ffffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 16px rgba(229, 9, 20, 0.35);
+    }
+    .section-tab.active {
+      background-color: #e50914 !important;
+      color: #ffffff !important;
+      font-weight: 700;
+      border-color: #e50914 !important;
+    }
+    .cat-btn.active {
+      background-color: #ffffff !important;
+      color: #000000 !important;
+      font-weight: 700;
+      border-color: #ffffff !important;
+    }
+    .item-card:hover {
+      transform: translateY(-2px);
+      border-color: #e50914;
+    }
+    .player-container:fullscreen {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-height: none !important;
+      border-radius: 0 !important;
+    }
+  </style>
+</head>
+<body class="bg-black text-white flex flex-col min-h-screen">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-black/95 backdrop-blur-md border-b border-neutral-900 px-3 py-2 sm:px-6">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+      
+      <!-- Logo -->
+      <div class="flex items-center gap-2 shrink-0 cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        <div class="w-2.5 h-2.5 bg-red-600 rounded-full animate-ping"></div>
+        <span class="text-xl sm:text-2xl font-black tracking-wide brand-glow">AlameeereTv</span>
+      </div>
+
+      <!-- Search Box -->
+      <div class="flex-1 max-w-lg relative">
+        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-neutral-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <input 
+          id="searchInput" 
+          type="text" 
+          placeholder="ابحث عن قناة أو فيلم أو مسلسل..." 
+          class="w-full bg-[#0d0d0d] border border-neutral-800 text-xs sm:text-sm rounded-full pr-9 pl-4 py-1.5 sm:py-2 text-white placeholder-neutral-500 focus:outline-none focus:border-red-600 transition"
+          oninput="handleSearch(this.value)"
+        >
+      </div>
+
+      <!-- Lang Toggle -->
+      <button id="langToggleBtn" onclick="toggleLang()" class="shrink-0 px-2.5 py-1 text-xs rounded-full bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-neutral-300 transition font-medium">
+        English
+      </button>
+
+    </div>
+  </header>
+
+  <!-- Navigation Sections -->
+  <nav class="max-w-7xl mx-auto w-full px-3 sm:px-6 pt-2 pb-1 flex items-center gap-2">
+    <button id="tabLive" onclick="switchSection('live')" class="section-tab active px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-[#111] text-neutral-300 border border-neutral-800 transition">
+      📺 <span id="labelTabLive">القنوات</span>
+    </button>
+    <button id="tabMovies" onclick="switchSection('movie')" class="section-tab px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-[#111] text-neutral-300 border border-neutral-800 transition">
+      🎬 <span id="labelTabMovies">الأفلام</span>
+    </button>
+    <button id="tabSeries" onclick="switchSection('series')" class="section-tab px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium bg-[#111] text-neutral-300 border border-neutral-800 transition">
+      🍿 <span id="labelTabSeries">المسلسلات</span>
+    </button>
+  </nav>
+
+  <!-- Main Content Layout -->
+  <main class="flex-1 max-w-7xl mx-auto w-full p-2 sm:p-4 grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-6 items-start">
+    
+    <!-- Player Column (Sticky at top) -->
+    <section class="lg:col-span-2 sticky top-[53px] lg:top-[60px] z-40 flex flex-col gap-2">
+      
+      <!-- Video Container -->
+      <div id="playerContainer" class="player-container relative bg-black rounded-xl sm:rounded-2xl overflow-hidden aspect-video border border-neutral-900 shadow-2xl flex items-center justify-center">
+        
+        <video 
+          id="videoPlayer" 
+          playsinline 
+          autoplay 
+          class="w-full h-full mode-0 bg-black transition-all duration-200"
+        ></video>
+
+        <!-- Aspect Mode HUD Toast -->
+        <div id="aspectToast" class="absolute top-3 right-3 bg-black/85 text-white text-[11px] sm:text-xs px-3 py-1.5 rounded-full border border-neutral-700 pointer-events-none opacity-0 transition-opacity duration-300 z-30 font-medium shadow-lg">
+          احتواء
+        </div>
+
+        <!-- Initial Notice -->
+        <div id="notice" class="absolute inset-0 flex flex-col items-center justify-center bg-black/95 text-neutral-300 text-xs sm:text-sm p-4 text-center z-20">
+          <div class="w-12 h-12 mb-3 rounded-full bg-[#0d0d0d] border border-neutral-800 flex items-center justify-center text-red-500">
+            <svg class="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <span id="noticeText" class="font-medium text-neutral-200">اختر محتوى لبدء التشغيل</span>
+        </div>
+
+        <!-- Floating Controls Bar (Always inside player for fullscreen) -->
+        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent p-2 sm:p-3 flex items-center justify-between gap-2 z-30">
+          
+          <!-- Play / Pause / Mute -->
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <button id="btnPlayPause" onclick="togglePlay()" title="تشغيل / إيقاف" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
+              <svg id="icoPlay" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <svg id="icoPause" class="w-3.5 h-3.5 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+
+            <button id="btnMute" onclick="toggleMute()" title="كتم / تشغيل الصوت" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
+              <svg id="icoVolOn" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+              <svg id="icoVolOff" class="w-3.5 h-3.5 hidden text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27l4.73 4.73H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+            </button>
+          </div>
+
+          <!-- Icons: Audio Track + Subtitle Track + 4 Aspect Modes (Logo Only) + Fullscreen -->
+          <div class="flex items-center gap-1.5 sm:gap-2 relative">
+            
+            <!-- Audio Tracks Button -->
+            <button id="btnAudio" onclick="toggleAudioMenu()" title="الصوتيات" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path>
+              </svg>
+            </button>
+            <!-- Audio Menu Popup -->
+            <div id="audioMenu" class="hidden absolute bottom-11 right-12 sm:right-16 bg-[#0a0a0a] border border-neutral-800 rounded-xl p-2 shadow-2xl min-w-[150px] text-xs z-50 flex flex-col gap-1 max-h-48 overflow-y-auto">
+              <div class="text-neutral-500 px-2 py-1 border-b border-neutral-800 text-[10px] font-semibold" id="labelAudioHeader">المسارات الصوتية</div>
+              <div id="audioList" class="flex flex-col gap-0.5"></div>
+            </div>
+
+            <!-- Subtitle Tracks Button -->
+            <button id="btnSubs" onclick="toggleSubsMenu()" title="الترجمات" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+              </svg>
+            </button>
+            <!-- Subtitle Menu Popup -->
+            <div id="subsMenu" class="hidden absolute bottom-11 right-20 sm:right-28 bg-[#0a0a0a] border border-neutral-800 rounded-xl p-2 shadow-2xl min-w-[150px] text-xs z-50 flex flex-col gap-1 max-h-48 overflow-y-auto">
+              <div class="text-neutral-500 px-2 py-1 border-b border-neutral-800 text-[10px] font-semibold" id="labelSubsHeader">الترجمات</div>
+              <div id="subsList" class="flex flex-col gap-0.5"></div>
+            </div>
+
+            <!-- 4-Cycle Aspect Ratio Button (Symbol Only) -->
+            <button id="btnAspect" onclick="cycleAspectMode()" title="قياسات الفيديو (4 قياسات)" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+              </svg>
+            </button>
+
+            <!-- Fullscreen Button -->
+            <button id="btnFullscreen" onclick="toggleFullscreen()" title="ملء الشاشة" class="w-8 h-8 rounded-full bg-[#111]/80 hover:bg-[#222] text-white flex items-center justify-center border border-neutral-800 transition">
+              <svg id="icoFsExpand" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M20 8V4m0 0h-4M4 16v4m0 0h4M20 16v4m0 0h-4"></path>
+              </svg>
+              <svg id="icoFsCompress" class="w-3.5 h-3.5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4v4H4m8 8v4m0-4h4M16 4v4h4M8 16H4v4"></path>
+              </svg>
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Current Playing Details -->
+      <div class="bg-[#0a0a0a] border border-neutral-900 rounded-xl p-3 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="currentLogo" class="w-10 h-10 rounded-lg bg-black border border-neutral-800 flex items-center justify-center text-lg overflow-hidden shrink-0">
+            📺
+          </div>
+          <div class="truncate">
+            <h2 id="currentName" class="text-xs sm:text-sm font-bold text-white truncate">لم يتم اختيار محتوى</h2>
+            <p id="currentCat" class="text-[11px] text-neutral-400 truncate">اختر قناة أو فيلماً أو مسلسلاً</p>
+          </div>
+        </div>
+
+        <span id="statusBadge" class="text-[10px] sm:text-xs bg-neutral-900 text-neutral-400 border border-neutral-800 px-2.5 py-1 rounded-full font-medium shrink-0">
+          جاهز
+        </span>
+      </div>
+
+    </section>
+
+    <!-- Channels & Content List Section -->
+    <section class="bg-[#0a0a0a] border border-neutral-900 rounded-2xl p-3 sm:p-4 flex flex-col gap-3 min-h-[420px] lg:max-h-[calc(100vh-90px)]">
+      
+      <!-- Category Chips Bar -->
+      <div id="categoriesBar" class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+        <!-- dynamic categories -->
+      </div>
+
+      <!-- Content Header Counter -->
+      <div class="flex justify-between items-center text-xs text-neutral-400 border-b border-neutral-900 pb-2">
+        <span id="contentCountLabel">المحتوى متاح (<span id="count" class="text-white font-bold">0</span>)</span>
+        <span id="activeSectionBadge" class="text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded-full">
+          سيرفر البروكسي
+        </span>
+      </div>
+
+      <!-- Scrollable List of Channels / Movies / Series -->
+      <div id="contentList" class="flex-1 overflow-y-auto pr-0.5 max-h-[60vh] lg:max-h-none">
+        <!-- dynamic items -->
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Series Episodes Modal -->
+  <div id="seriesModal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#0f0f0f] border border-neutral-800 rounded-2xl max-w-xl w-full p-4 flex flex-col gap-3 max-h-[85vh]">
+      <div class="flex justify-between items-center border-b border-neutral-800 pb-2">
+        <h3 id="seriesModalTitle" class="font-bold text-sm sm:text-base truncate">حلقات المسلسل</h3>
+        <button onclick="closeSeriesModal()" class="text-neutral-400 hover:text-white text-lg font-bold px-2">✕</button>
+      </div>
+      <div id="seriesModalSeasons" class="flex items-center gap-1.5 overflow-x-auto pb-1"></div>
+      <div id="seriesModalEpisodes" class="flex-1 overflow-y-auto space-y-1.5 pr-1 max-h-[55vh]"></div>
+    </div>
+  </div>
+
+  <script>
+    // الإعدادات المباشرة لسيرفر البروكسي وحساب الإكستريم
+    const PROXY_URL = "https://b.m737217130.workers.dev";
+    const AUTH_QUERY = "username=4116039046&password=6281134156";
+    const USER = "4116039046";
+    const PASS = "6281134156";
+
+    // المتغيرات العامة
+    let currentLang = "ar";
+    let currentSection = "live"; // live | movie | series
+    let rawCategories = [];
+    let rawItems = [];
+    let activeCategoryId = "all";
+    let searchQuery = "";
+    let hlsInstance = null;
+    let aspectIndex = 0;
+    const aspectModes = ["mode-0", "mode-1", "mode-2", "mode-3"];
+    const aspectNamesAr = ["احتواء (Contain)", "تمديد (Stretch)", "تكبير (Cover)", "تكبير+ (16:9)"];
+    const aspectNamesEn = ["Fit (Contain)", "Stretch", "Zoom (Cover)", "Zoom+ (16:9)"];
+
+    const video = document.getElementById("videoPlayer");
+    const playerContainer = document.getElementById("playerContainer");
+
+    // نصوص الترجمة للواجهة
+    const i18n = {
+      ar: {
+        langBtn: "English",
+        searchPlaceholder: "ابحث عن قناة أو فيلم أو مسلسل...",
+        tabLive: "القنوات",
+        tabMovies: "الأفلام",
+        tabSeries: "المسلسلات",
+        catAll: "الكل",
+        loading: "جارٍ التحميل...",
+        noResults: "لا توجد نتائج مطابقة",
+        ready: "جاهز",
+        playing: "قيد التشغيل",
+        error: "تعذر التشغيل",
+        chooseContent: "اختر محتوى لبدء التشغيل",
+        noAudio: "لا توجد مسارات صوتية إضافية",
+        noSubs: "لا توجد ترجمات متاحة",
+        audioHeader: "المسارات الصوتية",
+        subsHeader: "الترجمات",
+        subsOff: "إيقاف الترجمة",
+        season: "الموسم",
+        episode: "الحلقة"
+      },
+      en: {
+        langBtn: "عربي",
+        searchPlaceholder: "Search channel, movie or series...",
+        tabLive: "Channels",
+        tabMovies: "Movies",
+        tabSeries: "Series",
+        catAll: "All",
+        loading: "Loading...",
+        noResults: "No results found",
+        ready: "Ready",
+        playing: "Playing",
+        error: "Playback Error",
+        chooseContent: "Select content to play",
+        noAudio: "No extra audio tracks",
+        noSubs: "No subtitles available",
+        audioHeader: "Audio Tracks",
+        subsHeader: "Subtitles",
+        subsOff: "Subtitles Off",
+        season: "Season",
+        episode: "Episode"
+      }
+    };
+
+    function toggleLang() {
+      currentLang = currentLang === "ar" ? "en" : "ar";
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = currentLang === "ar" ? "rtl" : "ltr";
+      
+      const t = i18n[currentLang];
+      document.getElementById("langToggleBtn").textContent = t.langBtn;
+      document.getElementById("searchInput").placeholder = t.searchPlaceholder;
+      document.getElementById("labelTabLive").textContent = t.tabLive;
+      document.getElementById("labelTabMovies").textContent = t.tabMovies;
+      document.getElementById("labelTabSeries").textContent = t.tabSeries;
+      document.getElementById("labelAudioHeader").textContent = t.audioHeader;
+      document.getElementById("labelSubsHeader").textContent = t.subsHeader;
+      
+      renderCategories();
+      renderContent();
+    }
+
+    async function apiFetch(action) {
+      try {
+        const res = await fetch(`${PROXY_URL}/player_api.php?${AUTH_QUERY}&action=${action}`);
+        if (!res.ok) throw new Error("API Error " + res.status);
+        return await res.json();
+      } catch (e) {
+        console.error("Fetch failed:", action, e);
+        return [];
+      }
+    }
+
+    async function switchSection(sec) {
+      currentSection = sec;
+      activeCategoryId = "all";
+      searchQuery = "";
+      document.getElementById("searchInput").value = "";
+
+      document.querySelectorAll(".section-tab").forEach(tab => tab.classList.remove("active"));
+      if (sec === "live") document.getElementById("tabLive").classList.add("active");
+      if (sec === "movie") document.getElementById("tabMovies").classList.add("active");
+      if (sec === "series") document.getElementById("tabSeries").classList.add("active");
+
+      document.getElementById("contentList").innerHTML = `<div class="p-8 text-center text-neutral-400 text-xs">${i18n[currentLang].loading}</div>`;
+
+      let catAction = "get_live_categories";
+      let streamAction = "get_live_streams";
+      if (sec === "movie") { catAction = "get_vod_categories"; streamAction = "get_vod_streams"; }
+      if (sec === "series") { catAction = "get_series_categories"; streamAction = "get_series"; }
+
+      const [cats, items] = await Promise.all([apiFetch(catAction), apiFetch(streamAction)]);
+      rawCategories = Array.isArray(cats) ? cats : [];
+      rawItems = Array.isArray(items) ? items : [];
+
+      renderCategories();
+      renderContent();
+    }
+
+    function renderCategories() {
+      const bar = document.getElementById("categoriesBar");
+      const t = i18n[currentLang];
+      let html = `<button onclick="filterCategory('all')" class="cat-btn shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#111] text-neutral-300 transition ${activeCategoryId === "all" ? "active" : ""}">${t.catAll}</button>`;
+      
+      rawCategories.forEach(c => {
+        const id = String(c.category_id);
+        const name = c.category_name;
+        html += `<button onclick="filterCategory('${id}')" class="cat-btn shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#111] text-neutral-300 transition ${activeCategoryId === id ? "active" : ""}">${name}</button>`;
+      });
+      bar.innerHTML = html;
+    }
+
+    function filterCategory(catId) {
+      activeCategoryId = String(catId);
+      renderCategories();
+      renderContent();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      renderContent();
+    }
+
+    function renderContent() {
+      const container = document.getElementById("contentList");
+      const t = i18n[currentLang];
+      
+      let filtered = rawItems.filter(item => {
+        const matchCat = activeCategoryId === "all" || String(item.category_id) === activeCategoryId;
+        const name = (item.name || item.title || "").toLowerCase();
+        const matchSearch = !searchQuery || name.includes(searchQuery);
+        return matchCat && matchSearch;
+      });
+
+      document.getElementById("count").textContent = filtered.length;
+
+      if (!filtered.length) {
+        container.innerHTML = `<div class="p-8 text-center text-neutral-500 text-xs">${t.noResults}</div>`;
+        return;
+      }
+
+      if (currentSection === "live") {
+        let html = `<div class="space-y-1">`;
+        filtered.slice(0, 200).forEach(item => {
+          const streamId = item.stream_id;
+          const name = item.name || "قناة";
+          const logo = item.stream_icon || "";
+          html += `
+            <div onclick="playStream('live', '${streamId}', '${escapeHtml(name)}', '${escapeHtml(logo)}')" class="item-card flex items-center gap-2.5 p-2 rounded-xl bg-[#0d0d0d] hover:bg-neutral-900 border border-neutral-850 cursor-pointer transition">
+              <div class="w-8 h-8 rounded-lg bg-black border border-neutral-800 flex items-center justify-center shrink-0 overflow-hidden">
+                ${logo ? `<img src="${logo}" class="w-full h-full object-contain" onerror="this.remove()">` : `📺`}
+              </div>
+              <span class="text-xs sm:text-sm font-medium text-neutral-200 truncate flex-1">${name}</span>
+            </div>
+          `;
+        });
+        html += `</div>`;
+        container.innerHTML = html;
+      } else {
+        // Movies & Series Grid with Posters
+        let html = `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">`;
+        filtered.slice(0, 150).forEach(item => {
+          const id = item.stream_id || item.series_id;
+          const name = item.name || item.title || "";
+          const poster = item.stream_icon || item.cover || "";
+          const ext = item.container_extension || "mp4";
+          const rating = item.rating ? `★ ${item.rating}` : "";
+
+          if (currentSection === "movie") {
+            html += `
+              <div onclick="playStream('movie', '${id}', '${escapeHtml(name)}', '${escapeHtml(poster)}', '${ext}')" class="item-card flex flex-col bg-[#0d0d0d] hover:bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden cursor-pointer transition">
+                <div class="aspect-[2/3] bg-black relative flex items-center justify-center overflow-hidden">
+                  ${poster ? `<img src="${poster}" class="w-full h-full object-cover" loading="lazy" onerror="this.remove()">` : `🎬`}
+                  ${rating ? `<span class="absolute top-1 right-1 bg-black/80 text-amber-400 text-[10px] px-1.5 py-0.5 rounded font-bold">${rating}</span>` : ""}
+                </div>
+                <div class="p-1.5">
+                  <h4 class="text-xs font-semibold truncate text-neutral-200">${name}</h4>
+                </div>
+              </div>
+            `;
+          } else {
+            // Series Card (Opens episodes modal)
+            html += `
+              <div onclick="openSeriesDetails('${id}', '${escapeHtml(name)}')" class="item-card flex flex-col bg-[#0d0d0d] hover:bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden cursor-pointer transition">
+                <div class="aspect-[2/3] bg-black relative flex items-center justify-center overflow-hidden">
+                  ${poster ? `<img src="${poster}" class="w-full h-full object-cover" loading="lazy" onerror="this.remove()">` : `🍿`}
+                  ${rating ? `<span class="absolute top-1 right-1 bg-black/80 text-amber-400 text-[10px] px-1.5 py-0.5 rounded font-bold">${rating}</span>` : ""}
+                </div>
+                <div class="p-1.5">
+                  <h4 class="text-xs font-semibold truncate text-neutral-200">${name}</h4>
+                </div>
+              </div>
+            `;
+          }
+        });
+        html += `</div>`;
+        container.innerHTML = html;
+      }
+    }
+
+    function playStream(type, id, name, logo, ext = "mp4") {
+      document.getElementById("notice").classList.add("hidden");
+      document.getElementById("currentName").textContent = name;
+      document.getElementById("currentCat").textContent = type === "live" ? i18n[currentLang].tabLive : (type === "movie" ? i18n[currentLang].tabMovies : i18n[currentLang].tabSeries);
+      
+      const logoEl = document.getElementById("currentLogo");
+      if (logo) logoEl.innerHTML = `<img src="${logo}" class="w-full h-full object-contain" onerror="this.remove()">`;
+      else logoEl.innerHTML = type === "live" ? "📺" : (type === "movie" ? "🎬" : "🍿");
+
+      document.getElementById("statusBadge").textContent = i18n[currentLang].playing;
+      document.getElementById("statusBadge").className = "text-[10px] sm:text-xs bg-emerald-950/60 text-emerald-400 border border-emerald-800 px-2.5 py-1 rounded-full font-medium shrink-0";
+
+      if (hlsInstance) {
+        hlsInstance.destroy();
+        hlsInstance = null;
+      }
+
+      closeAudioMenu();
+      closeSubsMenu();
+
+      let streamUrl = "";
+      if (type === "live") {
+        streamUrl = `${PROXY_URL}/live/${USER}/${PASS}/${id}.m3u8`;
+        if (Hls.isSupported()) {
+          hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: true });
+          hlsInstance.loadSource(streamUrl);
+          hlsInstance.attachMedia(video);
+          hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+            video.play().catch(() => {});
+            refreshTrackOptions();
+          });
+          hlsInstance.on(Hls.Events.AUDIO_TRACKS_UPDATED, refreshTrackOptions);
+          hlsInstance.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, refreshTrackOptions);
+          hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+              console.warn("HLS fatal error, retrying TS fallback...");
+              video.src = `${PROXY_URL}/live/${USER}/${PASS}/${id}.ts`;
+              video.play().catch(() => {});
+            }
+          });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = streamUrl;
+          video.play().catch(() => {});
+        } else {
+          video.src = `${PROXY_URL}/live/${USER}/${PASS}/${id}.ts`;
+          video.play().catch(() => {});
+        }
+      } else if (type === "movie") {
+        streamUrl = `${PROXY_URL}/movie/${USER}/${PASS}/${id}.${ext || "mp4"}`;
+        video.src = streamUrl;
+        video.play().catch(() => {});
+      } else if (type === "series_ep") {
+        streamUrl = `${PROXY_URL}/series/${USER}/${PASS}/${id}.${ext || "mp4"}`;
+        video.src = streamUrl;
+        video.play().catch(() => {});
+      }
+
+      video.onloadedmetadata = refreshTrackOptions;
+    }
+
+    async function openSeriesDetails(seriesId, seriesTitle) {
+      document.getElementById("seriesModal").classList.remove("hidden");
+      document.getElementById("seriesModalTitle").textContent = seriesTitle;
+      document.getElementById("seriesModalSeasons").innerHTML = `<span class="text-xs text-neutral-400">${i18n[currentLang].loading}</span>`;
+      document.getElementById("seriesModalEpisodes").innerHTML = "";
+
+      const details = await apiFetch(`get_series_info&series_id=${seriesId}`);
+      const seasonsData = details.episodes || {};
+      const seasonKeys = Object.keys(seasonsData);
+
+      if (!seasonKeys.length) {
+        document.getElementById("seriesModalEpisodes").innerHTML = `<div class="text-center text-xs text-neutral-500 py-4">${i18n[currentLang].noResults}</div>`;
+        return;
+      }
+
+      let seasonsHtml = "";
+      seasonKeys.forEach((sKey, idx) => {
+        seasonsHtml += `
+          <button onclick="renderEpisodes(${JSON.stringify(seasonsData[sKey]).replace(/"/g, "&quot;")}, '${sKey}')" class="shrink-0 text-xs px-3 py-1 rounded-full border border-neutral-800 bg-[#151515] hover:bg-neutral-800 text-neutral-300 font-medium transition ${idx === 0 ? "border-red-600 text-white" : ""}">
+            ${i18n[currentLang].season} ${sKey}
+          </button>
+        `;
+      });
+      document.getElementById("seriesModalSeasons").innerHTML = seasonsHtml;
+      renderEpisodes(seasonsData[seasonKeys[0]], seasonKeys[0]);
+    }
+
+    function renderEpisodes(episodes, sKey) {
+      const container = document.getElementById("seriesModalEpisodes");
+      if (!Array.isArray(episodes) || !episodes.length) {
+        container.innerHTML = `<div class="text-center text-xs text-neutral-500 py-4">${i18n[currentLang].noResults}</div>`;
+        return;
+      }
+
+      let html = "";
+      episodes.forEach(ep => {
+        const epId = ep.id;
+        const epTitle = ep.title || `${i18n[currentLang].episode} ${ep.episode_num || ""}`;
+        const ext = ep.container_extension || "mp4";
+        html += `
+          <div onclick="playStream('series_ep', '${epId}', '${escapeHtml(epTitle)}', '', '${ext}'); closeSeriesModal();" class="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 cursor-pointer transition">
+            <span class="text-xs sm:text-sm text-neutral-200 truncate flex-1">${epTitle}</span>
+            <span class="text-xs text-red-500 font-bold ml-2">▶</span>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function closeSeriesModal() {
+      document.getElementById("seriesModal").classList.add("hidden");
+    }
+
+    // قياسات الفيديو الـ 4
+    function cycleAspectMode() {
+      aspectIndex = (aspectIndex + 1) % 4;
+      video.className = `w-full h-full bg-black transition-all duration-200 ${aspectModes[aspectIndex]}`;
+      
+      const toast = document.getElementById("aspectToast");
+      toast.textContent = currentLang === "ar" ? aspectNamesAr[aspectIndex] : aspectNamesEn[aspectIndex];
+      toast.classList.remove("opacity-0");
+      clearTimeout(window.aspectToastTimeout);
+      window.aspectToastTimeout = setTimeout(() => toast.classList.add("opacity-0"), 1800);
+    }
+
+    // إدارة المسارات الصوتية
+    function toggleAudioMenu() {
+      const menu = document.getElementById("audioMenu");
+      closeSubsMenu();
+      if (!menu.classList.contains("hidden")) {
+        menu.classList.add("hidden");
+      } else {
+        refreshTrackOptions();
+        menu.classList.remove("hidden");
+      }
+    }
+    function closeAudioMenu() {
+      document.getElementById("audioMenu").classList.add("hidden");
+    }
+
+    // إدارة مسارات الترجمة
+    function toggleSubsMenu() {
+      const menu = document.getElementById("subsMenu");
+      closeAudioMenu();
+      if (!menu.classList.contains("hidden")) {
+        menu.classList.add("hidden");
+      } else {
+        refreshTrackOptions();
+        menu.classList.remove("hidden");
+      }
+    }
+    function closeSubsMenu() {
+      document.getElementById("subsMenu").classList.add("hidden");
+    }
+
+    function refreshTrackOptions() {
+      const aList = document.getElementById("audioList");
+      const sList = document.getElementById("subsList");
+      const t = i18n[currentLang];
+
+      let audioTracks = [];
+      let subTracks = [];
+
+      if (hlsInstance) {
+        audioTracks = hlsInstance.audioTracks || [];
+        subTracks = hlsInstance.subtitleTracks || [];
+      } else if (video.audioTracks) {
+        for (let i = 0; i < video.audioTracks.length; i++) {
+          const at = video.audioTracks[i];
+          audioTracks.push({ name: at.label || at.language || `Audio ${i + 1}`, id: i, selected: at.enabled });
+        }
+      }
+
+      // عرض الصوتيات
+      if (!audioTracks.length) {
+        aList.innerHTML = `<span class="text-[11px] text-neutral-500 px-2 py-1">${t.noAudio}</span>`;
+      } else {
+        let html = "";
+        audioTracks.forEach((track, idx) => {
+          const isSelected = hlsInstance ? (idx === hlsInstance.audioTrack) : track.selected;
+          const label = track.name || track.lang || `Track ${idx + 1}`;
+          html += `
+            <button onclick="selectAudioTrack(${idx})" class="text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium">
+              <span>${label}</span>
+              ${isSelected ? `<span class="text-red-500 font-bold">✓</span>` : ""}
+            </button>
+          `;
+        });
+        aList.innerHTML = html;
+      }
+
+      // عرض الترجمات
+      if (hlsInstance && subTracks.length) {
+        let html = `
+          <button onclick="selectSubtitleTrack(-1)" class="text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium">
+            <span>${t.subsOff}</span>
+            ${(hlsInstance.subtitleTrack === -1 || !hlsInstance.subtitleDisplay) ? `<span class="text-red-500 font-bold">✓</span>` : ""}
+          </button>
+        `;
+        subTracks.forEach((track, idx) => {
+          const isSelected = hlsInstance.subtitleDisplay && idx === hlsInstance.subtitleTrack;
+          const label = track.name || track.lang || `Sub ${idx + 1}`;
+          html += `
+            <button onclick="selectSubtitleTrack(${idx})" class="text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium">
+              <span>${label}</span>
+              ${isSelected ? `<span class="text-red-500 font-bold">✓</span>` : ""}
+            </button>
+          `;
+        });
+        sList.innerHTML = html;
+      } else if (video.textTracks && video.textTracks.length) {
+        let html = `
+          <button onclick="selectNativeSubtitle(-1)" class="text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium">
+            <span>${t.subsOff}</span>
+          </button>
+        `;
+        for (let i = 0; i < video.textTracks.length; i++) {
+          const tr = video.textTracks[i];
+          const isSelected = tr.mode === "showing";
+          const label = tr.label || tr.language || `Sub ${i + 1}`;
+          html += `
+            <button onclick="selectNativeSubtitle(${i})" class="text-right px-2 py-1 rounded text-neutral-200 hover:bg-neutral-800 flex items-center justify-between font-medium">
+              <span>${label}</span>
+              ${isSelected ? `<span class="text-red-500 font-bold">✓</span>` : ""}
+            </button>
+          `;
+        }
+        sList.innerHTML = html;
+      } else {
+        sList.innerHTML = `<span class="text-[11px] text-neutral-500 px-2 py-1">${t.noSubs}</span>`;
+      }
+    }
+
+    function selectAudioTrack(idx) {
+      if (hlsInstance) {
+        hlsInstance.audioTrack = idx;
+      } else if (video.audioTracks) {
+        for (let i = 0; i < video.audioTracks.length; i++) {
+          video.audioTracks[i].enabled = (i === idx);
+        }
+      }
+      refreshTrackOptions();
+      closeAudioMenu();
+    }
+
+    function selectSubtitleTrack(idx) {
+      if (hlsInstance) {
+        hlsInstance.subtitleTrack = idx;
+        hlsInstance.subtitleDisplay = (idx >= 0);
+      }
+      refreshTrackOptions();
+      closeSubsMenu();
+    }
+
+    function selectNativeSubtitle(idx) {
+      for (let i = 0; i < video.textTracks.length; i++) {
+        video.textTracks[i].mode = (i === idx) ? "showing" : "disabled";
+      }
+      refreshTrackOptions();
+      closeSubsMenu();
+    }
+
+    // Playback Controls
+    function togglePlay() {
+      if (video.paused) {
+        video.play();
+        document.getElementById("icoPlay").classList.add("hidden");
+        document.getElementById("icoPause").classList.remove("hidden");
+      } else {
+        video.pause();
+        document.getElementById("icoPlay").classList.remove("hidden");
+        document.getElementById("icoPause").classList.add("hidden");
+      }
+    }
+
+    function toggleMute() {
+      video.muted = !video.muted;
+      if (video.muted) {
+        document.getElementById("icoVolOn").classList.add("hidden");
+        document.getElementById("icoVolOff").classList.remove("hidden");
+      } else {
+        document.getElementById("icoVolOn").classList.remove("hidden");
+        document.getElementById("icoVolOff").classList.add("hidden");
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        if (playerContainer.requestFullscreen) playerContainer.requestFullscreen();
+        else if (playerContainer.webkitRequestFullscreen) playerContainer.webkitRequestFullscreen();
+        else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }
+
+    document.addEventListener("fullscreenchange", () => {
+      const isFs = !!document.fullscreenElement;
+      document.getElementById("icoFsExpand").classList.toggle("hidden", isFs);
+      document.getElementById("icoFsCompress").classList.toggle("hidden", !isFs);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("#btnAudio") && !e.target.closest("#audioMenu")) closeAudioMenu();
+      if (!e.target.closest("#btnSubs") && !e.target.closest("#subsMenu")) closeSubsMenu();
+    });
+
+    function escapeHtml(str) {
+      return String(str || "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", """: "&quot;", "'": "&#39;" })[m]);
+    }
+
+    // بدء التشغيل التلقائي عند فتح الصفحة
+    window.addEventListener("DOMContentLoaded", () => {
+      switchSection("live");
+    });
+  </script>
+</body>
+</html>
