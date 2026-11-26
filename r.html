@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Alameeere Cinema - أفلام ومسلسلات</title>
+  <title>AlameeereLive - أفلام ومسلسلات</title>
 
   <!-- PWA & Mobile Meta Tags -->
-  <meta name="application-name" content="AlameeereCinema">
-  <meta name="apple-mobile-web-app-title" content="AlameeereCinema">
+  <meta name="application-name" content="AlameeereLive">
+  <meta name="apple-mobile-web-app-title" content="AlameeereLive">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -77,12 +77,6 @@
       transition: object-fit 0.2s ease;
     }
 
-    /* Video Aspect Modes */
-    .mode-0 { object-fit: contain !important; }
-    .mode-1 { object-fit: fill !important; }
-    .mode-2 { object-fit: cover !important; }
-    .mode-3 { object-fit: contain !important; aspect-ratio: 16/9 !important; }
-
     #screenDimmer {
       position: absolute;
       inset: 0;
@@ -102,100 +96,118 @@
       align-items: center;
       gap: 14px;
       z-index: 12;
-      pointer-events: none;
+      cursor: pointer;
       transition: opacity 0.3s ease;
     }
     #centerLogo img {
-      width: 105px;
-      height: 105px;
-      border-radius: 24px;
-      box-shadow: 0 0 35px rgba(229, 9, 20, 0.4);
+      width: 110px;
+      height: 110px;
+      border-radius: 26px;
+      box-shadow: 0 0 35px rgba(229, 9, 20, 0.45);
     }
     #centerLogo .logo-title {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 800;
       letter-spacing: 0.5px;
       display: flex;
       align-items: center;
       gap: 5px;
     }
-    #centerLogo .live-badge {
+    .live-badge {
       color: var(--accent);
-      background: rgba(229, 9, 20, 0.15);
-      padding: 2px 8px;
-      border-radius: 6px;
-      border: 1px solid rgba(229, 9, 20, 0.3);
-      font-size: 15px;
+      font-weight: 900;
+    }
+    .hint-chip {
+      font-size: 13px;
+      color: #bbb;
+      background: rgba(255,255,255,0.08);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
     }
 
     #gestureLayer {
       position: absolute;
       inset: 0;
       z-index: 10;
-      touch-action: none;
-    }
-
-    #toastIndicator {
-      position: absolute;
-      top: 15%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(15, 15, 15, 0.92);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      padding: 10px 22px;
-      border-radius: 30px;
-      font-size: 15px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 50;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
     }
 
     .tap-ripple {
       position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 35%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(229, 9, 20, 0.25);
+      border: 1px solid rgba(229, 9, 20, 0.5);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(255,255,255,0.06);
+      color: white;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      z-index: 15;
+    }
+    #tapLeft { left: 15%; }
+    #tapRight { right: 15%; }
+
+    #toastIndicator {
+      position: absolute;
+      top: calc(var(--sat) + 20px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(18, 18, 18, 0.92);
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      padding: 9px 20px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      z-index: 30;
       opacity: 0;
       pointer-events: none;
-      z-index: 25;
-      transition: opacity 0.25s ease;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      white-space: nowrap;
+      max-width: 90vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    #tapLeft { left: 0; border-top-right-radius: 50%; border-bottom-right-radius: 50%; }
-    #tapRight { right: 0; border-top-left-radius: 50%; border-bottom-left-radius: 50%; }
 
     #controlsOverlay {
       position: absolute;
       inset: 0;
-      z-index: 40;
+      z-index: 20;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: calc(var(--sat) + 12px) calc(var(--sar) + 14px) calc(var(--sab) + 14px) calc(var(--sal) + 14px);
-      background: linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, transparent 22%, transparent 70%, rgba(0,0,0,0.92) 100%);
-      opacity: 1;
+      padding: calc(var(--sat) + 14px) calc(var(--sar) + 16px) calc(var(--sab) + 16px) calc(var(--sal) + 16px);
+      background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.92) 100%);
       transition: opacity 0.3s ease;
       pointer-events: none;
     }
-    #controlsOverlay.hidden-controls {
+    #controlsOverlay * {
+      pointer-events: auto;
+    }
+    .hidden-controls {
       opacity: 0 !important;
       pointer-events: none !important;
     }
-    #controlsOverlay > * {
-      pointer-events: auto;
+    .hidden-controls * {
+      pointer-events: none !important;
     }
 
+    /* Top Bar: ONLY Movies & Series Menu Icon on Right */
     .top-bar {
       display: flex;
       align-items: center;
@@ -206,21 +218,6 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      max-width: 65%;
-    }
-    .top-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    }
-    .top-subtitle {
-      font-size: 12px;
-      color: #aaa;
-      margin-top: 2px;
     }
     .top-left {
       display: flex;
@@ -228,30 +225,41 @@
       gap: 10px;
     }
 
-    .ctrl-btn {
-      background: rgba(26, 26, 26, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
+    .movies-menu-btn {
       display: flex;
       align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 15px;
-      transition: background 0.15s, transform 0.1s, border-color 0.15s;
-      outline: none;
-    }
-    .ctrl-btn:active {
-      transform: scale(0.92);
-      background: rgba(229, 9, 20, 0.3);
-    }
-    .ctrl-btn.active {
+      gap: 8px;
       background: var(--accent);
-      border-color: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 22px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
+      transition: background 0.15s, transform 0.1s;
+    }
+    .movies-menu-btn:hover, .movies-menu-btn:active {
+      background: var(--accent-hover);
+      transform: scale(0.98);
     }
 
+    .top-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 60vw;
+    }
+    .top-subtitle {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    /* Center Controls */
     .center-controls {
       display: flex;
       align-items: center;
@@ -259,9 +267,39 @@
       gap: 32px;
       width: 100%;
     }
+    .center-controls.hidden-init,
+    .bottom-bar.hidden-init {
+      display: none !important;
+    }
+
+    .seek-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(30, 30, 30, 0.75);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 800;
+      transition: transform 0.12s, background 0.15s;
+    }
+    .seek-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+    .seek-btn:active {
+      transform: scale(0.9);
+      background: rgba(229, 9, 20, 0.5);
+    }
+
     .play-btn-large {
-      width: 66px;
-      height: 66px;
+      width: 68px;
+      height: 68px;
       border-radius: 50%;
       background: var(--accent);
       border: none;
@@ -270,37 +308,15 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 25px rgba(229, 9, 20, 0.6);
-      transition: transform 0.15s, background 0.15s;
+      box-shadow: 0 0 25px rgba(229, 9, 20, 0.6);
+      transition: transform 0.12s, background 0.15s;
     }
     .play-btn-large:active {
       transform: scale(0.92);
-    }
-    .seek-btn {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: rgba(20, 20, 20, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 700;
-      gap: 1px;
-    }
-    .seek-btn svg {
-      width: 18px;
-      height: 18px;
-    }
-    .seek-btn:active {
-      transform: scale(0.92);
-      background: rgba(255,255,255,0.15);
+      background: var(--accent-hover);
     }
 
+    /* Bottom Bar & Timeline */
     .bottom-bar {
       width: 100%;
       display: flex;
@@ -308,32 +324,32 @@
       gap: 6px;
     }
     .timeline-container {
-      width: 100%;
       display: flex;
       align-items: center;
       gap: 12px;
+      width: 100%;
     }
     .time-label {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       color: #ddd;
+      min-width: 45px;
       font-variant-numeric: tabular-nums;
-      min-width: 58px;
-      text-align: center;
     }
     .slider-track {
-      position: relative;
       flex: 1;
-      height: 24px;
+      height: 26px;
       display: flex;
       align-items: center;
+      position: relative;
       cursor: pointer;
+      touch-action: none;
     }
     .slider-bg {
       position: absolute;
       left: 0;
       right: 0;
-      height: 6px;
+      height: 5px;
       background: rgba(255, 255, 255, 0.25);
       border-radius: 3px;
       overflow: hidden;
@@ -345,7 +361,7 @@
       background: var(--accent);
       width: 0%;
       border-radius: 3px;
-      transition: width 0.1s linear;
+      transition: width 0.05s linear;
     }
     .slider-thumb {
       position: absolute;
@@ -358,9 +374,10 @@
       box-shadow: 0 0 8px rgba(0,0,0,0.8);
       pointer-events: none;
       left: 0%;
-      transition: left 0.1s linear;
+      transition: left 0.05s linear;
     }
 
+    /* Drawer (Sidebar for Movies & Series) */
     #drawer {
       position: fixed;
       top: 0;
@@ -408,12 +425,25 @@
       justify-content: space-between;
     }
     .drawer-title {
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 800;
       display: flex;
       align-items: center;
       gap: 8px;
     }
+    .close-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #242424;
+      border: 1px solid #333;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
     .tabs-nav {
       display: flex;
       background: #0a0a0a;
@@ -515,30 +545,35 @@
       border-radius: 4px;
     }
 
+    /* Perfectly Proportioned Poster Cards */
     .media-card {
       background: var(--card-bg);
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       position: relative;
-      border: 1px solid #222;
+      border: 1px solid #262626;
       cursor: pointer;
       transition: transform 0.15s, border-color 0.15s;
+      height: 285px;
+      min-height: 285px;
     }
     .media-card:hover, .media-card:active {
       transform: translateY(-2px);
-      border-color: #444;
+      border-color: #555;
     }
     .media-card.playing {
       border-color: var(--accent);
-      box-shadow: 0 0 10px rgba(229, 9, 20, 0.4);
+      box-shadow: 0 0 12px rgba(229, 9, 20, 0.5);
     }
+
     .poster-wrap {
       position: relative;
       width: 100%;
-      padding-top: 145%;
-      background: #1c1c1c;
+      height: 225px;
+      min-height: 225px;
+      background: #181818;
       overflow: hidden;
     }
     .poster-img {
@@ -547,24 +582,25 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      background: #1c1c1c;
+      background: #181818;
+      display: block;
     }
     .fav-btn {
       position: absolute;
-      top: 6px;
-      left: 6px;
-      width: 30px;
-      height: 30px;
+      top: 8px;
+      left: 8px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      background: rgba(0,0,0,0.65);
-      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.7);
+      border: 1px solid rgba(255,255,255,0.25);
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 5;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 15px;
       transition: transform 0.1s, color 0.15s;
     }
     .fav-btn.is-fav {
@@ -572,25 +608,29 @@
       background: rgba(0,0,0,0.85);
       border-color: #ffb703;
     }
+
     .media-info {
-      padding: 8px;
+      padding: 9px 8px 10px 8px;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
+      background: #151515;
     }
     .media-title {
       font-size: 13px;
       font-weight: 700;
-      color: #eee;
+      color: #fff;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      line-height: 1.3;
     }
     .media-meta {
       font-size: 11px;
       color: #888;
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
 
     #loadMoreBtn {
@@ -607,6 +647,7 @@
       text-align: center;
     }
 
+    /* Series Episodes Modal */
     #episodesModal {
       position: fixed;
       inset: 0;
@@ -631,11 +672,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      animation: slideUp 0.25s ease-out;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
+      box-shadow: 0 -5px 30px rgba(0,0,0,0.9);
     }
     .episodes-header {
       padding: 14px 16px;
@@ -738,186 +775,192 @@
       #drawer {
         position: relative;
         transform: none !important;
-        width: 320px;
         box-shadow: none;
       }
       #drawerBackdrop {
         display: none !important;
+      }
+      #itemsContainer {
+        grid-template-columns: repeat(3, 1fr);
       }
     }
   </style>
 </head>
 <body>
 
-<div id="appContainer">
-  <div id="videoWrapper">
-    <video id="mainVideo" playsinline preload="auto" class="mode-0"></video>
-    
-    <div id="screenDimmer"></div>
+  <div id="appContainer">
+    <div id="videoWrapper">
+      <video id="mainVideo" playsinline preload="metadata"></video>
+      <div id="screenDimmer"></div>
 
-    <div id="centerLogo">
-      <img src="data:image/jpeg;base64,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htz9hnBjjPdR0H0rz/wHrMqfts+L73zJD5ljIpGScjZBgfQYr5RXWtYVYVXVb8CA7oQLh/3ZwRleeOCenqaZHqupxXz30eo3aXUgw86zsJGHu2cnoPyoA+q/2aNXng+MnxXkeSRvtNzLuySQT9plwT+Zrp9M1yz8ZfA3wsmieD/Dvi86XDHbzabqc/lC2kSPYxXsGyP4sZVsivi211TUrWaWa21C7glmOZXjmZWfnPzEHnn1o0vVdU0qVpdM1G8sZHGGe3naMke5UjNAH2hP8R7zwt408B6D4r8P+GNA05BL9iaxvmkFiWhaIIVYDYuXA3DK88Hg1p34121+JFzrujfDLwT9oLSTw+IJ7547h9ykEuFUsGYEqTgrg9cV8L3t3d31y1ze3M1zO/3pJpC7N9SeTVw+INdOn/2cda1I2W3b9n+1P5ePTbnGKAPszwP48tvHngDxXpi+HvD1/rJ1ee4vNEubrdazFpFYN5i53qdpw/Tcozxg1k6/4i8Q+HvBWlaDN4C8JeG9L1TW7SP7JYaizSQSC4icSBMbXJ8vnaTjGTXx7Y3l3Y3C3NldT2s6/dkhkKMPoRzU9/q+q6hdx3d/qd7d3EZBSWadndcc8EnIoA+kP2j/ABetl+0/4R1nVJJJNN0tLS4MTElYx57l2C+vAPvtFeo+NpLrVfGlhr+kfD7wd4jDrDLFrt5eMs0JXBVhgEkDAKlM/nXwxfXt5fz+ffXc91LjbvmkLtj0yTVqy17XLGzNnZazqNtbNnMMN06Ic9flBxQB7p8QPFWreIfitrlzq9np9pfWttBZyiwuTPFIULkNuIBzhsYIyMYPNeTy+E9QhMl08tvsTMjAMc4HPpXM215cW7MYZpIy33irEZqZ9UvnUq93OynggyHBrhnh6vtZTg1rb8D66jneAll1HCYmlJunzWadleTv29D0Dxdq8tjrmk3qkjyg2c91JAI/KtDV9Qi0uy1LVbdyJ70KN3qduAR+GTXlNxd3E5UzTSSFem5icUS3lxLGsck0jov3VLEgfQVisu0ir7b+etz1pcc3qYiap/HrH+7Ll5G/mj1pNRGpeH7H7PYWV+saKPKnIxGQMHqOvFc58R9Uu5NNs9OuLa2iRD5kYikztwMbcYGB+lcXa391a5+z3EkWeuxiM1DcXEs7l5ZGdj1LHJqqOBdOpzX0X9dzmzPjCONwToqDjOSSfw20/wC3ebW219OhFRRRXpHwgUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//Z" alt="Alameeere">
-      <div class="logo-title">
-        Alameeere <span class="live-badge">Cinema</span>
-      </div>
-      <div style="font-size: 13px; color: #888;">اختر فيلماً أو مسلسلاً للبدء</div>
-    </div>
-
-    <div id="gestureLayer"></div>
-
-    <div id="tapLeft" class="tap-ripple">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 19l-9-7 9-7v14zM22 19l-9-7 9-7v14z"/></svg>
-      <span style="font-size: 12px; font-weight: 800; margin-top: 4px;">10- ثوانٍ</span>
-    </div>
-    <div id="tapRight" class="tap-ripple">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 19l9-7-9-7v14zM2 19l9-7-9-7v14z"/></svg>
-      <span style="font-size: 12px; font-weight: 800; margin-top: 4px;">+10 ثوانٍ</span>
-    </div>
-
-    <div id="toastIndicator">
-      <span id="toastIcon"></span>
-      <span id="toastText"></span>
-    </div>
-
-    <div id="controlsOverlay">
-      <div class="top-bar">
-        <div class="top-right">
-          <button id="toggleDrawerBtn" class="ctrl-btn" title="القائمة">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
-          <div style="min-width: 0;">
-            <div id="nowPlayingTitle" class="top-title">Alameeere Cinema</div>
-            <div id="nowPlayingSub" class="top-subtitle">جاهز للتشغيل</div>
-          </div>
-        </div>
-
-        <div class="top-left">
-          <button id="playerFavBtn" class="ctrl-btn" title="إضافة للمفضلة">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-          </button>
-          <button id="aspectBtn" class="ctrl-btn" title="أبعاد الفيديو">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 4v4M14 4v4M10 20v-4M14 20v-4"/></svg>
-          </button>
-          <button id="rotateBtn" class="ctrl-btn" title="دوران الشاشة">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-          </button>
+      <!-- Center Logo (Visible initially, clicking it opens menu) -->
+      <div id="centerLogo" title="اضغط لفتح قائمة الأفلام والمسلسلات">
+        <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCADAAMADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD4yooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigApUVnYKqlmJwAByTSV9VfsJfDjTb29ufiPr9slwtjP8AZ9JhlXK+eAC8xB6lAVC+5J6gUAeaWPwF8R2Xh6017xtfQ+Fra9H+h2k0TS3s/fIhGNijuXZcZHHNNPwj0ydMWfiWdX7efZDaf++XJH5Gvcf2vtWmk+KFghcmFNJiMYzwMySbvzIH5V5zok0jspyarl0HGVnseP8AjDwL4g8Mjzr22E1mThbu3JeEn0JxlT7MAa5gqRX2PoI82MwzRpLFKu2SN1DK6+jA8Eexrl/Hf7PttrUMmpeCSlpd4LNp8r4ikP8A0zc/dP8Astx7jpWcrxOmFKnV+F2fZ7ff/n958v0Vr+ItA1XQdSm03VrG4sruBtskMyFWU+4NZJGKIyUldGVWjOlLlmrMSiilAyaoyEoqx9km8oS+W2w8BscVCykGkpJlypyjuhtFFFMgKKKKACiiigAooooAKKKKACiiigBRya+4f2b9RTTPgt4ct4ztDRyyt7s0zkn+VfDyfeH1r6t+FWoNafDXw/Du6WhOPrI9NblW0uZn7XGqsniDTdTjw0n9l7FzyMiZsE/TdXhWm3+tpMt1Brt1FcfeGXJXPoR0x+FeoftKXJu7PTpSckQuhP8A20Q/1ryC2l2qn0FEgppN6ntvw7+KdvBcw6d4ygXT3bhL+NSYH/3gM7fqMj1Ar6h8HLFPawXNvLHNBKoaOSNgyuvqCOCPpXwno91G6G3uIo5oW+9HIMqff2PuOa9I+G2s+LPBU4vPAl8LyyZt9xoN826OT1MZ4w3uuG/3q5niVF2me1DJK1en7TDe9bp1/wCCfWXxH+HnhTx9oYs/EVgGmRMQXsWFuIP91u4/2TkfTrXxJ8Z/gv4i8AXEt2g/tTRN3yX0CHCegkXqh/Q9jX2D8NPi/wCFvH9t9ghaTSPEEYxNpN4cSlh18o8CQfTDDuopfFN1tWRGAZGBVlYZDA9QQeCPatVFP3onnutUgvZVVt33Xp/lsfnOy4ODVi1hYkSFGMakbiB0/Gvc/ip8L9JvZpdR8LpHp90cs1nnEEh/2D/yzPt93/drkfBs1q2my6LPa+TPFlbmCRcGQ5wSR6jp7Vz4uu6EOa1z1uHsnp5ri/Ye1UHZtX6vt/Xyudt4c1DQtW8LxaS1qkuklNnkHhom/vA9n75798g15P4/8MS+H9WaAP59tIPMt5wMCRD0PsR0I7EVrxiTwr4hUKzGwuf/AEH/ABU/55rrfENsmueHLixcBp7YG4tj1OQPmUexUZ+qivJpVXh6qad4yP0jMMrp5xl806ahiKOkkttO3k1t/wAMeIMMGm1Zu49jkVWNfQRd0fjNWDhJphRRRTMwooooAKKKKACiiigAooooAfF98fWvonwncmDwboKZwPsKH/x5q+dofvj617lYXYTw3oaA4xp0f82pJ++jqpxToTfmjM+Nk32jQbZ852lh+bJ/hXlUb9B7V6L8SpfO8Mk/3ZB+pH+FeaA805GFNamzp8xVxzXc+GtSaF1+avO7Q8ium0h2DCvKxdrH6DwzV5Jo9tg03w341t449aaSz1FMfZ9Ut+J42H3d3TeB78jsRTtY8a+J/AF3BofxBkGtaZOhNjrVqd8rIDjMg4L44znDj1bivNh4kTRYQ2/fN/CgPT61xfirxTqWt3q3N7cvKUUqgJ+VV/ugdAKwy6VZS/uno8Z0MtUeaMl7Tsunz/Q971TULa+sEv8AT7qK8tJc+XNE25W9R7EdwcEdxXk3jxvsusWmvW/E4cRz4/jGOCfwyv5Vy/g7XNS0jVJZ9N/49WT/AEq3YnypR2BHY+hHI7Vu+NbyG60xZrct5M+yRA3VeeVPuCCPwz3r26kVODTPzTB1Z0a8Z03Zp3XyNjxdbpe+G2mTkxYmjPsev6H9Kl8JX5Njp9yxyU+R/facfyxUauB4MxJ/z4c5/wB2s3wgxGjRjn/Xvj8lr5Wmv3Eov7LP3+rWUc3pVY6e1pJyXmmv00OS8X2gstdvbZRhY5mUfQHj9Kwj1rq/iOQfFV/j/np/QVyjV9Hhnemmfhud0o0sbUhHZN/mJRRRXQeQFFFFABRRRQAUUUUAFFFFADo+HFeqW13/AMSPSVz92xjH6tXlS9a722n/AOJRpwz0tVH6tQlrc1jO1OUR/jCbzfDk4zwHQ/8Aj1cSY8P0rqNfl36Fcr/uH/x4VlmzOQ2OCoP6Cs601G1zrwGFlX5uXpb9SGzjORV59SFsmyA/N/f9PpVS6IiT5mCD07mu18F/CbxL4gt49U1KJ9F0hwGWa4jPnTL6xxnBI/2jhfc1zKl7V3Z688c8DHkg7P8AE4NpLi7nEcSySyyHCogLMx9gOTWxa+GJI8S6s5Tv9njYF/8AgR6L9OT9K9Tk8P6d4dga20i1MJK7ZJ3O6aX/AHm7D/ZXA9jXM6hbn5mIAVRkk8AD3rsjTUEeHVrVK8u7ZzssaJF5MESQxDoiDA+p7k+5qncI129npEPLGQyOf7gP/wBbJqPWNZhjYxWZ8xuhk/hH09a0/DMVrBpTaj9oVpHB8+Rj9z/Z/wA9a58XX9nTuj1eH8sWMxfs5tJLV69Fv/XTc0fFF4lvojwRnHm4iQf7I6/oP1q74atDDY2ED/KSvmPntuOf5YrntOifxHrYdkYWNtyc+np9WP8Aniui8TXq6bo80hIE9yDHEB2H8R/AcfjXhyp8sY0Fu9Wfq+DxSr1K2bVNKUI8sfNJ3bXq9F/wDz/xPd/bNXurkdJJWYfQnisY9anuH3MTVc19DTjyxSPxTHV3XrSm+ruFFFFaHGFFFFABRRRQAUUUUAFFFFABXY6a3naHZyqc7FaJvYqxP8mFcdW74R1mDTbh7bUImm064I81VPzIR0dfcZPHcfhTTA0bpVuLSa2ZwhkX5SegIIIz7cY/Gul8BeDvGvjp47LRtHgt4o8Rz6pcNtt0x3zyGbHZQx9hXT+E/DPhm5aLUWR9TgY5j3Sgw/iFAz9CfqK938H3oRYYIVRI0ULHHGAqqPRQOAPYVNSlCpbmWx1YXG18KpKjK3No/wCunqtSb4UfAXwX4Mjj1XUB/wAJJrww32y8jBihb/plEcgf7zZPpit3xjaPO7gBndvxJqt40+KnhHwJp5bX9SDXpXMen2+HuH/4D/APdiPxr5a+Kfx78TeLXltNMH9iaWxI8qByZXH+3JwT9BgfWk5W0SFSpKT5qrsvxOz+I2veG9BeWO8vFu70dLO2YFgfR26J9OT7V4R4o8S3msTMG2QW4PyQRcKPr3J9zWJNcPI2WYkn1qEnNQoNu8mdNbGQjH2dCNl36v1f6ICcmpreQ5CMxCEjIFQUoOK0aujghNxdz2fTV0fTPDsV5FMiaft3CT+KRvT3b27fSvNvFOtS6tqDTn5Ix8saA8IvYVi+fJs2bzt9M0wsTXDh8CqU3Nu7Z9dnfF9bM8NTwsIKnTilotm1+nZAxzTaKK7z45u4UUUUAFFFFABRRRQAU7y32b9jbf72OKveG9Ivdf8AEGn6Jp0ZkvL+5jtoFA6u7BR+HNfo7qui+CtR8IXv7O9s0a3Vv4XikicgY+8Ujk9dwkVZD7OPWgD817a2uLlyltBLMwGSsaFjj8KjZSrFWBBBwQe1fUX/AAT7tbnS/jn4h0+9iaG5ttJlgmjbqjrcxKyn6EGuV8K/AjVviHqPibxVdeJtC8N6DBq9zAby/nGWcStxtBG0c9WIz2BoA8Gor3PxD+zT4s0f4i+G/CzazpNzY+I2kWw1eEs0BKRmQq4xkHaMjGQQcg9cdNJ+x54vFlqPleLfDsup2+5rexVm3Tp/CxJ/1e7tkY6ZI7AHzppGr6ppE/n6XqF1Zyd2hlKZ+uOv41uz/Efx1Nbm3bxTqixkYIjmKEj6rg17Drn7JXjHT/Bl1rFr4i0TUtVsoPOu9Jt2YyR4XcyB+hcDPBAzjgnjPOfCn9nrXfGXhAeMNZ8RaN4R0GVtttdanJtM/JG5RkALkEAkjODgHrQB41NNLNI0ksjyO53MzHJY+pJ60zNeq/EX4D+OPCPjTR/DcMMGt/26+zSbuwbMV0eMjJxtIBBOeMHOSOa72X9kjxB9lks7bx54TufE0UHnPoqTkSAYzjcefxKhffHNAXPmyivWvhL8BfF3jy61d55rPw5pmizvbajfamxRYZk+/GB3Ze+SAOMnkVpfEP8AZ28ReFv7F1DT9e0fxD4f1a+hsU1WwctHDJK4RTIBn5cnqpIyMcHGQDxOivojxh+yl4r8M6HrmsXviPR5oNNtvNto4Vcy3sg6xop6HOB3yTwKsaV+yZ4hk0+0i1vxv4Y0TX72IyW2j3EpaZv9kkdx0O0MBzyaAPnSGCabPlRO+Ou1ScU0IS23HNe5/CzSNZ+H3i3xR4b1+3NnqNqIo5UDZDD5irKw6qQQQe4NeMliNTLJwwlyPrmuaNfmqShba34nsVcq9lhKGJb0qOX4Ow3U9J1HTDGNQsri1MqB4xNEU3Ke4z1FUa9s8X6JqfizVrDT9W1+yWVLZ5Iilu+37yhs5PXofwrg/DXgq51jxHd6Q9zHa/ZN3myuhIBDbQMe9Z0sZCUOaTsduYcNYmjiVSoxbTdlfdu12t9DkMGkr07Rfhcl3FNd33iGysbISFIJnQ5nUEgOASMKccZOT6VzXj7wdeeFbuJJZ4bq2nBaC4iztcDqCDyD04961hiqU5cqepw4jI8bh6Pt6kGonLUUUV0HkBRRRQB7t+xvoUb+Obrxjex4tdDgPkuw+UTuCAc/7Kb29sivTNP+L3wST4nv45hl11PENyvkPdskvlbCoj2lN20JtA7cYz1r5ItNT1G0tpLa1v7qCCTO+OOZlVsjByAcHjiqlAH3V4V0tfD/AO1Fq3iWziKWmv6OZyUX5ROJ4hKPxwr/APAjXE+EvCHhyL4fXvifT/A1t468R6hq9wZrO8vCkMWJ5VxtyFyq4PI3HecHFfLy+INeUqV1rUlKjC4un4HHA59h+VN0/XNa04SjT9X1C0ExzKILl08w+rYPP40Afdmr6lLb3PwmgfTbTTXs9ScGzsyWhtz9hnBjjPdR0H0rz/wHrMqfts+L73zJD5ljIpGScjZBgfQYr5RXWtYVYVXVb8CA7oQLh/3ZwRleeOCenqaZHqupxXz30eo3aXUgw86zsJGHu2cnoPyoA+q/2aNXng+MnxXkeSRvtNzLuySQT9plwT+Zrp9M1yz8ZfA3wsmieD/Dvi86XDHbzabqc/lC2kSPYxXsGyP4sZVsivi211TUrWaWa21C7glmOZXjmZWfnPzEHnn1o0vVdU0qVpdM1G8sZHGGe3naMke5UjNAH2hP8R7zwt408B6D4r8P+GNA05BL9iaxvmkFiWhaIIVYDYuXA3DK88Hg1p34121+JFzrujfDLwT9oLSTw+IJ7547h9ykEuFUsGYEqTgrg9cV8L3t3d31y1ze3M1zO/3pJpC7N9SeTVw+INdOn/2cda1I2W3b9n+1P5ePTbnGKAPszwP48tvHngDxXpi+HvD1/rJ1ee4vNEubrdazFpFYN5i53qdpw/Tcozxg1k6/4i8Q+HvBWlaDN4C8JeG9L1TW7SP7JYaizSQSC4icSBMbXJ8vnaTjGTXx7Y3l3Y3C3NldT2s6/dkhkKMPoRzU9/q+q6hdx3d/qd7d3EZBSWadndcc8EnIoA+kP2j/ABetl+0/4R1nVJJJNN0tLS4MTElYx57l2C+vAPvtFeo+NpLrVfGlhr+kfD7wd4jDrDLFrt5eMs0JXBVhgEkDAKlM/nXwxfXt5fz+ffXc91LjbvmkLtj0yTVqy17XLGzNnZazqNtbNnMMN06Ic9flBxQB7p8QPFWreIfitrlzq9np9pfWttBZyiwuTPFIULkNuIBzhsYIyMYPNeTy+E9QhMl08tvsTMjAMc4HPpXM215cW7MYZpIy33irEZqZ9UvnUq93OynggyHBrhnh6vtZTg1rb8D66jneAll1HCYmlJunzWadleTv29D0Dxdq8tjrmk3qkjyg2c91JAI/KtDV9Qi0uy1LVbdyJ70KN3qduAR+GTXlNxd3E5UzTSSFem5icUS3lxLGsck0jov3VLEgfQVisu0ir7b+etz1pcc3qYiap/HrH+7Ll5G/mj1pNRGpeH7H7PYWV+saKPKnIxGQMHqOvFc58R9Uu5NNs9OuLa2iRD5kYikztwMbcYGB+lcXa391a5+z3EkWeuxiM1DcXEs7l5ZGdj1LHJqqOBdOpzX0X9dzmzPjCONwToqDjOSSfw20/wC3ebW219OhFRRRXpHwgUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//Z" alt="AlameeereLive">
+        <div class="logo-title" dir="ltr">Alameeere <span class="live-badge">Live</span></div>
+        <div class="hint-chip">
+          <span>🎬</span> اضغط لفتح الأفلام والمسلسلات
         </div>
       </div>
 
-      <div class="center-controls">
-        <button id="rewind10Btn" class="seek-btn" title="تأخير 10 ثوانٍ">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 19l-9-7 9-7v14zM22 19l-9-7 9-7v14z"/></svg>
-          <span>10-</span>
-        </button>
+      <!-- Touch Gestures Layer -->
+      <div id="gestureLayer"></div>
 
-        <button id="playPauseBtn" class="play-btn-large" title="تشغيل / إيقاف">
-          <svg id="playIcon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          <svg id="pauseIcon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-        </button>
-
-        <button id="forward10Btn" class="seek-btn" title="تقديم 10 ثوانٍ">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 19l9-7-9-7v14zM2 19l9-7-9-7v14z"/></svg>
-          <span>+10</span>
-        </button>
+      <!-- Skip Indicator Overlays -->
+      <div id="tapLeft" class="tap-ripple">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 19l-9-7 9-7v14zM22 19l-9-7 9-7v14z"/></svg>
+        <span style="font-size: 11px; font-weight: 800; margin-top: 4px;">10- ثوانٍ</span>
+      </div>
+      <div id="tapRight" class="tap-ripple">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 19l9-7-9-7v14zM2 19l9-7-9-7v14z"/></svg>
+        <span style="font-size: 11px; font-weight: 800; margin-top: 4px;">+10 ثوانٍ</span>
       </div>
 
-      <div class="bottom-bar">
-        <div class="timeline-container">
-          <span id="currentTimeLabel" class="time-label">00:00</span>
-          
-          <div id="sliderTrack" class="slider-track">
-            <div class="slider-bg">
-              <div id="sliderFill" class="slider-fill"></div>
+      <!-- Toast Indicator -->
+      <div id="toastIndicator">
+        <span id="toastIcon"></span>
+        <span id="toastText"></span>
+      </div>
+
+      <!-- Player Controls Overlay -->
+      <div id="controlsOverlay">
+        <!-- Top Bar: ONLY Movies & Series Menu Icon on Top Right, nothing else! -->
+        <div class="top-bar">
+          <div class="top-right">
+            <button id="toggleDrawerBtn" class="movies-menu-btn" title="فتح قائمة الأفلام والمسلسلات">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="2" width="20" height="20" rx="4"></rect><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"></path></svg>
+              <span>الأفلام والمسلسلات</span>
+            </button>
+            <div style="min-width: 0;">
+              <div id="nowPlayingTitle" class="top-title" dir="ltr">Alameeere <span class="live-badge">Live</span></div>
+              <div id="nowPlayingSub" class="top-subtitle">جاهز للتشغيل</div>
             </div>
-            <div id="sliderThumb" class="slider-thumb"></div>
           </div>
 
-          <span id="durationLabel" class="time-label">00:00</span>
+          <div class="top-left">
+            <!-- Left icons removed as requested -->
+          </div>
+        </div>
+
+        <!-- Center Controls: Hidden on page open, visible when video is selected! -->
+        <div id="centerControls" class="center-controls hidden-init">
+          <button id="rewind10Btn" class="seek-btn" title="تأخير 10 ثوانٍ">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 19l-9-7 9-7v14zM22 19l-9-7 9-7v14z"/></svg>
+            <span>10-</span>
+          </button>
+
+          <button id="playPauseBtn" class="play-btn-large" title="تشغيل / إيقاف">
+            <svg id="playIcon" width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <svg id="pauseIcon" width="30" height="30" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          </button>
+
+          <button id="forward10Btn" class="seek-btn" title="تقديم 10 ثوانٍ">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 19l9-7-9-7v14zM2 19l9-7-9-7v14z"/></svg>
+            <span>+10</span>
+          </button>
+        </div>
+
+        <!-- Bottom Timeline: Hidden on page open, visible when video is selected! -->
+        <div id="bottomBar" class="bottom-bar hidden-init">
+          <div class="timeline-container">
+            <span id="currentTimeLabel" class="time-label">00:00</span>
+            
+            <div id="sliderTrack" class="slider-track">
+              <div class="slider-bg">
+                <div id="sliderFill" class="slider-fill"></div>
+              </div>
+              <div id="sliderThumb" class="slider-thumb"></div>
+            </div>
+
+            <span id="durationLabel" class="time-label">00:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drawer Backdrop -->
+    <div id="drawerBackdrop"></div>
+
+    <!-- Movies & Series Drawer -->
+    <div id="drawer">
+      <div class="drawer-header">
+        <div class="drawer-top-row">
+          <div class="drawer-title"><span>🎬</span> <span dir="ltr">Alameeere <span class="live-badge">Live</span></span></div>
+          <button id="closeDrawerBtn" class="close-btn" title="إغلاق">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div class="tabs-nav">
+          <button id="tabMovies" class="tab-btn active">
+            🎬 الأفلام
+          </button>
+          <button id="tabSeries" class="tab-btn">
+            🍿 المسلسلات
+          </button>
+          <button id="tabFavs" class="tab-btn">
+            ⭐ المفضلة
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="search-input-box">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="searchInput" placeholder="ابحث عن فيلم أو مسلسل..." autocomplete="off">
+          <button id="searchClearBtn" class="search-clear-btn">✕</button>
+        </div>
+
+        <select id="categorySelect" class="category-select">
+          <option value="">جاري تحميل التصنيفات...</option>
+        </select>
+      </div>
+
+      <div id="itemsContainer">
+        <div class="empty-state">
+          <div class="spinner" style="margin: 0 auto 12px;"></div>
+          جاري جلب المحتوى...
         </div>
       </div>
     </div>
   </div>
 
-  <div id="drawerBackdrop"></div>
-
-  <div id="drawer">
-    <div class="drawer-header">
-      <div class="drawer-top-row">
-        <div class="drawer-title">
-          <span>🎬</span> Alameeere Cinema
+  <!-- Series Episodes Modal Sheet -->
+  <div id="episodesModal">
+    <div class="episodes-sheet">
+      <div class="episodes-header">
+        <div style="min-width: 0;">
+          <div id="modalSeriesTitle" style="font-size: 16px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">اسم المسلسل</div>
+          <div id="modalSeriesSub" style="font-size: 12px; color: #aaa;">اختر الحلقة للمشاهدة</div>
         </div>
-        <button id="closeDrawerBtn" class="ctrl-btn" style="width:34px; height:34px;">
+        <button id="closeModalBtn" class="close-btn" title="إغلاق">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
 
-      <div class="tabs-nav">
-        <button id="tabMovies" class="tab-btn active">🎬 الأفلام</button>
-        <button id="tabSeries" class="tab-btn">🍿 المسلسلات</button>
-        <button id="tabFavs" class="tab-btn">⭐ المفضلة</button>
-      </div>
-    </div>
-
-    <div class="filter-section">
-      <div class="search-input-box">
-        <input id="searchInput" type="text" placeholder="ابحث عن فيلم أو مسلسل...">
-        <span class="search-icon">🔍</span>
-        <button id="searchClearBtn" class="search-clear-btn">&times;</button>
-      </div>
-      <select id="categorySelect" class="category-select">
-        <option value="">جاري تحميل الباقات...</option>
-      </select>
-    </div>
-
-    <div id="itemsContainer">
-      <div class="empty-state">
-        <div class="spinner" style="margin: 0 auto 12px auto;"></div>
-        جاري الاتصال بالسيرفر...
-      </div>
+      <div id="seasonPills" class="season-pills"></div>
+      <div id="episodesList" class="episodes-list"></div>
     </div>
   </div>
-</div>
 
-<div id="episodesModal">
-  <div class="episodes-sheet">
-    <div class="episodes-header">
-      <div>
-        <div id="modalSeriesTitle" style="font-size: 16px; font-weight: 800; color:#fff;">اسم المسلسل</div>
-        <div id="modalSeriesSub" style="font-size: 12px; color: #888;">اختر الحلقة للمشاهدة</div>
-      </div>
-      <button id="closeModalBtn" class="ctrl-btn" style="width:34px; height:34px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-
-    <div id="seasonPills" class="season-pills"></div>
-
-    <div id="episodesList" class="episodes-list">
-      <div class="empty-state">جاري تحميل الحلقات...</div>
-    </div>
-  </div>
-</div>
-
-<script>
-(() => {
+  <script>
+  // Configuration
   const WORKER_BASE = "https://b.m737217130.workers.dev";
   const DEFAULT_CTX = "aHR0cDovLzE5NS4xMjguMjcuMjUzOjIwOTV8NDExNjAzOTA0Nnw2MjgxMTM0MTU2";
-  const DIRECT_ORIGIN = "https://195.128.27.253.sslip.io";
 
   // حجب المواد غير اللائقة والإباحية
   const ADULT_REGEX = /(18\+|adult|xxx|porn|sex|erotic|stepmom|lesbian|yoga\s*18|threesom|teen\s*18|إباحي|للكبار|سكس|نيك|شرموط|سحاق)/i;
 
-  // تسوية النصوص للبحث السلس عربي وإنجليزي (حتى لو جزء من الاسم)
+  // تسوية النصوص للبحث السلس عربي وإنجليزي
   function normalizeSearchText(str) {
     if (!str) return "";
     return str
       .toString()
       .toLowerCase()
-      .replace(/[ً-ٰٟ]/g, "") // إزالة التشكيل
+      .replace(/[ً-ٰٟ]/g, "")
       .replace(/[أإآا]/g, "ا")
       .replace(/[ة]/g, "ه")
       .replace(/[ى]/g, "ي")
-      .replace(/[^\w\s؀-ۿ]/gi, " ") // إزالة الرموز الخاصة
+      .replace(/[^\w\s؀-ۿ]/gi, " ")
       .replace(/\s+/g, " ")
       .trim();
   }
@@ -927,6 +970,8 @@
   const screenDimmer = document.getElementById("screenDimmer");
   const centerLogo = document.getElementById("centerLogo");
   const controlsOverlay = document.getElementById("controlsOverlay");
+  const centerControls = document.getElementById("centerControls");
+  const bottomBar = document.getElementById("bottomBar");
   const playPauseBtn = document.getElementById("playPauseBtn");
   const playIcon = document.getElementById("playIcon");
   const pauseIcon = document.getElementById("pauseIcon");
@@ -939,9 +984,6 @@
   const durationLabel = document.getElementById("durationLabel");
   const nowPlayingTitle = document.getElementById("nowPlayingTitle");
   const nowPlayingSub = document.getElementById("nowPlayingSub");
-  const aspectBtn = document.getElementById("aspectBtn");
-  const rotateBtn = document.getElementById("rotateBtn");
-  const playerFavBtn = document.getElementById("playerFavBtn");
   const toggleDrawerBtn = document.getElementById("toggleDrawerBtn");
   const closeDrawerBtn = document.getElementById("closeDrawerBtn");
   const drawer = document.getElementById("drawer");
@@ -956,6 +998,7 @@
   const episodesModal = document.getElementById("episodesModal");
   const closeModalBtn = document.getElementById("closeModalBtn");
   const modalSeriesTitle = document.getElementById("modalSeriesTitle");
+  const modalSeriesSub = document.getElementById("modalSeriesSub");
   const seasonPills = document.getElementById("seasonPills");
   const episodesList = document.getElementById("episodesList");
   const toastIndicator = document.getElementById("toastIndicator");
@@ -974,15 +1017,11 @@
   let renderedCount = 0;
   const CHUNK_SIZE = 30;
   let activeMedia = null;
-  let favorites = JSON.parse(localStorage.getItem("alameeere_favs") || "{}");
-  let aspectMode = 0;
+  let favorites = JSON.parse(localStorage.getItem("alameeere_cinema_favs") || "{}");
   let isDraggingSlider = false;
   let controlsTimer = null;
   let currentBrightness = 1.0;
   let toastTimer = null;
-
-  const aspectClasses = ["mode-0", "mode-1", "mode-2", "mode-3"];
-  const aspectNames = ["احتواء", "تمديد", "ملء الشاشة", "16:9"];
 
   function formatTime(sec) {
     if (isNaN(sec) || sec < 0) return "00:00";
@@ -1002,7 +1041,7 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       toastIndicator.style.opacity = "0";
-    }, 1500);
+    }, 2200);
   }
 
   function showControls() {
@@ -1011,7 +1050,7 @@
   }
   function resetControlsTimer() {
     clearTimeout(controlsTimer);
-    if (!video.paused) {
+    if (!video.paused && activeMedia) {
       controlsTimer = setTimeout(() => {
         controlsOverlay.classList.add("hidden-controls");
       }, 3500);
@@ -1019,6 +1058,11 @@
   }
 
   function togglePlay() {
+    if (!activeMedia) {
+      openDrawer();
+      showToast("اختر فيلماً أو مسلسلاً للبدء", "🎬");
+      return;
+    }
     if (video.paused) {
       video.play().catch(e => console.log("Play failed:", e));
     } else {
@@ -1030,6 +1074,9 @@
     playIcon.style.display = "none";
     pauseIcon.style.display = "block";
     centerLogo.style.opacity = "0";
+    centerLogo.style.pointerEvents = "none";
+    centerControls.classList.remove("hidden-init");
+    bottomBar.classList.remove("hidden-init");
     resetControlsTimer();
   });
 
@@ -1054,10 +1101,16 @@
   });
 
   video.addEventListener("error", () => {
-    showToast("جاري التبديل لمسار بديل...", "⚠️");
-    if (activeMedia && activeMedia.directUrl && video.src !== activeMedia.directUrl) {
-      video.src = activeMedia.directUrl;
-      video.play().catch(() => {});
+    console.log("Video error event:", video.error);
+    if (activeMedia) {
+      if (video.src && video.src.includes(".mkv")) {
+        const altUrl = video.src.replace(".mkv", ".mp4");
+        console.log("Trying alt mp4:", altUrl);
+        video.src = altUrl;
+        video.play().catch(() => {});
+        return;
+      }
+      showToast("تعذر تشغيل الفيديو. قد يتطلب جهازاً يدعم صيغ 4K/HEVC", "⚠️");
     }
   });
 
@@ -1072,6 +1125,7 @@
   forward10Btn.addEventListener("click", (e) => { e.stopPropagation(); seekRelative(10); });
   playPauseBtn.addEventListener("click", (e) => { e.stopPropagation(); togglePlay(); });
 
+  // Slider Seek
   function handleSliderSeek(e) {
     const rect = sliderTrack.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -1117,36 +1171,7 @@
     }
   });
 
-  aspectBtn.addEventListener("click", () => {
-    aspectMode = (aspectMode + 1) % 4;
-    video.className = aspectClasses[aspectMode];
-    showToast(aspectNames[aspectMode], "📐");
-  });
-
-  rotateBtn.addEventListener("click", async () => {
-    try {
-      if (document.fullscreenElement) {
-        if (screen.orientation && screen.orientation.unlock) {
-          screen.orientation.unlock();
-        }
-        await document.exitFullscreen();
-        showToast("الوضع العادي", "📱");
-      } else {
-        await document.documentElement.requestFullscreen();
-        if (screen.orientation && screen.orientation.lock) {
-          await screen.orientation.lock("landscape").catch(() => {});
-        }
-        showToast("كامل الشاشة (أفقي)", "🖥️");
-      }
-    } catch (e) {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
-    }
-  });
-
+  // Drawer Open / Close
   function openDrawer() {
     drawer.classList.add("open");
     drawerBackdrop.classList.add("open");
@@ -1158,7 +1183,11 @@
   toggleDrawerBtn.addEventListener("click", openDrawer);
   closeDrawerBtn.addEventListener("click", closeDrawer);
   drawerBackdrop.addEventListener("click", closeDrawer);
+  centerLogo.addEventListener("click", () => {
+    if (!activeMedia) openDrawer();
+  });
 
+  // Favorites Management
   function isFav(id) {
     return !!favorites[id];
   }
@@ -1171,29 +1200,15 @@
       favorites[id] = item;
       showToast("تمت الإضافة للمفضلة", "⭐");
     }
-    localStorage.setItem("alameeere_favs", JSON.stringify(favorites));
-    updatePlayerFavBtn();
-    renderCurrentItems();
-  }
-
-  function updatePlayerFavBtn() {
-    if (!activeMedia) {
-      playerFavBtn.classList.remove("active");
-      return;
-    }
-    const id = activeMedia.stream_id || activeMedia.series_id;
-    if (isFav(id)) {
-      playerFavBtn.classList.add("active");
+    localStorage.setItem("alameeere_cinema_favs", JSON.stringify(favorites));
+    if (currentTab === "favs") {
+      loadFavoritesView();
     } else {
-      playerFavBtn.classList.remove("active");
+      renderCurrentItems();
     }
   }
 
-  playerFavBtn.addEventListener("click", () => {
-    if (activeMedia) toggleFav(activeMedia);
-  });
-
-  // Gestures
+  // Touch Gestures
   let touchStartX = 0;
   let touchStartY = 0;
   let lastTapTime = 0;
@@ -1243,13 +1258,17 @@
           tapRight.style.opacity = "1";
           setTimeout(() => tapRight.style.opacity = "0", 300);
         } else {
-          rotateBtn.click();
+          toggleFullscreenRotation();
         }
       } else {
-        if (controlsOverlay.classList.contains("hidden-controls")) {
-          showControls();
+        if (!activeMedia) {
+          openDrawer();
         } else {
-          controlsOverlay.classList.add("hidden-controls");
+          if (controlsOverlay.classList.contains("hidden-controls")) {
+            showControls();
+          } else {
+            controlsOverlay.classList.add("hidden-controls");
+          }
         }
       }
     }
@@ -1257,14 +1276,31 @@
     isSwiping = false;
   });
 
-  gestureLayer.addEventListener("click", () => {
-    if (controlsOverlay.classList.contains("hidden-controls")) {
-      showControls();
-    } else {
-      controlsOverlay.classList.add("hidden-controls");
+  async function toggleFullscreenRotation() {
+    try {
+      if (document.fullscreenElement) {
+        if (screen.orientation && screen.orientation.unlock) {
+          screen.orientation.unlock();
+        }
+        await document.exitFullscreen();
+        showToast("الوضع العادي", "📱");
+      } else {
+        await document.documentElement.requestFullscreen();
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock("landscape").catch(() => {});
+        }
+        showToast("كامل الشاشة (أفقي)", "🖥️");
+      }
+    } catch (e) {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
     }
-  });
+  }
 
+  // Keyboard Shortcuts (Smart TV & PC)
   window.addEventListener("keydown", (e) => {
     if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
     switch (e.key) {
@@ -1293,7 +1329,7 @@
         break;
       case "f":
       case "F":
-        rotateBtn.click();
+        toggleFullscreenRotation();
         break;
       case "m":
       case "M":
@@ -1303,6 +1339,7 @@
     }
   });
 
+  // Stream URL Builders via Worker Proxy
   function getMovieStreamUrl(streamId, ext) {
     const extension = ext || "mkv";
     return `${WORKER_BASE}/s/${DEFAULT_CTX}/movie/${streamId}.${extension}`;
@@ -1312,15 +1349,16 @@
     return `${WORKER_BASE}/s/${DEFAULT_CTX}/series/${episodeId}.${extension}`;
   }
 
+  // Play Movie
   function playMovie(movie) {
     activeMedia = movie;
-    nowPlayingTitle.innerText = movie.name;
+    nowPlayingTitle.innerHTML = `${movie.name}`;
     nowPlayingSub.innerText = "فيلم";
-    updatePlayerFavBtn();
+
+    centerControls.classList.remove("hidden-init");
+    bottomBar.classList.remove("hidden-init");
 
     const streamUrl = getMovieStreamUrl(movie.stream_id, movie.container_extension);
-    movie.directUrl = `${DIRECT_ORIGIN}/movie/4116039046/6281134156/${movie.stream_id}.${movie.container_extension || 'mkv'}`;
-
     video.src = streamUrl;
     video.play().then(() => {
       showToast("جاري التشغيل...", "🎬");
@@ -1331,15 +1369,16 @@
     highlightPlayingCard(movie.stream_id);
   }
 
+  // Play Episode
   function playEpisode(ep, seriesTitle) {
     activeMedia = ep;
-    nowPlayingTitle.innerText = ep.title || `${seriesTitle} - الحلقة ${ep.episode_num}`;
+    nowPlayingTitle.innerHTML = `${seriesTitle} - ${ep.title || 'الحلقة ' + ep.episode_num}`;
     nowPlayingSub.innerText = seriesTitle;
-    updatePlayerFavBtn();
+
+    centerControls.classList.remove("hidden-init");
+    bottomBar.classList.remove("hidden-init");
 
     const streamUrl = getSeriesStreamUrl(ep.id, ep.container_extension);
-    ep.directUrl = `${DIRECT_ORIGIN}/series/4116039046/6281134156/${ep.id}.${ep.container_extension || 'mkv'}`;
-
     video.src = streamUrl;
     video.play().then(() => {
       showToast(`الحلقة ${ep.episode_num}`, "🍿");
@@ -1350,6 +1389,7 @@
     });
   }
 
+  // Open Series Episodes Modal
   async function openSeriesModal(series) {
     modalSeriesTitle.innerText = series.name;
     modalSeriesSub.innerText = "جاري تحميل الحلقات...";
@@ -1360,70 +1400,94 @@
     try {
       const resp = await fetch(`${WORKER_BASE}/player_api.php?action=get_series_info&series_id=${series.series_id}`);
       const data = await resp.json();
-      const episodesBySeason = data.episodes || {};
-      const seasonKeys = Object.keys(episodesBySeason);
+      const episodesData = data.episodes || {};
+      const seasonKeys = Object.keys(episodesData);
 
       if (seasonKeys.length === 0) {
         episodesList.innerHTML = `<div class="empty-state">لا توجد حلقات متاحة لهذا المسلسل حالياً.</div>`;
+        modalSeriesSub.innerText = "لا توجد حلقات";
         return;
       }
 
+      modalSeriesSub.innerText = `${seasonKeys.length} مواسم متاحة`;
       seasonPills.innerHTML = "";
       seasonKeys.forEach((sKey, idx) => {
         const pill = document.createElement("button");
         pill.className = `season-pill ${idx === 0 ? 'active' : ''}`;
-        pill.innerText = `الموسم ${sKey}`;
+        pill.innerText = isNaN(sKey) ? sKey : `الموسم ${sKey}`;
         pill.addEventListener("click", () => {
           document.querySelectorAll(".season-pill").forEach(p => p.classList.remove("active"));
           pill.classList.add("active");
-          renderEpisodesList(episodesBySeason[sKey], series.name);
+          renderEpisodesList(episodesData[sKey], series.name);
         });
         seasonPills.appendChild(pill);
       });
 
-      renderEpisodesList(episodesBySeason[seasonKeys[0]], series.name);
+      renderEpisodesList(episodesData[seasonKeys[0]], series.name);
     } catch (err) {
-      episodesList.innerHTML = `<div class="empty-state">تعذر تحميل الحلقات، تأكد من اتصال الإنترنت.</div>`;
+      episodesList.innerHTML = `<div class="empty-state">تعذر تحميل بيانات المسلسل. تحقق من اتصالك.</div>`;
+      modalSeriesSub.innerText = "خطأ في الاتصال";
     }
   }
 
   function renderEpisodesList(epList, seriesTitle) {
+    episodesList.innerHTML = "";
     if (!epList || epList.length === 0) {
       episodesList.innerHTML = `<div class="empty-state">لا توجد حلقات في هذا الموسم.</div>`;
       return;
     }
-    episodesList.innerHTML = "";
+
     epList.forEach(ep => {
       const item = document.createElement("div");
       item.className = "episode-item";
-      const dur = ep.info && ep.info.duration ? ep.info.duration : "";
+      if (activeMedia && activeMedia.id === ep.id) item.classList.add("playing");
+
       item.innerHTML = `
-        <span class="ep-num">${ep.episode_num}</span>
-        <span class="ep-name">${ep.title || 'حلقة ' + ep.episode_num}</span>
-        <span class="ep-dur">${dur}</span>
+        <span class="ep-num">${ep.episode_num || '•'}</span>
+        <span class="ep-name" title="${ep.title || 'حلقة ' + ep.episode_num}">${ep.title || 'الحلقة ' + ep.episode_num}</span>
+        <span class="ep-dur">${ep.info && ep.info.duration ? ep.info.duration : '▶'}</span>
       `;
       item.addEventListener("click", () => playEpisode(ep, seriesTitle));
       episodesList.appendChild(item);
     });
   }
 
-  closeModalBtn.addEventListener("click", () => episodesModal.classList.remove("open"));
+  closeModalBtn.addEventListener("click", () => {
+    episodesModal.classList.remove("open");
+  });
 
+  // Load Categories & Filter Adult Content
   async function loadCategories() {
     try {
-      categorySelect.innerHTML = `<option value="">جاري تحميل التصنيفات...</option>`;
-      
-      const [vRes, sRes] = await Promise.all([
+      const [vodRes, seriesRes] = await Promise.all([
         fetch(`${WORKER_BASE}/player_api.php?action=get_vod_categories`).then(r => r.json()),
         fetch(`${WORKER_BASE}/player_api.php?action=get_series_categories`).then(r => r.json())
       ]);
 
-      vodCategories = (vRes || []).filter(c => !ADULT_REGEX.test(c.category_name));
-      seriesCategories = (sRes || []).filter(c => !ADULT_REGEX.test(c.category_name));
+      // Filter adult content
+      vodCategories = (vodRes || []).filter(c => !ADULT_REGEX.test(c.category_name));
+      seriesCategories = (seriesRes || []).filter(c => !ADULT_REGEX.test(c.category_name));
+
+      // Prioritize Arabic and high-compatibility categories for movies
+      // ترتيب الفئات بحيث تكون الفئات العربية القياسية والمتوافقة أولاً، ثم مسلسلات رمضان
+      vodCategories.sort((a, b) => {
+        const aName = a.category_name.toLowerCase();
+        const bName = b.category_name.toLowerCase();
+        // إعطاء أولوية قصوى للأفلام العربية غير 4K لضمان التوافق مع كافة الأجهزة القديمة
+        function getScore(name) {
+          if (name.includes("4k") || name.includes("uhd")) return 1;
+          if (name === "arabic movies" || name.includes("أفلام عربية") || name.includes("افلام عربيه")) return 10;
+          if (name.includes("arabic")) return 8;
+          if (name.includes("premiere")) return 6;
+          return 3;
+        }
+        return getScore(bName) - getScore(aName);
+      });
 
       populateCategoryDropdown();
     } catch (e) {
-      categorySelect.innerHTML = `<option value="">خطأ في تحميل التصنيفات</option>`;
+      categorySelect.innerHTML = `<option>تعذر تحميل التصنيفات</option>`;
+      itemsContainer.innerHTML = `<div class="empty-state">خطأ في الاتصال بالخادم. يرجى إعادة المحاولة.</div>`;
     }
   }
 
@@ -1457,12 +1521,6 @@
   });
 
   async function loadCategoryStreams(catId) {
-    itemsContainer.innerHTML = `
-      <div class="empty-state">
-        <div class="spinner" style="margin: 0 auto 10px;"></div>
-        جاري تحميل المحتوى...
-      </div>`;
-
     const cacheKey = `${currentTab}_${catId}`;
     if (cachedStreams[cacheKey]) {
       currentItems = cachedStreams[cacheKey];
@@ -1470,32 +1528,29 @@
       return;
     }
 
+    itemsContainer.innerHTML = `<div class="empty-state"><div class="spinner" style="margin: 0 auto 12px;"></div>جاري جلب القائمة...</div>`;
+
+    const action = currentTab === "movies" ? "get_vod_streams" : "get_series";
     try {
-      const action = currentTab === "movies" ? "get_vod_streams" : "get_series";
       const resp = await fetch(`${WORKER_BASE}/player_api.php?action=${action}&category_id=${catId}`);
-      const data = await resp.json();
-
-      const filtered = (data || []).filter(item => {
-        if (item.is_adult == 1 || item.is_adult == "1") return false;
-        if (ADULT_REGEX.test(item.name || "")) return false;
-        return true;
-      });
-
+      const raw = await resp.json();
+      
+      // Filter adult content
+      const filtered = (raw || []).filter(item => !ADULT_REGEX.test(item.name || ""));
       cachedStreams[cacheKey] = filtered;
       currentItems = filtered;
       renderCurrentItems();
     } catch (err) {
-      itemsContainer.innerHTML = `<div class="empty-state">تعذر جلب المحتوى من السيرفر.</div>`;
+      itemsContainer.innerHTML = `<div class="empty-state">تعذر تحميل المحتوى لهذه الباقة.</div>`;
     }
   }
 
-  // البحث السلس عربي وإنجليزي (حتى لو جزء من الاسم)
   function renderCurrentItems() {
     const rawQuery = searchInput.value;
     const cleanQuery = normalizeSearchText(rawQuery);
+    
     let displayList = currentItems;
-
-    if (cleanQuery.length > 0) {
+    if (cleanQuery) {
       searchClearBtn.style.display = "block";
       displayList = currentItems.filter(i => {
         const normName = normalizeSearchText(i.name || "");
@@ -1535,6 +1590,7 @@
     }
   }
 
+  // Create Beautiful Media Card with Proportioned Vertical Poster
   function createMediaCard(item) {
     const isMovie = !!item.stream_id;
     const id = item.stream_id || item.series_id;
@@ -1547,7 +1603,7 @@
 
     card.innerHTML = `
       <div class="poster-wrap">
-        <img class="poster-img" src="${imgUrl}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'150\' viewBox=\'0 0 100 150\'%3E%3Crect width=\'100\' height=\'150\' fill=\'%23222\'/ %3E%3Ctext x=\'50%\' y=\'50%\' fill=\'%23666\' font-size=\'12\' text-anchor=\'middle\'%3Eلا توجد صورة%3C/text%3E%3C/svg%3E';">
+        <img class="poster-img" src="${imgUrl}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'150\' viewBox=\'0 0 100 150\'%3E%3Crect width=\'100\' height=\'150\' fill=\'%23222\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23666\' font-size=\'12\' text-anchor=\'middle\'>لا توجد صورة%3C/text%3E%3C/svg%3E';">
         <button class="fav-btn ${isFavorite ? 'is-fav' : ''}" title="المفضلة">
           ★
         </button>
@@ -1556,7 +1612,7 @@
         <div class="media-title" title="${item.name}">${item.name}</div>
         <div class="media-meta">
           <span>${isMovie ? 'فيلم' : 'مسلسل'}</span>
-          <span>${item.rating && item.rating !== '0' ? '⭐ ' + item.rating : ''}</span>
+          <span>${item.rating && item.rating !== '0' ? '⭐ ' + item.rating : (item.year || '')}</span>
         </div>
       </div>
     `;
@@ -1634,8 +1690,8 @@
     populateCategoryDropdown();
   });
 
+  // Init
   loadCategories();
-})();
-</script>
+  </script>
 </body>
 </html>
