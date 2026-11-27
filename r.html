@@ -256,6 +256,10 @@
     .media-card.playing { border-color: var(--accent); box-shadow: 0 0 12px rgba(229, 9, 20, 0.5); }
 
     .poster-wrap { position: relative; width: 100%; height: 225px; min-height: 225px; background: #181818; overflow: hidden; }
+    body.saver .poster-img{display:none}
+    body.saver .poster-wrap::after{content:"🎬";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.35}
+    #saverBtn{background:#222;color:#bbb;border:1px solid #333;border-radius:14px;padding:4px 10px;font-size:12px;cursor:pointer}
+    #saverBtn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
     .poster-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #181818; display: block; }
     .fav-btn { position: absolute; top: 8px; left: 8px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.25); color: #fff; display: flex; align-items: center; justify-content: center; z-index: 5; cursor: pointer; font-size: 15px; transition: transform 0.1s, color 0.15s; }
     .fav-btn.is-fav { color: #ffb703; background: rgba(0,0,0,0.85); border-color: #ffb703; }
@@ -294,13 +298,148 @@
     @media (orientation: landscape) {
       #videoFitBtn { display: flex; }
     }
-  </style>
+  
+    /* New Controls for Servers & Quality */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .server-select {
+      background: #222;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+    }
+    .refresh-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .refresh-btn:active { background: rgba(255,255,255,0.25); }
+
+    /* --- توافق الشاشات وأجهزة أندرويد القديمة وريموت التلفزيون --- */
+    button:focus, select:focus, input:focus, .media-card:focus, .tab-btn:focus, .seek-btn:focus {
+      outline: 2px solid #e50914 !important;
+      outline-offset: 2px;
+    }
+    
+    .drawer-server-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 0;
+      border-top: 1px solid #262626;
+      flex-wrap: wrap;
+    }
+    .server-picker-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      min-width: 140px;
+    }
+    .server-label {
+      font-size: 11px;
+      color: #aaa;
+      white-space: nowrap;
+      font-weight: bold;
+    }
+    .server-select {
+      flex: 1;
+      background: #242424;
+      border: 1px solid #444;
+      color: #fff;
+      border-radius: 6px;
+      padding: 5px 6px;
+      font-size: 11px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+    }
+    .btn-tool {
+      background: #262626;
+      border: 1px solid #3a3a3a;
+      color: #fff;
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-tool:active { background: #383838; }
+    .btn-tool.on { background: #e50914; border-color: #ff2222; }
+
+    /* زر اختيار الجودة في مشغل الفيديو */
+    .quality-control-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      margin-left: 8px;
+    }
+    .quality-btn {
+      background: rgba(20, 20, 20, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      color: #fff;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .quality-btn:active { background: rgba(50, 50, 50, 0.9); }
+    .quality-select-hidden {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .quality-select {
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      display: none;
+      margin-left: 8px;
+    }
+
+</style>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1" defer></script>
 </head>
 <body>
 
   <div id="appContainer">
     <div id="videoWrapper">
-      <video id="mainVideo" playsinline preload="metadata"></video>
+      <video id="mainVideo" playsinline preload="none"></video>
       <div id="screenDimmer"></div>
 
       <div id="centerLogo" title="اضغط لفتح قائمة الأفلام والمسلسلات">
@@ -344,7 +483,15 @@
               <div id="nowPlayingSub" class="top-subtitle">جاهز للتشغيل</div>
             </div>
           </div>
-          <div class="top-left"></div>
+          <div class="top-left">
+            <div id="qualityControlWrap" class="quality-control-wrap" style="display:none;">
+              <button id="qualityBtn" class="quality-btn" type="button" title="اضغط لتغيير الجودة">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+                <span id="qualityCurrentLabel">أقل جودة 🪶</span>
+              </button>
+              <select id="videoQualitySelect" class="quality-select-hidden" title="اختيار جودة الفيديو"></select>
+            </div>
+          </div>
         </div>
 
         <!-- Center Controls: Fixed RTL issue with dir="ltr" -->
@@ -394,9 +541,21 @@
       <div class="drawer-header">
         <div class="drawer-top-row">
           <div class="drawer-title"><span>🎬</span> <span dir="ltr">Alameeere <span class="live-badge">Live</span></span></div>
-          <button id="closeDrawerBtn" class="close-btn" title="إغلاق">
+          <button id="closeDrawerBtn" class="close-btn" title="إغلاق" tabindex="0">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
+        </div>
+
+        <div class="drawer-server-row">
+          <div class="server-picker-box">
+            <span class="server-label">السيرفر:</span>
+            <select id="serverSelect" class="server-select" title="تبديل السيرفر" tabindex="0">
+              <option value="alameeere1">⭐ alameeere1 (نوفا - m3u8)</option>
+              <option value="alameeere2">🎬 alameeere2 (السابق)</option>
+            </select>
+          </div>
+          <button id="refreshBtn" type="button" class="btn-tool" title="تحديث المحتوى ومسح الكاش" tabindex="0">🔄 تحديث</button>
+          <button id="saverBtn" type="button" class="btn-tool" title="إخفاء الصور لتوفير البيانات" tabindex="0">🪶 توفير البيانات</button>
         </div>
 
         <div class="tabs-nav">
@@ -438,9 +597,58 @@
   </div>
 
   <script>
+  // تخزين آمن: يعمل حتى لو المتصفح منع التخزين (فتح الملف من الجوال content:// أو file://)
+  var safeStorage = (function(){
+    var mem = {}, ok = false;
+    try { var k="__t"; window.localStorage.setItem(k,"1"); window.localStorage.removeItem(k); ok = true; } catch(e) {}
+    return {
+      getItem: function(k){ if (ok) { try { return window.localStorage.getItem(k); } catch(e){} } return mem.hasOwnProperty(k) ? mem[k] : null; },
+      setItem: function(k,v){ if (ok) { try { window.localStorage.setItem(k,v); return; } catch(e){} } mem[k] = String(v); },
+      removeItem: function(k){ if (ok) { try { window.localStorage.removeItem(k); return; } catch(e){} } delete mem[k]; },
+      keys: function(){ if (ok) { try { return Object.keys(window.localStorage); } catch(e){} } return Object.keys(mem); }
+    };
+  })();
+
   // --- Configuration ---
   const WORKER_BASE = "https://b.m737217130.workers.dev";
-  const DEFAULT_CTX = "aHR0cDovLzE5NS4xMjguMjcuMjUzOjIwOTV8NDExNjAzOTA0Nnw2MjgxMTM0MTU2";
+  
+  // --- إعدادات السيرفرات: alameeere1 (نوفا الأساسي) و alameeere2 (السابق) ---
+  const SERVERS = {
+    alameeere1: {
+      id: "alameeere1",
+      name: "alameeere1 (نوفا)",
+      format: "m3u8",
+      isHls: true
+    },
+    alameeere2: {
+      id: "alameeere2",
+      name: "alameeere2 (السابق)",
+      format: "mkv",
+      isHls: false
+    }
+  };
+
+  let selectedServerKey = safeStorage.getItem("alameeere_server") || "alameeere1";
+  let activeServer = SERVERS[selectedServerKey] || SERVERS.alameeere1;
+  let hlsPlayer = null;
+
+  function switchServer(key) {
+    if (!SERVERS[key]) return;
+    safeStorage.setItem("alameeere_server", key);
+    clearSiteCache();
+    showToast(`تم التبديل إلى ${SERVERS[key].name}، جاري إعادة التحميل...`, "🔄");
+    setTimeout(() => { location.reload(); }, 600);
+  }
+
+  function clearSiteCache() {
+    try {
+      const keys = safeStorage.keys();
+      for (const k of keys) {
+        if (k.startsWith("alameeere_cache_")) safeStorage.removeItem(k);
+      }
+    } catch(e) {}
+  }
+
   
   const BLOCKED_CATEGORIES = new Set([
     "Stepmom 18+ For Adults", "Yoga 18+ For Adults", "Threesom 18+ For Adults",
@@ -509,7 +717,7 @@
   let renderedCount = 0;
   const CHUNK_SIZE = 30;
   let activeMedia = null;
-  let favorites = JSON.parse(localStorage.getItem("alameeere_cinema_favs") || "{}");
+  let favorites = JSON.parse(safeStorage.getItem("alameeere_cinema_favs") || "{}");
   let isDraggingSlider = false;
   let controlsTimer = null;
   let currentBrightness = 1.0;
@@ -692,7 +900,7 @@
     const id = item.stream_id || item.series_id;
     if (favorites[id]) { delete favorites[id]; showToast("تم الحذف من المفضلة", "⭐"); }
     else { favorites[id] = item; showToast("تمت الإضافة للمفضلة", "⭐"); }
-    localStorage.setItem("alameeere_cinema_favs", JSON.stringify(favorites));
+    safeStorage.setItem("alameeere_cinema_favs", JSON.stringify(favorites));
     if (currentTab === "favs") loadFavoritesView(); else renderCurrentItems();
   }
 
@@ -796,10 +1004,119 @@
   });
 
   // --- Stream URLs & Playback ---
-  function getMovieStreamUrl(streamId, ext) { return `${WORKER_BASE}/s/${DEFAULT_CTX}/movie/${streamId}.${ext || "mkv"}`; }
-  function getSeriesStreamUrl(episodeId, ext) { return `${WORKER_BASE}/s/${DEFAULT_CTX}/series/${episodeId}.${ext || "mkv"}`; }
+    function getMovieStreamUrl(streamId, ext) {
+    const format = activeServer.isHls ? "m3u8" : (ext || activeServer.format);
+    return `${WORKER_BASE}/s/${activeServer.id}/movie/${streamId}.${format}`;
+  }
+  function getSeriesStreamUrl(episodeId, ext) {
+    const format = activeServer.isHls ? "m3u8" : (ext || activeServer.format);
+    return `${WORKER_BASE}/s/${activeServer.id}/series/${episodeId}.${format}`;
+  }
 
   // Immediate close and play in background
+  
+  function playStreamUrl(url) {
+    const qSelect = document.getElementById("videoQualitySelect");
+    if (qSelect) {
+      qSelect.innerHTML = "";
+      qSelect.style.display = "none";
+    }
+
+    if (hlsPlayer) {
+      hlsPlayer.destroy();
+      hlsPlayer = null;
+    }
+
+    if (url.includes(".m3u8") && typeof Hls !== "undefined" && Hls.isSupported()) {
+      hlsPlayer = new Hls({
+        capLevelToPlayerSize: true, // يوفر البيانات حسب حجم شاشة الجوال
+        startLevel: -1 // تلقائي
+      });
+      hlsPlayer.loadSource(url);
+      hlsPlayer.attachMedia(video);
+
+      hlsPlayer.on(Hls.Events.MANIFEST_PARSED, (e, data) => {
+        const qWrap = document.getElementById("qualityControlWrap");
+        const qLabel = document.getElementById("qualityCurrentLabel");
+        
+        if (data.levels && data.levels.length > 0 && qSelect) {
+          if (qWrap) qWrap.style.display = "inline-flex";
+          qSelect.innerHTML = "";
+
+          // العثور على أقل جودة متوفرة (أقل Bitrate وأقل أبعاد)
+          let lowestIdx = 0;
+          let lowestBitrate = Infinity;
+          let lowestLabel = "";
+          
+          data.levels.forEach((lvl, idx) => {
+            const br = lvl.bitrate || (lvl.height ? lvl.height * 1000 : 999999);
+            if (br < lowestBitrate) {
+              lowestBitrate = br;
+              lowestIdx = idx;
+            }
+          });
+
+          // إجبار المشغل على البدء فوراً بأقل جودة ممكنة لتوفير البيانات والواي فاي
+          hlsPlayer.currentLevel = lowestIdx;
+          hlsPlayer.loadLevel = lowestIdx;
+
+          data.levels.forEach((lvl, idx) => {
+            const opt = document.createElement("option");
+            opt.value = idx;
+            const res = lvl.height ? `${lvl.height}p` : `${Math.round(lvl.bitrate / 1000)}k`;
+            const isLowest = (idx === lowestIdx);
+            if (isLowest) lowestLabel = res;
+            opt.textContent = `جودة ${res} ${isLowest ? '(أقل جودة 🪶)' : ''}`;
+            if (isLowest) opt.selected = true;
+            qSelect.appendChild(opt);
+          });
+
+          // خيار الجودة التلقائية
+          const autoOpt = document.createElement("option");
+          autoOpt.value = "-1";
+          autoOpt.textContent = "جودة: تلقائي (Auto)";
+          qSelect.appendChild(autoOpt);
+
+          if (qLabel) qLabel.textContent = (lowestLabel ? `${lowestLabel} 🪶` : "أقل جودة 🪶");
+
+          qSelect.onchange = () => {
+            const chosen = parseInt(qSelect.value, 10);
+            hlsPlayer.currentLevel = chosen;
+            const txt = qSelect.options[qSelect.selectedIndex].text;
+            if (qLabel) {
+              qLabel.textContent = chosen === -1 ? "تلقائي" : txt.replace("جودة ", "");
+            }
+            showToast(`تم التبديل: ${txt}`, "📶");
+          };
+
+          showToast("تم بدء البث بأقل جودة تلقائياً لتوفير البيانات 🪶", "⚡");
+        } else if (qWrap) {
+          qWrap.style.display = "none";
+        }
+        video.play().catch(e => console.log("Auto play prevented:", e));
+      });
+
+      hlsPlayer.on(Hls.Events.ERROR, (event, data) => {
+        if (data.fatal) {
+          switch(data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              hlsPlayer.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              hlsPlayer.recoverMediaError();
+              break;
+            default:
+              hlsPlayer.destroy();
+              break;
+          }
+        }
+      });
+    } else {
+      video.src = url;
+      video.play().catch(e => console.log("Auto play prevented:", e));
+    }
+  }
+
   function playMovie(movie) {
     closeDrawer(); 
     showToast("جاري التشغيل...", "🎬");
@@ -816,8 +1133,7 @@
     currentFitIndex = 0;
 
     const streamUrl = getMovieStreamUrl(movie.stream_id, movie.container_extension);
-    video.src = streamUrl;
-    video.play().catch(e => console.log("Auto play prevented:", e));
+    playStreamUrl(streamUrl);
     highlightPlayingCard(movie.stream_id);
   }
 
@@ -838,8 +1154,7 @@
     currentFitIndex = 0;
 
     const streamUrl = getSeriesStreamUrl(ep.id, ep.container_extension);
-    video.src = streamUrl;
-    video.play().catch(e => console.log("Episode play error:", e));
+    playStreamUrl(streamUrl);
   }
 
   // --- Series Modal ---
@@ -851,8 +1166,7 @@
     episodesModal.classList.add("open");
 
     try {
-      const resp = await fetch(`${WORKER_BASE}/player_api.php?action=get_series_info&series_id=${series.series_id}`);
-      const data = await resp.json();
+      const data = await cachedJSON(`${WORKER_BASE}/player_api.php?account=${activeServer.id}&action=get_series_info&series_id=${series.series_id}`, TTL.info);
       const episodesData = data.episodes || {};
       const seasonKeys = Object.keys(episodesData);
 
@@ -904,12 +1218,79 @@
 
   closeModalBtn.addEventListener("click", () => { episodesModal.classList.remove("open"); });
 
+
+  // --- Data saving: cache API responses on the device ---
+  const TTL = { cats: 7*24*3600e3, list: 7*24*3600e3, info: 7*24*3600e3 }; // كاش لمدة أسبوع كامل
+  const memCache = {};
+  async function cachedJSON(url, ttl) {
+    if (memCache[url]) return memCache[url];
+    let store = null;
+    try { store = await caches.open("alameeere-api-v1"); } catch (e) {}
+    if (store) {
+      try {
+        const hit = await store.match(url);
+        if (hit && Date.now() - Number(hit.headers.get("x-saved") || 0) < ttl) {
+          const d = await hit.json(); memCache[url] = d; return d;
+        }
+      } catch (e) {}
+    }
+    const resp = await fetch(url);
+    const text = await resp.text();
+    const data = JSON.parse(text);
+    memCache[url] = data;
+    if (store && resp.ok) {
+      store.put(url, new Response(text, { headers: { "content-type": "application/json", "x-saved": String(Date.now()) } })).catch(() => {});
+    }
+    return data;
+  }
+
+  // Small compressed posters (WebP ~180px) instead of full-size images
+  function thumbUrl(u) {
+    if (!u || !/^https?:/i.test(u)) return u || "";
+    return "https://wsrv.nl/?url=" + encodeURIComponent(u) + "&w=180&h=270&fit=cover&output=webp&q=55";
+  }
+  window.posterFallback = function (img) {
+    if (img.dataset.orig && img.src !== img.dataset.orig) { img.src = img.dataset.orig; img.dataset.orig = ""; return; }
+    img.onerror = null;
+    img.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='150'%3E%3Crect width='100' height='150' fill='%23222'/%3E%3C/svg%3E";
+  };
+
+  // Data saver mode: hide posters entirely
+  let saverOn = safeStorage.getItem("alameeere_saver");
+  saverOn = saverOn === null ? !!(navigator.connection && navigator.connection.saveData) : saverOn === "1";
+  function applySaver() {
+    document.body.classList.toggle("saver", saverOn);
+    const b = document.getElementById("saverBtn"); if (b) b.classList.toggle("on", saverOn);
+  }
+  document.getElementById("saverBtn").addEventListener("click", (e) => {
+    e.stopPropagation(); saverOn = !saverOn;
+    safeStorage.setItem("alameeere_saver", saverOn ? "1" : "0"); applySaver();
+    showToast(saverOn ? "وضع توفير البيانات: الصور مخفية" : "تم إظهار الصور", "🪶");
+  });
+
+  const sSelect = document.getElementById("serverSelect");
+  if (sSelect) {
+    sSelect.value = selectedServerKey;
+    sSelect.addEventListener("change", (e) => switchServer(e.target.value));
+  }
+  const rBtn = document.getElementById("refreshBtn");
+  if (rBtn) {
+    rBtn.addEventListener("click", () => {
+      clearSiteCache();
+      showToast("تم مسح الكاش وتحديث المحتوى بنجاح", "🔄");
+      setTimeout(() => location.reload(), 600);
+    });
+  }
+
+  // Stop downloading video when the app goes to background
+  document.addEventListener("visibilitychange", () => { if (document.hidden && !video.paused) video.pause(); });
+
   // --- Categories & Data Loading ---
   async function loadCategories() {
     try {
       const [vodRes, seriesRes] = await Promise.all([
-        fetch(`${WORKER_BASE}/player_api.php?action=get_vod_categories`).then(r => r.json()),
-        fetch(`${WORKER_BASE}/player_api.php?action=get_series_categories`).then(r => r.json())
+        cachedJSON(`${WORKER_BASE}/player_api.php?account=${activeServer.id}&action=get_vod_categories`, TTL.cats),
+        cachedJSON(`${WORKER_BASE}/player_api.php?account=${activeServer.id}&action=get_series_categories`, TTL.cats)
       ]);
 
       vodCategories = (vodRes || []).filter(c => !isBlockedCategory(c.category_name));
@@ -961,8 +1342,7 @@
     itemsContainer.innerHTML = `<div class="empty-state"><div class="spinner" style="margin: 0 auto 12px;"></div>جاري جلب القائمة...</div>`;
     const action = currentTab === "movies" ? "get_vod_streams" : "get_series";
     try {
-      const resp = await fetch(`${WORKER_BASE}/player_api.php?action=${action}&category_id=${catId}`);
-      const raw = await resp.json();
+      const raw = await cachedJSON(`${WORKER_BASE}/player_api.php?account=${activeServer.id}&action=${action}&category_id=${catId}`, TTL.list);
       const filtered = (raw || []).filter(item => !ADULT_REGEX.test(item.name || ""));
       cachedStreams[cacheKey] = filtered;
       currentItems = filtered;
@@ -1048,8 +1428,18 @@
     itemsContainer.innerHTML = `<div class="empty-state"><div class="spinner" style="margin: 0 auto 12px;"></div>جاري البحث في جميع المجموعات... (قد يستغرق لحظات)</div>`;
     
     try {
-      const promises = cats.map(cat => fetch(`${WORKER_BASE}/player_api.php?action=${action}&category_id=${cat.category_id}`).then(r => r.json()));
-      const results = await Promise.all(promises);
+      // One request for the whole library (cached) instead of one per category
+      let results = [];
+      try {
+        const all = await cachedJSON(`${WORKER_BASE}/player_api.php?account=${activeServer.id}&action=${action}`, TTL.list);
+        if (Array.isArray(all) && all.length) {
+          const allowed = new Set(cats.map(c => String(c.category_id)));
+          results = [all.filter(i => allowed.has(String(i.category_id)))];
+        }
+      } catch (e) {}
+      if (!results.length) {
+        results = await Promise.all(cats.map(cat => cachedJSON(`${WORKER_BASE}/player_api.php?action=${action}&category_id=${cat.category_id}`, TTL.list).catch(() => [])));
+      }
       
       let merged = [];
       const seenIds = new Set();
@@ -1160,7 +1550,7 @@
 
     card.innerHTML = `
       <div class="poster-wrap">
-        <img class="poster-img" src="${imgUrl}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'150\' viewBox=\'0 0 100 150\'%3E%3Crect width=\'100\' height=\'150\' fill=\'%23222\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%23666\' font-size=\'12\' text-anchor=\'middle\'>لا توجد صورة%3C/text%3E%3C/svg%3E';">
+        <img class="poster-img" src="${thumbUrl(imgUrl)}" data-orig="${imgUrl}" alt="" loading="lazy" decoding="async" width="180" height="270" onerror="posterFallback(this)">
         <button class="fav-btn ${isFavorite ? 'is-fav' : ''}" title="المفضلة">★</button>
       </div>
       <div class="media-info">
@@ -1213,6 +1603,8 @@
     searchInput.value = ""; searchClearBtn.style.display = "none";
     populateCategoryDropdown();
   });
+
+  applySaver();
 
   // Init
   loadCategories();
