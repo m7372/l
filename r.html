@@ -340,17 +340,18 @@
     .drawer-server-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 6px;
       padding: 6px 0;
       border-top: 1px solid #262626;
-      flex-wrap: wrap;
+      width: 100%;
     }
     .server-picker-box {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex: 1;
-      min-width: 140px;
+      min-width: 0;
     }
     .server-label {
       font-size: 11px;
@@ -360,6 +361,8 @@
     }
     .server-select {
       flex: 1;
+      min-width: 75px;
+      max-width: 110px;
       background: #242424;
       border: 1px solid #444;
       color: #fff;
@@ -370,22 +373,103 @@
       outline: none;
       cursor: pointer;
     }
-    .btn-tool {
+    .server-actions-inline {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .btn-tool-inline {
       background: #262626;
       border: 1px solid #3a3a3a;
-      color: #fff;
+      color: #eee;
       border-radius: 6px;
-      padding: 5px 8px;
+      padding: 5px 7px;
       font-size: 11px;
+      font-weight: 600;
       cursor: pointer;
       font-family: inherit;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
     }
-    .btn-tool:active { background: #383838; }
-    .btn-tool.on { background: #e50914; border-color: #ff2222; }
+    .btn-tool-inline:hover { background: #333; }
+    .btn-tool-inline:active { background: #383838; }
+    .btn-tool-inline.on { background: #e50914; border-color: #ff2222; color: #fff; }
+
+    /* نافذة استئناف المشاهدة من حيث توقفت */
+    .resume-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 99;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .resume-modal-overlay.open { display: flex; }
+    .resume-modal-box {
+      position: relative;
+      background: #1c1c1c;
+      border: 1px solid #333;
+      border-radius: 14px;
+      padding: 22px 20px 20px 20px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .resume-modal-icon { font-size: 34px; line-height: 1; }
+    .resume-modal-title { font-size: 16px; font-weight: 800; color: #fff; }
+    .resume-modal-desc { font-size: 13px; color: #bbb; line-height: 1.4; }
+    .resume-modal-actions { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 6px; }
+    .btn-resume-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-resume-primary:active { background: #b80710; }
+    .btn-resume-secondary {
+      background: #2b2b2b;
+      color: #ddd;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      font-family: inherit;
+    }
+    .btn-resume-secondary:active { background: #383838; }
+    .resume-modal-close {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: transparent;
+      border: none;
+      color: #888;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px;
+    }
 
     /* زر اختيار الجودة في مشغل الفيديو */
     .quality-control-wrap {
@@ -550,12 +634,14 @@
           <div class="server-picker-box">
             <span class="server-label">السيرفر:</span>
             <select id="serverSelect" class="server-select" title="تبديل السيرفر" tabindex="0">
-              <option value="alameeere1">⭐ alameeere1 (نوفا - m3u8)</option>
-              <option value="alameeere2">🎬 alameeere2 (السابق)</option>
+              <option value="alameeere1">alameeere1</option>
+              <option value="alameeere2">alameeere2</option>
             </select>
           </div>
-          <button id="refreshBtn" type="button" class="btn-tool" title="تحديث المحتوى ومسح الكاش" tabindex="0">🔄 تحديث</button>
-          <button id="saverBtn" type="button" class="btn-tool" title="إخفاء الصور لتوفير البيانات" tabindex="0">🪶 توفير البيانات</button>
+          <div class="server-actions-inline">
+            <button id="refreshBtn" type="button" class="btn-tool-inline" title="تحديث المحتوى ومسح الكاش" tabindex="0">🔄 تحديث</button>
+            <button id="saverBtn" type="button" class="btn-tool-inline" title="إخفاء الصور لتوفير البيانات" tabindex="0">🪶 توفير البيانات</button>
+          </div>
         </div>
 
         <div class="tabs-nav">
@@ -577,6 +663,20 @@
       <div id="itemsContainer">
         <div class="empty-state"><div class="spinner" style="margin: 0 auto 12px;"></div>جاري جلب المحتوى...</div>
       </div>
+    </div>
+  </div>
+
+  <!-- نافذة استئناف المشاهدة من حيث توقفت -->
+  <div id="resumeModal" class="resume-modal-overlay">
+    <div class="resume-modal-box">
+      <div class="resume-modal-icon">⏱️</div>
+      <div id="resumeModalTitle" class="resume-modal-title">متابعة المشاهدة؟</div>
+      <div id="resumeModalDesc" class="resume-modal-desc">لقد شاهدت جزءاً من هذا الفيديو سابقاً.</div>
+      <div class="resume-modal-actions">
+        <button id="resumeContinueBtn" class="btn-resume-primary" tabindex="0">▶ استئناف من حيث توقفت (<span id="resumeTimeText">00:00</span>)</button>
+        <button id="resumeRestartBtn" class="btn-resume-secondary" tabindex="0">🔄 البدء من جديد</button>
+      </div>
+      <button id="resumeCloseBtn" class="resume-modal-close" title="إغلاق">✕</button>
     </div>
   </div>
 
@@ -616,13 +716,13 @@
   const SERVERS = {
     alameeere1: {
       id: "alameeere1",
-      name: "alameeere1 (نوفا)",
+      name: "alameeere1",
       format: "m3u8",
       isHls: true
     },
     alameeere2: {
       id: "alameeere2",
-      name: "alameeere2 (السابق)",
+      name: "alameeere2",
       format: "mkv",
       isHls: false
     }
@@ -807,11 +907,97 @@
     playIcon.style.display = "block"; pauseIcon.style.display = "none"; showControls();
   });
 
+  let lastProgressSave = 0;
   video.addEventListener("timeupdate", () => {
     if (!isDraggingSlider && video.duration) {
       const pct = (video.currentTime / video.duration) * 100;
       sliderFill.style.width = pct + "%"; sliderThumb.style.left = pct + "%";
       currentTimeLabel.innerText = formatTime(video.currentTime); durationLabel.innerText = formatTime(video.duration);
+      
+      const now = Date.now();
+      if (now - lastProgressSave > 2000 && activeMedia) {
+        lastProgressSave = now;
+        savePlaybackProgress();
+      }
+    }
+  });
+
+  function getMediaKey(media) {
+    if (!media) return "";
+    const id = media.id || media.stream_id || media.series_id;
+    return "progress_" + activeServer.id + "_" + id;
+  }
+
+  function savePlaybackProgress() {
+    if (!activeMedia || !video.duration || video.currentTime < 5) return;
+    // إذا وصل لآخر 95% من الفيديو اعتبره انتهى
+    if (video.currentTime / video.duration > 0.95) {
+      safeStorage.removeItem(getMediaKey(activeMedia));
+      return;
+    }
+    try {
+      safeStorage.setItem(getMediaKey(activeMedia), JSON.stringify({
+        time: Math.floor(video.currentTime),
+        duration: Math.floor(video.duration),
+        savedAt: Date.now()
+      }));
+    } catch (e) {}
+  }
+
+  function getSavedProgress(media) {
+    try {
+      const raw = safeStorage.getItem(getMediaKey(media));
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (data && data.time && data.time > 10) return data;
+    } catch (e) {}
+    return null;
+  }
+
+  // نافذة الاستئناف
+  const resumeModal = document.getElementById("resumeModal");
+  const resumeTimeText = document.getElementById("resumeTimeText");
+  const resumeContinueBtn = document.getElementById("resumeContinueBtn");
+  const resumeRestartBtn = document.getElementById("resumeRestartBtn");
+  const resumeCloseBtn = document.getElementById("resumeCloseBtn");
+  let pendingResumePlay = null;
+
+  function askResumeOrPlay(media, playFn) {
+    const saved = getSavedProgress(media);
+    if (saved && saved.time > 10) {
+      pendingResumePlay = { media: media, playFn: playFn, savedTime: saved.time };
+      resumeTimeText.innerText = formatTime(saved.time);
+      resumeModal.classList.add("open");
+    } else {
+      playFn(0);
+    }
+  }
+
+  resumeContinueBtn.addEventListener("click", () => {
+    resumeModal.classList.remove("open");
+    if (pendingResumePlay) {
+      const p = pendingResumePlay;
+      pendingResumePlay = null;
+      p.playFn(p.savedTime);
+    }
+  });
+
+  resumeRestartBtn.addEventListener("click", () => {
+    resumeModal.classList.remove("open");
+    if (pendingResumePlay) {
+      const p = pendingResumePlay;
+      safeStorage.removeItem(getMediaKey(p.media));
+      pendingResumePlay = null;
+      p.playFn(0);
+    }
+  });
+
+  resumeCloseBtn.addEventListener("click", () => {
+    resumeModal.classList.remove("open");
+    if (pendingResumePlay) {
+      const p = pendingResumePlay;
+      pendingResumePlay = null;
+      p.playFn(0);
     }
   });
 
@@ -1015,30 +1201,80 @@
 
   // Immediate close and play in background
   
-  function playStreamUrl(url) {
+  function qualityName(lvl) {
+    if (!lvl) return "";
+    if (lvl.height) return lvl.height + "p";
+    const br = lvl.bitrate || 0;
+    if (!br) return "SD";
+    if (br < 450000) return "240p";
+    if (br < 900000) return "360p";
+    if (br < 1600000) return "480p";
+    if (br < 3500000) return "720p";
+    return "1080p";
+  }
+  // عداد استهلاك البث
+  let dataUsed = 0, dataTimer = null, lastBytes = 0;
+  function fmtBytes(b) { return b >= 1073741824 ? (b/1073741824).toFixed(2)+" GB" : (b/1048576).toFixed(1)+" MB"; }
+  function dataMeterEl() {
+    let el = document.getElementById("dataMeter");
+    if (!el) {
+      el = document.createElement("div"); el.id = "dataMeter";
+      el.style.cssText = "position:fixed;top:calc(env(safe-area-inset-top,0px) + 54px);left:10px;z-index:60;background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;pointer-events:none;direction:ltr";
+      (document.getElementById("playerContainer") || document.body).appendChild(el);
+    }
+    return el;
+  }
+  function startDataMeter() {
+    dataUsed = 0; lastBytes = 0; clearInterval(dataTimer);
+    const el = dataMeterEl(); el.style.display = "block"; el.textContent = "📶 0.0 MB";
+    dataTimer = setInterval(function() {
+      if (!hlsPlayer && video.webkitVideoDecodedByteCount) dataUsed = Math.max(dataUsed, video.webkitVideoDecodedByteCount + (video.webkitAudioDecodedByteCount || 0));
+      const speed = (dataUsed - lastBytes) * 8 / 2 / 1000; lastBytes = dataUsed;
+      el.textContent = "📶 " + fmtBytes(dataUsed) + (speed > 0 ? " · " + Math.round(speed) + " kbps" : "");
+    }, 2000);
+  }
+
+  function playStreamUrl(url, startTime) {
+    if (typeof startTime !== "number") startTime = 0;
     const qSelect = document.getElementById("videoQualitySelect");
+    const qWrap = document.getElementById("qualityControlWrap");
+    const qLabel = document.getElementById("qualityCurrentLabel");
+    
     if (qSelect) {
       qSelect.innerHTML = "";
-      qSelect.style.display = "none";
     }
+    if (qWrap) qWrap.style.display = "none";
 
     if (hlsPlayer) {
       hlsPlayer.destroy();
       hlsPlayer = null;
     }
 
+    const seekToStart = function() {
+      if (startTime > 0) {
+        try {
+          video.currentTime = startTime;
+          showToast("تم استئناف المشاهدة من " + formatTime(startTime), "⏱️");
+        } catch(e) {}
+      }
+    };
+
     if (url.includes(".m3u8") && typeof Hls !== "undefined" && Hls.isSupported()) {
       hlsPlayer = new Hls({
         capLevelToPlayerSize: true, // يوفر البيانات حسب حجم شاشة الجوال
         startLevel: -1 // تلقائي
       });
+      startDataMeter();
+      hlsPlayer.on(Hls.Events.FRAG_LOADED, function(ev, d) {
+        try { dataUsed += (d.frag && d.frag.stats && (d.frag.stats.loaded || d.frag.stats.total)) || (d.stats && d.stats.loaded) || 0; } catch(e) {}
+      });
+      hlsPlayer.on(Hls.Events.LEVEL_SWITCHED, function(ev, d) {
+        if (qLabel && hlsPlayer && hlsPlayer.autoLevelEnabled) qLabel.textContent = qualityName(hlsPlayer.levels[d.level]) + " (تلقائي)";
+      });
       hlsPlayer.loadSource(url);
       hlsPlayer.attachMedia(video);
 
-      hlsPlayer.on(Hls.Events.MANIFEST_PARSED, (e, data) => {
-        const qWrap = document.getElementById("qualityControlWrap");
-        const qLabel = document.getElementById("qualityCurrentLabel");
-        
+      hlsPlayer.on(Hls.Events.MANIFEST_PARSED, function(e, data) {
         if (data.levels && data.levels.length > 0 && qSelect) {
           if (qWrap) qWrap.style.display = "inline-flex";
           qSelect.innerHTML = "";
@@ -1048,7 +1284,7 @@
           let lowestBitrate = Infinity;
           let lowestLabel = "";
           
-          data.levels.forEach((lvl, idx) => {
+          data.levels.forEach(function(lvl, idx) {
             const br = lvl.bitrate || (lvl.height ? lvl.height * 1000 : 999999);
             if (br < lowestBitrate) {
               lowestBitrate = br;
@@ -1060,13 +1296,13 @@
           hlsPlayer.currentLevel = lowestIdx;
           hlsPlayer.loadLevel = lowestIdx;
 
-          data.levels.forEach((lvl, idx) => {
+          data.levels.forEach(function(lvl, idx) {
             const opt = document.createElement("option");
             opt.value = idx;
-            const res = lvl.height ? `${lvl.height}p` : `${Math.round(lvl.bitrate / 1000)}k`;
+            const res = qualityName(lvl);
             const isLowest = (idx === lowestIdx);
             if (isLowest) lowestLabel = res;
-            opt.textContent = `جودة ${res} ${isLowest ? '(أقل جودة 🪶)' : ''}`;
+            opt.textContent = res + (isLowest ? " (الأقل)" : "");
             if (isLowest) opt.selected = true;
             qSelect.appendChild(opt);
           });
@@ -1074,29 +1310,40 @@
           // خيار الجودة التلقائية
           const autoOpt = document.createElement("option");
           autoOpt.value = "-1";
-          autoOpt.textContent = "جودة: تلقائي (Auto)";
+          autoOpt.textContent = "تلقائي";
           qSelect.appendChild(autoOpt);
 
-          if (qLabel) qLabel.textContent = (lowestLabel ? `${lowestLabel} 🪶` : "أقل جودة 🪶");
+          // إذا كان البث يقدم جودة واحدة فقط من السيرفر
+          if (data.levels.length === 1) {
+            if (qLabel) qLabel.textContent = lowestLabel;
+            qSelect.title = "السيرفر يوفر جودة واحدة فقط لهذا المحتوى";
+          } else {
+            if (qLabel) qLabel.textContent = lowestLabel;
+          }
 
-          qSelect.onchange = () => {
+          qSelect.onchange = function() {
             const chosen = parseInt(qSelect.value, 10);
             hlsPlayer.currentLevel = chosen;
             const txt = qSelect.options[qSelect.selectedIndex].text;
             if (qLabel) {
-              qLabel.textContent = chosen === -1 ? "تلقائي" : txt.replace("جودة ", "");
+              qLabel.textContent = chosen === -1 ? "تلقائي" : qualityName(hlsPlayer.levels[chosen]);
             }
-            showToast(`تم التبديل: ${txt}`, "📶");
+            showToast("تم التبديل: " + txt, "📶");
           };
 
-          showToast("تم بدء البث بأقل جودة تلقائياً لتوفير البيانات 🪶", "⚡");
+          if (data.levels.length > 1) {
+            showToast("تم بدء البث بأقل جودة تلقائياً لتوفير البيانات 🪶", "⚡");
+          }
         } else if (qWrap) {
           qWrap.style.display = "none";
         }
-        video.play().catch(e => console.log("Auto play prevented:", e));
+
+        video.play().then(function() {
+          seekToStart();
+        }).catch(function(e) { console.log("Auto play prevented:", e); });
       });
 
-      hlsPlayer.on(Hls.Events.ERROR, (event, data) => {
+      hlsPlayer.on(Hls.Events.ERROR, function(event, data) {
         if (data.fatal) {
           switch(data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
@@ -1112,49 +1359,63 @@
         }
       });
     } else {
+      startDataMeter();
+      video.addEventListener("loadedmetadata", function onMeta() {
+        video.removeEventListener("loadedmetadata", onMeta);
+        if (video.videoHeight && qWrap && qLabel && !hlsPlayer) {
+          qWrap.style.display = "inline-flex"; qLabel.textContent = video.videoHeight + "p";
+          if (qSelect) qSelect.innerHTML = '<option>' + video.videoHeight + 'p</option>';
+        }
+      });
       video.src = url;
-      video.play().catch(e => console.log("Auto play prevented:", e));
+      video.play().then(function() {
+        seekToStart();
+      }).catch(function(e) { console.log("Auto play prevented:", e); });
     }
   }
 
   function playMovie(movie) {
-    closeDrawer(); 
-    showToast("جاري التشغيل...", "🎬");
-    
-    activeMedia = movie;
-    nowPlayingTitle.innerHTML = `${movie.name}`;
-    nowPlayingSub.innerText = "فيلم";
-    videoQualityBadge.style.display = "none"; // Hide until loaded
-    
-    centerControls.classList.remove("hidden-init");
-    bottomBar.classList.remove("hidden-init");
+    askResumeOrPlay(movie, function(startSec) {
+      closeDrawer(); 
+      showToast("جاري التشغيل...", "🎬");
+      
+      activeMedia = movie;
+      nowPlayingTitle.innerHTML = movie.name;
+      nowPlayingSub.innerText = "فيلم";
+      videoQualityBadge.style.display = "none"; // Hide until loaded
+      
+      centerControls.classList.remove("hidden-init");
+      bottomBar.classList.remove("hidden-init");
 
-    video.style.objectFit = 'contain'; 
-    currentFitIndex = 0;
+      video.style.objectFit = "contain"; 
+      currentFitIndex = 0;
 
-    const streamUrl = getMovieStreamUrl(movie.stream_id, movie.container_extension);
-    playStreamUrl(streamUrl);
-    highlightPlayingCard(movie.stream_id);
+      const streamUrl = getMovieStreamUrl(movie.stream_id, movie.container_extension);
+      playStreamUrl(streamUrl, startSec);
+      highlightPlayingCard(movie.stream_id);
+    });
   }
 
   function playEpisode(ep, seriesTitle) {
-    episodesModal.classList.remove("open");
-    closeDrawer(); 
-    showToast(`الحلقة ${ep.episode_num}`, "🍿");
-    
-    activeMedia = ep;
-    nowPlayingTitle.innerHTML = `${seriesTitle} - ${ep.title || 'الحلقة ' + ep.episode_num}`;
-    nowPlayingSub.innerText = seriesTitle;
-    videoQualityBadge.style.display = "none"; // Hide until loaded
+    askResumeOrPlay(ep, function(startSec) {
+      episodesModal.classList.remove("open");
+      closeDrawer(); 
+      showToast("الحلقة " + ep.episode_num, "🍿");
+      
+      activeMedia = ep;
+      nowPlayingTitle.innerHTML = seriesTitle + " - " + (ep.title || ("الحلقة " + ep.episode_num));
+      nowPlayingSub.innerText = seriesTitle;
+      videoQualityBadge.style.display = "none"; // Hide until loaded
 
-    centerControls.classList.remove("hidden-init");
-    bottomBar.classList.remove("hidden-init");
+      centerControls.classList.remove("hidden-init");
+      bottomBar.classList.remove("hidden-init");
 
-    video.style.objectFit = 'contain'; 
-    currentFitIndex = 0;
+      video.style.objectFit = "contain"; 
+      currentFitIndex = 0;
 
-    const streamUrl = getSeriesStreamUrl(ep.id, ep.container_extension);
-    playStreamUrl(streamUrl);
+      const streamUrl = getSeriesStreamUrl(ep.id, ep.container_extension);
+      playStreamUrl(streamUrl, startSec);
+    });
   }
 
   // --- Series Modal ---
@@ -1398,23 +1659,29 @@
     if (normTitle.startsWith(normQuery)) return 90;
     if (normTitle.includes(normQuery)) return 80;
     
-    const queryTokens = normQuery.split(" ");
-    const titleTokens = normTitle.split(" ");
-    let tokenMatches = 0;
-    queryTokens.forEach(qt => {
-      if (titleTokens.some(tt => tt.includes(qt) || qt.includes(tt))) tokenMatches++;
-    });
-    if (tokenMatches === queryTokens.length) return 70;
+    const queryTokens = normQuery.split(" ").filter(t => t.length > 0);
+    const titleTokens = normTitle.split(" ").filter(t => t.length > 0);
     
+    // يجب أن تطابق كل كلمات البحث جزءاً من العنوان (وليس العكس لتجنب النتائج الخاطئة)
+    let allMatched = queryTokens.length > 0;
+    queryTokens.forEach(qt => {
+      const match = titleTokens.some(tt => tt.includes(qt));
+      if (!match) allMatched = false;
+    });
+    if (allMatched && queryTokens.length > 0) return 70;
+    
+    // مطابقة صوتية عربية-إنجليزية دقيقة
     const phonTitle = getPhonetic(normTitle);
     const phonQuery = getPhonetic(normQuery);
-    if (phonTitle.includes(phonQuery) || phonQuery.includes(phonTitle)) return 60;
+    if (phonTitle === phonQuery) return 65;
+    if (phonQuery.length >= 3 && phonTitle.includes(phonQuery)) return 60;
     
-    if (normQuery.length > 3 && normTitle.length > 3) {
+    // مسافة Levenshtein دقيقة للأخطاء الإملائية الطفيفة
+    if (normQuery.length >= 5 && normTitle.length >= 5) {
        const dist = levenshtein(normTitle, normQuery);
-       if (dist <= 2) return 50;
+       if (dist <= 1) return 50;
        const tokenDist = Math.min(...titleTokens.map(tt => levenshtein(tt, normQuery)));
-       if (tokenDist <= 2) return 40;
+       if (tokenDist <= 1) return 40;
     }
     return 0;
   }
@@ -1425,22 +1692,20 @@
     const cats = currentTab === "movies" ? vodCategories : seriesCategories;
     const action = currentTab === "movies" ? "get_vod_streams" : "get_series";
     
-    itemsContainer.innerHTML = `<div class="empty-state"><div class="spinner" style="margin: 0 auto 12px;"></div>جاري البحث في جميع المجموعات... (قد يستغرق لحظات)</div>`;
+    itemsContainer.innerHTML = `<div class="empty-state"><div class="spinner" style="margin: 0 auto 12px;"></div><span class="search-progress">جاري البحث في جميع المجموعات...</span></div>`;
     
     try {
-      // One request for the whole library (cached) instead of one per category
-      let results = [];
-      try {
-        const all = await cachedJSON(`${WORKER_BASE}/player_api.php?account=${activeServer.id}&action=${action}`, TTL.list);
-        if (Array.isArray(all) && all.length) {
-          const allowed = new Set(cats.map(c => String(c.category_id)));
-          results = [all.filter(i => allowed.has(String(i.category_id)))];
-        }
-      } catch (e) {}
-      if (!results.length) {
-        results = await Promise.all(cats.map(cat => cachedJSON(`${WORKER_BASE}/player_api.php?action=${action}&category_id=${cat.category_id}`, TTL.list).catch(() => [])));
+      // البحث في كل المجموعات: طلب لكل مجموعة (مع الكاش) على دفعات صغيرة
+      const results = [];
+      const BATCH = 6;
+      for (let i = 0; i < cats.length; i += BATCH) {
+        const part = await Promise.all(cats.slice(i, i + BATCH).map(cat =>
+          cachedJSON(`${WORKER_BASE}/player_api.php?account=${activeServer.id}&action=${action}&category_id=${cat.category_id}`, TTL.list)
+            .then(r => Array.isArray(r) ? r : []).catch(() => [])));
+        part.forEach(r => results.push(r));
+        const el = itemsContainer.querySelector(".search-progress");
+        if (el) el.textContent = `جاري البحث في المجموعات ${Math.min(i + BATCH, cats.length)} / ${cats.length}`;
       }
-      
       let merged = [];
       const seenIds = new Set();
       
@@ -1456,7 +1721,7 @@
         });
       });
       
-      allTabItems[currentTab] = merged;
+      if (merged.length) allTabItems[currentTab] = merged;
       return merged;
     } catch (e) {
       console.error("Failed to fetch all items for search", e);
@@ -1480,7 +1745,11 @@
     
     searchTimer = setTimeout(async () => {
       if (query.length >= 2 && currentTab !== "favs") {
-        const allData = await fetchAllTabItems();
+        const local = cachedStreams[`${currentTab}_${categorySelect.value}`] || [];
+        const fetched = await fetchAllTabItems();
+        if (searchInput.value.trim() !== query) return;
+        const seen = new Set(); const allData = [];
+        local.concat(fetched).forEach(it => { const id = it.stream_id || it.series_id; if (!seen.has(id)) { seen.add(id); allData.push(it); } });
         const scored = [];
         
         allData.forEach(item => {
